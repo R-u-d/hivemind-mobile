@@ -11,6 +11,15 @@
     "test": "jest --watchAll=false",
     "web": "expo start --web"
   },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|@shopify/flash-list)"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/native": "^7.1.8",
@@ -34,7 +43,6 @@
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
