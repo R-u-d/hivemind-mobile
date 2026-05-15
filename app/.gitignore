@@ -41,3 +41,9 @@ yarn-error.*
 /ios
 /android
 .vscode/
+
+.env.local
+.env
+.env.local
+.env.production
+.env.staging

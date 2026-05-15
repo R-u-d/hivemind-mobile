@@ -1,7 +1,7 @@
 from pathlib import Path
 from decouple import config
 import dj_database_url
-import os
+import sentry_sdk
 # -------------------------------------------------------------------
 # BASE DIRECTORY
 # -------------------------------------------------------------------
@@ -110,3 +110,16 @@ USE_TZ = True
 # -------------------------------------------------------------------
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# -------------------------------------------------------------------
+# SENTRY
+# -------------------------------------------------------------------
+SENTRY_DSN = config("SENTRY_DSN", default="")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment="production" if not DEBUG else "development",
+        traces_sample_rate=1.0,
+        send_default_pii=False,
+    )
