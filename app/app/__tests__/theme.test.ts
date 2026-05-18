@@ -1,4 +1,12 @@
-import { colors, darkColors, communityTypeColors, communityCreate, spacing, radius, typography } from '@/theme';
+import {
+  colors,
+  darkColors,
+  communityTypeColors,
+  communityCreate,
+  spacing,
+  radius,
+  typography,
+} from '@/theme';
 
 describe('colors', () => {
   it('exports primary', () => {
@@ -25,8 +33,17 @@ describe('darkColors', () => {
 
 describe('communityTypeColors', () => {
   const types = [
-    'student', 'gamer', 'hobby', 'sports', 'music',
-    'books', 'outdoors', 'travel', 'photo', 'foodie', 'tech',
+    'student',
+    'gamer',
+    'hobby',
+    'sports',
+    'music',
+    'books',
+    'outdoors',
+    'travel',
+    'photo',
+    'foodie',
+    'tech',
   ] as const;
 
   it.each(types)('%s has primary, background and text', type => {
