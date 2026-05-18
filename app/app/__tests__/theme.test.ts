@@ -1,8 +1,25 @@
-import { colors, communityTypeColors, communityCreate, spacing, radius, typography } from '@/theme';
+import { colors, darkColors, communityTypeColors, communityCreate, spacing, radius, typography } from '@/theme';
 
 describe('colors', () => {
   it('exports primary', () => {
     expect(colors.primary).toBe('#6D28D9');
+  });
+});
+
+describe('darkColors', () => {
+  it('has the same keys as colors', () => {
+    expect(Object.keys(darkColors)).toEqual(Object.keys(colors));
+  });
+
+  it('flips neutrals', () => {
+    expect(darkColors.bg).not.toBe(colors.bg);
+    expect(darkColors.surface).not.toBe(colors.surface);
+    expect(darkColors.text).not.toBe(colors.text);
+  });
+
+  it('keeps brand colors identical', () => {
+    expect(darkColors.primary).toBe(colors.primary);
+    expect(darkColors.danger).toBe(colors.danger);
   });
 });
 

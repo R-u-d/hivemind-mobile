@@ -13,14 +13,20 @@ export type CommunityType =
 
 // ── Colors ────────────────────────────────────────────────────────────────
 
+export type Colors = { readonly [K in keyof typeof colors]: string };
+
 export const colors = {
   // Brand
   primary: '#6D28D9',
   primaryDark: '#4C1D95',
   primaryPressed: '#5B21B6',
   primarySoft: '#EDE9FE',
+  primaryGlow: 'rgba(109, 40, 217, 0.32)',
+  primaryAmethyst: '#7C3AED',
+  primaryPlum: '#3B0764',
 
   // Neutrals
+  ink: '#0E0E11',
   text: '#1A1A1F',
   textMuted: '#6B6B73',
   textFaint: '#9B9BA3',
@@ -101,5 +107,29 @@ export const typography = {
 } as const;
 
 // ── Dark mode ─────────────────────────────────────────────────────────────
-// Stubbed — not implemented in v1, planned for v2.
-// export const darkColors: typeof colors = { ... };
+// Brand tokens are identical. Only neutrals flip.
+
+export const darkColors: Colors = {
+  // Brand — unchanged
+  primary:         '#6D28D9',
+  primaryDark:     '#4C1D95',
+  primaryPressed:  '#5B21B6',
+  primarySoft:     '#2D1B69',   // dark purple surface tint
+  primaryGlow:     'rgba(109, 40, 217, 0.32)',
+  primaryAmethyst: '#7C3AED',
+  primaryPlum:     '#3B0764',
+
+  // Neutrals — flipped
+  ink:         '#F5F5F7',
+  text:        '#F2F2F7',
+  textMuted:   '#8E8E93',
+  textFaint:   '#636366',
+  border:      '#2C2C2E',
+  borderSoft:  '#242426',
+  surface:     '#1C1C1E',
+  surfaceSunk: '#141416',
+  bg:          '#0F0F10',
+
+  // Semantic — unchanged
+  danger: '#DC2626',
+};
