@@ -29,6 +29,6 @@ module.exports = defineConfig([
     },
   },
   {
-    ignores: ['node_modules/', '.expo/', 'dist/', 'babel.config.js'],
+    ignores: ['node_modules/', '.expo/', 'dist/', 'babel.config.js', 'expo-env.d.ts'],
   },
 ]);
