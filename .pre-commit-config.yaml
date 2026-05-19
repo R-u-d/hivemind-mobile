@@ -1,0 +1,32 @@
+repos:
+  - repo: local
+    hooks:
+      # ── Backend ──────────────────────────────────────────────────────────
+      - id: ruff
+        name: ruff (api)
+        entry: bash -c 'cd api && venv/Scripts/ruff.exe check .'
+        language: system
+        files: ^api/.*\.py$
+        pass_filenames: false
+
+      - id: pytest
+        name: pytest (api)
+        entry: bash -c 'cd api && venv/Scripts/pytest.exe'
+        language: system
+        files: ^api/.*\.py$
+        pass_filenames: false
+
+      # ── Frontend ─────────────────────────────────────────────────────────
+      - id: eslint
+        name: eslint (app)
+        entry: bash -c 'cd app && npm run lint'
+        language: system
+        files: ^app/.*\.(ts|tsx)$
+        pass_filenames: false
+
+      - id: typecheck
+        name: typecheck (app)
+        entry: bash -c 'cd app && npm run typecheck'
+        language: system
+        files: ^app/.*\.(ts|tsx)$
+        pass_filenames: false
