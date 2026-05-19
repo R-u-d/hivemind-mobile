@@ -1,8 +1,6 @@
 import pytest
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.factories import UserFactory
-
 
 REGISTER_URL = "/api/auth/register/"
 LOGIN_URL = "/api/auth/login/"
