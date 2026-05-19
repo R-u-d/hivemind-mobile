@@ -2,9 +2,8 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 import sentry_sdk
-# -------------------------------------------------------------------
-# BASE DIRECTORY
-# -------------------------------------------------------------------
+from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # -------------------------------------------------------------------
@@ -33,11 +32,16 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "corsheaders",
+    "rest_framework_simplejwt.token_blacklist",
 
     # local apps
     "core",
+    "users",
 ]
 
+# -------------------------------------------------------------------
+# MIDDLEWARE
+# -------------------------------------------------------------------
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 
@@ -70,22 +74,41 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # -------------------------------------------------------------------
-# DATABASE (ENV DRIVEN)
+# DATABASE
 # -------------------------------------------------------------------
 DATABASES = {
     "default": dj_database_url.parse(config("DATABASE_URL"))
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-]
-
+# -------------------------------------------------------------------
+# REST FRAMEWORK
+# -------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+# -------------------------------------------------------------------
+# SIMPLE JWT (IMPORTANT FIX)
+# -------------------------------------------------------------------
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# -------------------------------------------------------------------
+# CORS
+# -------------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+]
 
 # -------------------------------------------------------------------
 # PASSWORD VALIDATION
@@ -106,13 +129,18 @@ USE_I18N = True
 USE_TZ = True
 
 # -------------------------------------------------------------------
-# STATIC FILES
+# STATIC
 # -------------------------------------------------------------------
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -------------------------------------------------------------------
-# SENTRY
+# USER MODEL
+# -------------------------------------------------------------------
+AUTH_USER_MODEL = "users.User"
+
+# -------------------------------------------------------------------
+# SENTRY (OPTIONAL)
 # -------------------------------------------------------------------
 SENTRY_DSN = config("SENTRY_DSN", default="")
 
