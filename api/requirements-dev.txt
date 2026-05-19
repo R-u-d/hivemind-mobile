@@ -1,0 +1,5 @@
+pytest
+pytest-django
+ruff
+factory-boy
+faker
