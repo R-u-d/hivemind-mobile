@@ -50,3 +50,10 @@ class PublicUserSerializer(serializers.ModelSerializer):
             "avatar_url",
             "created_at",
         ]
+        read_only_fields = [
+            "id",
+            "display_name",
+            "bio",
+            "avatar_url",
+            "created_at",
+        ]

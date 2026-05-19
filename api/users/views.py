@@ -21,9 +21,23 @@ User = get_user_model()
 # REGISTER
 # -------------------------
 class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
+      serializer_class = RegisterSerializer
+      permission_classes = [permissions.AllowAny]
 
+      def create(self, request, *args, **kwargs):
+          serializer = self.get_serializer(data=request.data)
+          serializer.is_valid(raise_exception=True)
+          user = serializer.save()
+
+          refresh = RefreshToken.for_user(user)
+          return Response(
+              {
+                  "user": UserSerializer(user).data,
+                  "access": str(refresh.access_token),
+                  "refresh": str(refresh),
+              },
+              status=status.HTTP_201_CREATED,
+          )
 
 # -------------------------
 # ME (GET + PATCH)
@@ -66,7 +80,7 @@ class LogoutView(APIView):
 
             return Response(
                 {"detail": "Logged out successfully"},
-                status=status.HTTP_200_OK
+                status=status.HTTP_204_NO_CONTENT
             )
 
         except TokenError:

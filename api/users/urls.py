@@ -21,5 +21,5 @@ urlpatterns = [
 
     # USERS
     path("users/me/", MeView.as_view()),
-    path("users/<int:pk>/", PublicProfileView.as_view()),
+    path("users/<uuid:pk>/", PublicProfileView.as_view()),
 ]
