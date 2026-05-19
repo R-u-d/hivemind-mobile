@@ -109,6 +109,18 @@ def test_logout_success(auth_client):
 
 
 @pytest.mark.django_db
+def test_logout_blocks_access_token_immediately(api_client, user):
+    refresh = RefreshToken.for_user(user)
+    access = str(refresh.access_token)
+
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+    api_client.post(LOGOUT_URL, {"refresh": str(refresh)})
+
+    response = api_client.get(ME_URL)
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
 def test_logout_unauthenticated_returns_401(api_client, user):
     refresh = str(RefreshToken.for_user(user))
     response = api_client.post(LOGOUT_URL, {"refresh": refresh})
