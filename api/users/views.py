@@ -21,23 +21,23 @@ User = get_user_model()
 # REGISTER
 # -------------------------
 class RegisterView(generics.CreateAPIView):
-      serializer_class = RegisterSerializer
-      permission_classes = [permissions.AllowAny]
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
 
-      def create(self, request, *args, **kwargs):
-          serializer = self.get_serializer(data=request.data)
-          serializer.is_valid(raise_exception=True)
-          user = serializer.save()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
-          refresh = RefreshToken.for_user(user)
-          return Response(
-              {
-                  "user": UserSerializer(user).data,
-                  "access": str(refresh.access_token),
-                  "refresh": str(refresh),
-              },
-              status=status.HTTP_201_CREATED,
-          )
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 # -------------------------
 # ME (GET + PATCH)
@@ -78,13 +78,10 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
 
-            return Response(
-                {"detail": "Logged out successfully"},
-                status=status.HTTP_204_NO_CONTENT
-            )
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         except TokenError:
             return Response(
                 {"detail": "Invalid or expired token"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
