@@ -1,3 +1,5 @@
+from datetime import datetime, timezone as dt_timezone
+
 from django.contrib.auth import get_user_model
 
 from rest_framework import generics, permissions
@@ -5,14 +7,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
-from .serializers import (
-    RegisterSerializer,
-    UserSerializer,
-    PublicUserSerializer,
-)
+from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer
+from .throttles import AuthRateThrottle
 
 User = get_user_model()
 
@@ -23,6 +23,7 @@ User = get_user_model()
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -75,8 +76,8 @@ class LogoutView(APIView):
             )
 
         try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            RefreshToken(refresh_token).blacklist()
+            self._blacklist_access_token(request)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -85,3 +86,15 @@ class LogoutView(APIView):
                 {"detail": "Invalid or expired token"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+    def _blacklist_access_token(self, request):
+        access = AccessToken(str(request.auth))
+        outstanding, _ = OutstandingToken.objects.get_or_create(
+            jti=access["jti"],
+            defaults={
+                "user": request.user,
+                "token": str(request.auth),
+                "expires_at": datetime.fromtimestamp(access["exp"], tz=dt_timezone.utc),
+            },
+        )
+        BlacklistedToken.objects.get_or_create(token=outstanding)

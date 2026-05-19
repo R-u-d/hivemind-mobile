@@ -24,6 +24,19 @@ node_modules/
 .expo/
 dist/
 web-build/
+expo-env.d.ts
+*.tsbuildinfo
+.metro-health-check*
+
+# ─── Mobile / Native ─────────────────────────────────────────────────────────
+/app/ios/
+/app/android/
+.kotlin/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
 # ─── Logs ────────────────────────────────────────────────────────────────────
 npm-debug.log*
