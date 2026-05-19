@@ -1,2 +1,0 @@
-# Api
-Django REST API
