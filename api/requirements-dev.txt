@@ -3,3 +3,4 @@ pytest-django
 ruff
 factory-boy
 faker
+pre-commit
