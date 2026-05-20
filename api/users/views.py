@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
-from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer
+from core.s3 import S3Error, generate_avatar_presigned_url
+from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer, AvatarUploadSerializer
 from .throttles import AuthRateThrottle
 
 User = get_user_model()
@@ -98,3 +99,25 @@ class LogoutView(APIView):
             },
         )
         BlacklistedToken.objects.get_or_create(token=outstanding)
+
+
+# -------------------------
+# AVATAR UPLOAD URL
+# -------------------------
+class AvatarUploadUrlView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = AvatarUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result = generate_avatar_presigned_url(
+                user_id=str(request.user.id),
+                content_type=serializer.validated_data["content_type"],
+                file_size=serializer.validated_data["file_size"],
+            )
+        except S3Error as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response(result, status=status.HTTP_200_OK)
