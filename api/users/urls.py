@@ -3,7 +3,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .throttles import AuthRateThrottle
-from .views import LogoutView, MeView, PublicProfileView, RegisterView
+from .views import AvatarUploadUrlView, LogoutView, MeView, PublicProfileView, RegisterView
 
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
@@ -23,5 +23,6 @@ urlpatterns = [
 
     # USERS
     path("users/me/", MeView.as_view()),
+    path("users/me/avatar-upload-url/", AvatarUploadUrlView.as_view(), name="avatar-upload-url"),
     path("users/<uuid:pk>/", PublicProfileView.as_view()),
 ]
