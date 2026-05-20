@@ -38,7 +38,8 @@
           "project": "react-native",
           "organization": "hivemind-ak"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
