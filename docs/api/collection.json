@@ -35,6 +35,21 @@
       "key": "user_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "community_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "avatar_upload_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "avatar_public_url",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -231,6 +246,156 @@
               "raw": "{{base_url}}/users/{{user_id}}/",
               "host": ["{{base_url}}"],
               "path": ["users", "{{user_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Avatar Upload URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('avatar_upload_url', res.upload_url);",
+                  "pm.collectionVariables.set('avatar_public_url', res.public_url);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me/avatar-upload-url/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me", "avatar-upload-url", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Avatar to S3",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "image/jpeg" }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {}
+            },
+            "url": {
+              "raw": "{{avatar_upload_url}}",
+              "host": ["{{avatar_upload_url}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Communities",
+      "item": [
+        {
+          "name": "List Communities",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Community",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('community_id', res.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Study Squad\",\n  \"description\": \"A place to study together.\",\n  \"community_type\": \"study\",\n  \"is_private\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Community",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Community",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"description\": \"Updated description.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Community",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", ""]
             }
           },
           "response": []

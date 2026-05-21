@@ -7,4 +7,5 @@ urlpatterns = [
     # API MODULES
     path("api/", include("core.urls")),
     path("api/", include("users.urls")),
+    path("api/", include("apps.communities.urls")),
 ]
