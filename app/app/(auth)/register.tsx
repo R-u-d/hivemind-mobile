@@ -207,7 +207,10 @@ export default function RegisterScreen() {
             >
               Already have an account?{' '}
             </Text>
-            <Pressable onPress={() => router.back()} accessibilityLabel="Sign in">
+            <Pressable
+              onPress={() => router.replace('/(auth)/login' as Href)}
+              accessibilityLabel="Sign in"
+            >
               <Text
                 style={[styles.switchLink, { color: colors.primary, fontFamily: fonts.medium }]}
               >
