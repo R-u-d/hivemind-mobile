@@ -5,3 +5,9 @@ class CreatedAtCursorPagination(CursorPagination):
     page_size = 20
     ordering = "-created_at"
     cursor_query_param = "cursor"
+
+
+class JoinedAtCursorPagination(CursorPagination):
+    page_size = 20
+    ordering = "joined_at"
+    cursor_query_param = "cursor"

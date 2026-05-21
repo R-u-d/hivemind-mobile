@@ -27,3 +27,26 @@ class Community(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Membership(models.Model):
+    class Role(models.TextChoices):
+        MEMBER = "member", "Member"
+        MODERATOR = "moderator", "Moderator"
+        OWNER = "owner", "Owner"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="memberships")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.MEMBER)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("community", "user")
+
+    def __str__(self):
+        return f"{self.user} in {self.community} ({self.role})"
