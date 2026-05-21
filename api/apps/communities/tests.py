@@ -1,9 +1,11 @@
 import pytest
+from rest_framework.test import APIRequestFactory
 
 from users.factories import UserFactory
 
 from .factories import CommunityFactory, MembershipFactory
 from .models import Community, Membership
+from .permissions import IsCommunityMember, IsCommunityModerator, IsCommunityOwner
 
 COMMUNITIES_URL = "/api/communities/"
 
@@ -370,3 +372,100 @@ def test_remove_member_owner_removes_moderator(auth_client):
     response = client.delete(member_detail_url(community.id, target_user.id))
     assert response.status_code == 204
     assert not Membership.objects.filter(community=community, user=target_user).exists()
+
+
+# ---- PERMISSION CLASS UNIT TESTS ----
+
+class _MockView:
+    def __init__(self, community_pk):
+        self.kwargs = {"community_pk": str(community_pk)}
+
+
+def _make_request(user):
+    req = APIRequestFactory().get("/")
+    req.user = user
+    return req
+
+
+# IsCommunityMember
+
+@pytest.mark.django_db
+def test_permission_member_grants_member(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    assert IsCommunityMember().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_member_denies_non_member(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    assert not IsCommunityMember().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_member_grants_owner(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    assert IsCommunityMember().has_permission(_make_request(user), _MockView(community.pk))
+
+
+# IsCommunityModerator
+
+@pytest.mark.django_db
+def test_permission_moderator_denies_member(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    assert not IsCommunityModerator().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_moderator_grants_moderator(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    assert IsCommunityModerator().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_moderator_grants_owner(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    assert IsCommunityModerator().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_moderator_denies_non_member(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    assert not IsCommunityModerator().has_permission(_make_request(user), _MockView(community.pk))
+
+
+# IsCommunityOwner
+
+@pytest.mark.django_db
+def test_permission_owner_denies_member(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    assert not IsCommunityOwner().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_owner_denies_moderator(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    assert not IsCommunityOwner().has_permission(_make_request(user), _MockView(community.pk))
+
+
+@pytest.mark.django_db
+def test_permission_owner_grants_owner(db):
+    user = UserFactory()
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    assert IsCommunityOwner().has_permission(_make_request(user), _MockView(community.pk))

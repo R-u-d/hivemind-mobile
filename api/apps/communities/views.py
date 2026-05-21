@@ -6,19 +6,13 @@ from rest_framework.views import APIView
 from core.pagination import CreatedAtCursorPagination, JoinedAtCursorPagination
 
 from .models import Community, Membership
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
     CommunityMinimalSerializer,
     CommunitySerializer,
     MembershipSerializer,
     RoleUpdateSerializer,
 )
-
-ROLE_RANK = {
-    Membership.Role.MEMBER: 0,
-    Membership.Role.MODERATOR: 1,
-    Membership.Role.OWNER: 2,
-}
 
 
 class CommunityViewSet(viewsets.ModelViewSet):
@@ -91,21 +85,12 @@ class LeaveView(APIView):
 
 
 class MemberDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def _get_actor(self, community, user):
-        try:
-            return Membership.objects.get(community=community, user=user)
-        except Membership.DoesNotExist:
-            return None
+    permission_classes = [permissions.IsAuthenticated, IsCommunityModerator]
 
     def patch(self, request, community_pk, user_pk):
         community = get_object_or_404(Community, pk=community_pk)
         target = get_object_or_404(Membership, community=community, user__id=user_pk)
-        actor = self._get_actor(community, request.user)
-
-        if actor is None or ROLE_RANK[actor.role] < ROLE_RANK[Membership.Role.MODERATOR]:
-            return Response({"detail": "You do not have permission."}, status=status.HTTP_403_FORBIDDEN)
+        actor = Membership.objects.get(community=community, user=request.user)
 
         serializer = RoleUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -129,10 +114,7 @@ class MemberDetailView(APIView):
     def delete(self, request, community_pk, user_pk):
         community = get_object_or_404(Community, pk=community_pk)
         target = get_object_or_404(Membership, community=community, user__id=user_pk)
-        actor = self._get_actor(community, request.user)
-
-        if actor is None or ROLE_RANK[actor.role] < ROLE_RANK[Membership.Role.MODERATOR]:
-            return Response({"detail": "You do not have permission."}, status=status.HTTP_403_FORBIDDEN)
+        actor = Membership.objects.get(community=community, user=request.user)
 
         if ROLE_RANK[actor.role] <= ROLE_RANK[target.role]:
             return Response(
