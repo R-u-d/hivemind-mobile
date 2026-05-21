@@ -38,6 +38,7 @@ export const colors = {
 
   // Semantic
   danger: '#DC2626',
+  warning: '#EF9F27',
   onPrimary: '#FFFFFF',
 } as const;
 
@@ -136,5 +137,6 @@ export const darkColors: Colors = {
 
   // Semantic — unchanged
   danger: '#DC2626',
+  warning: '#EF9F27',
   onPrimary: '#FFFFFF',
 };
