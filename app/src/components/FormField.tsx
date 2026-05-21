@@ -7,12 +7,14 @@ import { useTheme } from '@/theme/ThemeContext';
 interface FormFieldProps extends TextInputProps {
   label: string;
   error?: string;
+  labelColor?: string;
   rightAccessory?: React.ReactNode;
 }
 
 export default function FormField({
   label,
   error,
+  labelColor,
   rightAccessory,
   onFocus,
   onBlur,
@@ -27,7 +29,9 @@ export default function FormField({
 
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.label, { color: colors.textMuted, fontFamily: fonts.medium }]}>
+      <Text
+        style={[styles.label, { color: labelColor ?? colors.textMuted, fontFamily: fonts.medium }]}
+      >
         {label}
       </Text>
       <View

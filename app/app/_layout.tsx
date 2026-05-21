@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Sentry from '@sentry/react-native';
 
 import { queryClient } from '@/api/queryClient';
+import AppSplash from '@/components/AppSplash';
 import QueryDevtools from '@/components/QueryDevtools';
 import { ThemeProvider } from '@/theme/ThemeContext';
 
@@ -19,6 +21,13 @@ SplashScreen.preventAutoHideAsync();
 
 export default Sentry.wrap(function RootLayout() {
   const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_500Medium });
+  const [splashDone, setSplashDone] = useState(false);
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
 
@@ -32,6 +41,7 @@ export default Sentry.wrap(function RootLayout() {
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
+        {!splashDone && <AppSplash onDone={() => setSplashDone(true)} />}
       </ThemeProvider>
       <QueryDevtools />
     </QueryClientProvider>

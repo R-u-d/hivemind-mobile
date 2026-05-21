@@ -40,6 +40,14 @@ export const colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+
+  // Splash screen (always dark — do not flip in darkColors)
+  splash: '#130C2E',
+  splashBg: '#0A0420',
+  splashGradient: '#2E1065',
+  splashFg: '#F5F3FF',
+  splashTagline: 'rgba(216, 200, 255, 0.78)',
+  splashDot: '#C4B5FD',
 } as const;
 
 // ── Community type colors ─────────────────────────────────────────────────
@@ -139,4 +147,12 @@ export const darkColors: Colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+
+  // Splash screen — same as light; splash is always dark
+  splash: '#130C2E',
+  splashBg: '#0A0420',
+  splashGradient: '#2E1065',
+  splashFg: '#F5F3FF',
+  splashTagline: 'rgba(216, 200, 255, 0.78)',
+  splashDot: '#C4B5FD',
 };

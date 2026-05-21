@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -70,10 +71,10 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.logoText, { color: colors.primary, fontFamily: fonts.medium }]}>
-            HiveMind
+          <MaterialCommunityIcons name="hexagon-outline" size={32} color={colors.primary} />
+          <Text style={[styles.title, { color: colors.text, marginTop: spacing.lg }]}>
+            Create your account
           </Text>
-          <Text style={[styles.title, { color: colors.text }]}>Create your account</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Find your people. Join your first community in under a minute.
           </Text>
@@ -233,7 +234,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
-  logoText: { fontSize: 15, letterSpacing: -0.3, marginBottom: spacing.lg },
   title: { ...typography.screenTitle },
   subtitle: { ...typography.screenSubtitle, marginTop: spacing.xs },
   form: {
