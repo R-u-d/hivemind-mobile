@@ -13,8 +13,12 @@ export const client = axios.create({ baseURL: BASE_URL, timeout: 15000 });
 
 client.interceptors.request.use(async config => {
   if (!config.headers.Authorization) {
-    const token = await tokenStorage.getAccess();
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await tokenStorage.getAccess();
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    } catch {
+      // SecureStore unavailable — proceed without token
+    }
   }
   return config;
 });

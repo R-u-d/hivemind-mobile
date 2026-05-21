@@ -4,14 +4,14 @@ repos:
       # ── Backend ──────────────────────────────────────────────────────────
       - id: ruff
         name: ruff (api)
-        entry: bash -c 'cd api && venv/bin/ruff check .'
+        entry: bash -c 'cd api && RUFF=venv/bin/ruff; [ -f "$RUFF" ] || RUFF=venv/Scripts/ruff; $RUFF check .'
         language: system
         files: ^api/.*\.py$
         pass_filenames: false
 
       - id: pytest
         name: pytest (api)
-        entry: bash -c 'cd api && venv/bin/pytest'
+        entry: bash -c 'cd api && PYTEST=venv/bin/pytest; [ -f "$PYTEST" ] || PYTEST=venv/Scripts/pytest; $PYTEST'
         language: system
         files: ^api/.*\.py$
         pass_filenames: false

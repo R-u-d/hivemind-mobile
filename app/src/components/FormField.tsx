@@ -16,6 +16,7 @@ export default function FormField({
   rightAccessory,
   onFocus,
   onBlur,
+  value,
   style,
   ...props
 }: FormFieldProps) {
@@ -41,6 +42,7 @@ export default function FormField({
             setFocused(false);
             onBlur?.(e);
           }}
+          value={value ?? ''}
           {...props}
         />
         {rightAccessory}
