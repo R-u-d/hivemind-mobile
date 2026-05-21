@@ -421,6 +421,18 @@
         },
         {
           "name": "Join Community",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('member_user_id', res.user_id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
