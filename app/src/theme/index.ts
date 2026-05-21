@@ -38,6 +38,7 @@ export const colors = {
 
   // Semantic
   danger: '#DC2626',
+  onPrimary: '#FFFFFF',
 } as const;
 
 // ── Community type colors ─────────────────────────────────────────────────
@@ -85,6 +86,7 @@ export const spacing = {
 export const radius = {
   sm: 6,
   md: 10,
+  input: 12,
   lg: 14,
   xl: 20,
   full: 999,
@@ -104,6 +106,8 @@ export const typography = {
   cardTitle: { fontSize: 13, fontWeight: '500' as const, fontFamily: fonts.medium },
   body: { fontSize: 12, fontWeight: '400' as const, fontFamily: fonts.regular },
   caption: { fontSize: 10, fontWeight: '400' as const, fontFamily: fonts.regular },
+  screenTitle: { fontSize: 26, letterSpacing: -0.6, fontFamily: fonts.medium },
+  screenSubtitle: { fontSize: 14, lineHeight: 14 * 1.45, fontFamily: fonts.regular },
 } as const;
 
 // ── Dark mode ─────────────────────────────────────────────────────────────
@@ -114,7 +118,7 @@ export const darkColors: Colors = {
   primary: '#6D28D9',
   primaryDark: '#4C1D95',
   primaryPressed: '#5B21B6',
-  primarySoft: '#2D1B69', // dark purple surface tint
+  primarySoft: '#2D1B69',
   primaryGlow: 'rgba(109, 40, 217, 0.32)',
   primaryAmethyst: '#7C3AED',
   primaryPlum: '#3B0764',
@@ -132,4 +136,5 @@ export const darkColors: Colors = {
 
   // Semantic — unchanged
   danger: '#DC2626',
+  onPrimary: '#FFFFFF',
 };

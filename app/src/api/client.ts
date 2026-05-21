@@ -3,6 +3,7 @@ import { router, type Href } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
 
 import { tokenStorage } from './tokenStorage';
+import type { RefreshResponse } from '@/types/auth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api';
 
@@ -29,7 +30,12 @@ client.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status !== 401 || original._retry) {
+    const isAuthEndpoint =
+      original.url?.includes('/auth/login/') ||
+      original.url?.includes('/auth/register/') ||
+      original.url?.includes('/auth/token/refresh/');
+
+    if (error.response?.status !== 401 || original._retry || isAuthEndpoint) {
       return Promise.reject(error);
     }
 
@@ -40,7 +46,9 @@ client.interceptors.response.use(
         refreshing = (async () => {
           const refresh = await tokenStorage.getRefresh();
           if (!refresh) throw new Error('No refresh token');
-          const { data } = await axios.post(`${BASE_URL}/auth/token/refresh/`, { refresh });
+          const { data } = await axios.post<RefreshResponse>(`${BASE_URL}/auth/token/refresh/`, {
+            refresh,
+          });
           await tokenStorage.setTokens(data.access, data.refresh ?? refresh);
           return data.access as string;
         })().finally(() => {
@@ -51,8 +59,8 @@ client.interceptors.response.use(
       const newAccess = await refreshing;
       original.headers.Authorization = `Bearer ${newAccess}`;
       return client(original);
-    } catch (e) {
-      Sentry.captureException(e);
+    } catch {
+      Sentry.captureMessage('Token refresh failed', 'error');
       await tokenStorage.clear();
       router.replace('/(auth)/login' as Href);
       return Promise.reject(error);
