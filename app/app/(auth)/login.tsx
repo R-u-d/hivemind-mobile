@@ -8,13 +8,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { router, type Href } from 'expo-router';
 
 import FormField from '@/components/FormField';
+import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
 import { tokenStorage } from '@/api/tokenStorage';
@@ -64,7 +64,7 @@ export default function LoginScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <MaterialCommunityIcons name="hexagon-outline" size={32} color={colors.primary} />
+          <HiveLogo size={32} color={colors.primary} />
           <Text style={[styles.title, { color: colors.text, marginTop: spacing.lg }]}>
             Welcome back
           </Text>
