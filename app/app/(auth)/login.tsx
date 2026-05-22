@@ -137,13 +137,6 @@ export default function LoginScreen() {
             </Text>
           ) : null}
 
-          <PrimaryButton
-            label="Sign in"
-            loadingLabel="Signing in…"
-            loading={isPending}
-            onPress={handleSubmit(onSubmit)}
-          />
-
           <View style={styles.switchRow}>
             <Text
               style={[styles.switchText, { color: colors.textMuted, fontFamily: fonts.regular }]}
@@ -161,6 +154,13 @@ export default function LoginScreen() {
               </Text>
             </Pressable>
           </View>
+
+          <PrimaryButton
+            label="Sign in"
+            loadingLabel="Signing in…"
+            loading={isPending}
+            onPress={handleSubmit(onSubmit)}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -183,7 +183,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.xl,
     gap: 14,
-    flex: 1,
   },
   showHide: { fontSize: 13 },
   footer: {

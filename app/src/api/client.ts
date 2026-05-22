@@ -37,7 +37,8 @@ client.interceptors.response.use(
     const isAuthEndpoint =
       original.url?.includes('/auth/login/') ||
       original.url?.includes('/auth/register/') ||
-      original.url?.includes('/auth/token/refresh/');
+      original.url?.includes('/auth/token/refresh/') ||
+      original.url?.includes('/auth/logout/');
 
     if (error.response?.status !== 401 || original._retry || isAuthEndpoint) {
       return Promise.reject(error);

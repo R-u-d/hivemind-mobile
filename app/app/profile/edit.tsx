@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,6 +22,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
 import { useAvatarUpload } from '@/hooks/useAvatarUpload';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useLogout } from '@/hooks/useLogout';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
 import { fonts, radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -41,6 +43,7 @@ export default function EditProfileScreen() {
   const { data: user } = useCurrentUser();
   const { mutateAsync: updateProfile, isPending: updatePending } = useUpdateProfile();
   const { mutateAsync: uploadAvatar, isPending: avatarPending } = useAvatarUpload();
+  const { mutate: logout } = useLogout();
 
   const [avatarUri, setAvatarUri] = useState<string | null>(user?.avatar_url ?? null);
   const [serverError, setServerError] = useState('');
@@ -114,6 +117,11 @@ export default function EditProfileScreen() {
           headerStyle: { backgroundColor: c.surface },
           headerTintColor: c.text,
           headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
+          headerRight: () => (
+            <Pressable onPress={() => logout()} accessibilityLabel="Log out" style={{ padding: 4 }}>
+              <Ionicons name="log-out-outline" size={22} color={c.danger} />
+            </Pressable>
+          ),
         }}
       />
       <KeyboardAvoidingView
