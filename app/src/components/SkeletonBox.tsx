@@ -16,7 +16,7 @@ export default function SkeletonBox({
   borderRadius = 6,
   style,
 }: SkeletonBoxProps) {
-  const c = useTheme();
+  const colors = useTheme();
   const anim = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -32,7 +32,11 @@ export default function SkeletonBox({
 
   return (
     <Animated.View
-      style={[{ backgroundColor: c.border }, { width, height, borderRadius, opacity: anim }, style]}
+      style={[
+        { backgroundColor: colors.border },
+        { width, height, borderRadius, opacity: anim },
+        style,
+      ]}
     />
   );
 }

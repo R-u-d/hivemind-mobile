@@ -9,11 +9,13 @@ interface StatCardProps {
 }
 
 export default function StatCard({ label, value }: StatCardProps) {
-  const c = useTheme();
+  const colors = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
-      <Text style={[styles.label, { color: c.textMuted, fontFamily: fonts.medium }]}>{label}</Text>
-      <Text style={[styles.value, { color: c.text, fontFamily: fonts.medium }]}>{value}</Text>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Text style={[styles.label, { color: colors.textMuted, fontFamily: fonts.medium }]}>
+        {label}
+      </Text>
+      <Text style={[styles.value, { color: colors.text, fontFamily: fonts.medium }]}>{value}</Text>
     </View>
   );
 }

@@ -24,6 +24,7 @@ export default function FormField({
 }: FormFieldProps) {
   const colors = useTheme();
   const [focused, setFocused] = useState(false);
+  const [multilineHeight, setMultilineHeight] = useState(0);
 
   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
 
@@ -38,7 +39,7 @@ export default function FormField({
         style={[
           styles.row,
           { borderColor, backgroundColor: colors.surface },
-          props.multiline && styles.rowMultiline,
+          props.multiline ? styles.rowMultiline : styles.rowSingleLine,
         ]}
       >
         <TextInput
@@ -47,7 +48,9 @@ export default function FormField({
             { color: colors.text, fontFamily: fonts.regular },
             props.multiline && styles.inputMultiline,
             style,
+            props.multiline && multilineHeight > 0 ? { height: multilineHeight } : undefined,
           ]}
+          underlineColorAndroid="transparent"
           placeholderTextColor={colors.textFaint}
           onFocus={e => {
             setFocused(true);
@@ -57,6 +60,9 @@ export default function FormField({
             setFocused(false);
             onBlur?.(e);
           }}
+          onContentSizeChange={
+            props.multiline ? e => setMultilineHeight(e.nativeEvent.contentSize.height) : undefined
+          }
           value={value ?? ''}
           scrollEnabled={props.multiline ? false : undefined}
           {...props}
@@ -77,14 +83,15 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, letterSpacing: 0.1 },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    height: 48,
     paddingHorizontal: 14,
     borderRadius: radius.input,
     borderWidth: 1,
   },
+  rowSingleLine: {
+    height: 48,
+    alignItems: 'center',
+  },
   rowMultiline: {
-    height: undefined,
     minHeight: 48,
     alignItems: 'flex-start',
     paddingVertical: 12,
@@ -94,6 +101,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: -0.1,
     paddingVertical: 0,
+    // suppress native focus ring that creates a double-border on multiline inputs
+    outlineStyle: 'none' as never,
   },
   inputMultiline: {
     textAlignVertical: 'top',

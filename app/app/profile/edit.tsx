@@ -39,7 +39,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function EditProfileScreen() {
-  const c = useTheme();
+  const colors = useTheme();
   const { data: user } = useCurrentUser();
   const { mutateAsync: updateProfile, isPending: updatePending } = useUpdateProfile();
   const { mutateAsync: uploadAvatar, isPending: avatarPending } = useAvatarUpload();
@@ -114,18 +114,22 @@ export default function EditProfileScreen() {
           title: 'Edit Profile',
           headerBackTitle: 'Back',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: c.surface },
-          headerTintColor: c.text,
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
           headerRight: () => (
-            <Pressable onPress={() => logout()} accessibilityLabel="Log out" style={{ padding: 4 }}>
-              <Ionicons name="log-out-outline" size={22} color={c.danger} />
+            <Pressable
+              onPress={() => logout()}
+              accessibilityLabel="Log out"
+              style={styles.logoutBtn}
+            >
+              <Ionicons name="log-out-outline" size={22} color={colors.danger} />
             </Pressable>
           ),
         }}
       />
       <KeyboardAvoidingView
-        style={[styles.flex, { backgroundColor: c.surface }]}
+        style={[styles.flex, { backgroundColor: colors.bg }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
@@ -137,11 +141,14 @@ export default function EditProfileScreen() {
             <Avatar uri={avatarUri} name={displayName} size={80} />
             <Pressable
               onPress={pickImage}
-              style={[styles.changePhotoBtn, { borderColor: c.primary }]}
+              style={[styles.changePhotoBtn, { borderColor: colors.primary }]}
               accessibilityLabel="Change profile photo"
             >
               <Text
-                style={[styles.changePhotoText, { color: c.primary, fontFamily: fonts.medium }]}
+                style={[
+                  styles.changePhotoText,
+                  { color: colors.primary, fontFamily: fonts.medium },
+                ]}
               >
                 Change photo
               </Text>
@@ -162,6 +169,7 @@ export default function EditProfileScreen() {
                   error={errors.display_name?.message}
                   autoCapitalize="words"
                   autoCorrect={false}
+                  maxLength={150}
                   accessibilityLabel="Display name"
                 />
               )}
@@ -180,6 +188,7 @@ export default function EditProfileScreen() {
                   error={errors.location?.message}
                   autoCapitalize="words"
                   autoCorrect={false}
+                  maxLength={100}
                   accessibilityLabel="Location"
                 />
               )}
@@ -207,7 +216,11 @@ export default function EditProfileScreen() {
                       styles.charCounter,
                       {
                         color:
-                          bioLength >= 200 ? c.danger : bioLength >= 150 ? c.warning : c.textFaint,
+                          bioLength >= 200
+                            ? colors.danger
+                            : bioLength >= 150
+                              ? colors.warning
+                              : colors.textFaint,
                         fontFamily: fonts.regular,
                       },
                     ]}
@@ -220,7 +233,7 @@ export default function EditProfileScreen() {
           </View>
 
           {serverError ? (
-            <Text style={[styles.serverError, { color: c.danger, fontFamily: fonts.regular }]}>
+            <Text style={[styles.serverError, { color: colors.danger, fontFamily: fonts.regular }]}>
               {serverError}
             </Text>
           ) : null}
@@ -259,4 +272,5 @@ const styles = StyleSheet.create({
   charCounter: { fontSize: 11, textAlign: 'right', marginTop: 4, paddingHorizontal: 2 },
   serverError: { fontSize: 13, paddingHorizontal: spacing.base, paddingTop: spacing.sm },
   footer: { paddingHorizontal: spacing.base, paddingTop: spacing.lg },
+  logoutBtn: { padding: 4, marginRight: spacing.base },
 });

@@ -11,9 +11,12 @@ import { fonts, radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 
 function PublicProfileSkeleton() {
-  const c = useTheme();
+  const colors = useTheme();
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.bg }}
+      contentContainerStyle={styles.content}
+    >
       <View style={styles.head}>
         <SkeletonBox width={68} height={68} borderRadius={34} />
         <View style={{ flex: 1, gap: 8 }}>
@@ -30,7 +33,7 @@ function PublicProfileSkeleton() {
 }
 
 export default function PublicProfileScreen() {
-  const c = useTheme();
+  const colors = useTheme();
   const { top } = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -46,50 +49,53 @@ export default function PublicProfileScreen() {
         options={{
           title: displayName,
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: c.bg },
-          headerTintColor: c.text,
+          headerStyle: { backgroundColor: colors.bg },
+          headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
         }}
       />
 
       {isError || !user ? (
-        <View style={[styles.center, { backgroundColor: c.bg, paddingTop: top }]}>
-          <Ionicons name="alert-circle-outline" size={48} color={c.textMuted} />
-          <Text style={[styles.errorTitle, { color: c.text, fontFamily: fonts.medium }]}>
+        <View style={[styles.center, { backgroundColor: colors.bg, paddingTop: top }]}>
+          <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.errorTitle, { color: colors.text, fontFamily: fonts.medium }]}>
             Profile not found
           </Text>
           <Pressable
             onPress={() => refetch()}
-            style={[styles.retryBtn, { borderColor: c.border }]}
+            style={[styles.retryBtn, { borderColor: colors.border }]}
             accessibilityLabel="Retry loading profile"
           >
-            <Text style={[styles.retryText, { color: c.primary, fontFamily: fonts.medium }]}>
+            <Text style={[styles.retryText, { color: colors.primary, fontFamily: fonts.medium }]}>
               Try again
             </Text>
           </Pressable>
           <Pressable onPress={() => router.back()} accessibilityLabel="Go back">
-            <Text style={[styles.backText, { color: c.textMuted, fontFamily: fonts.regular }]}>
+            <Text style={[styles.backText, { color: colors.textMuted, fontFamily: fonts.regular }]}>
               Go back
             </Text>
           </Pressable>
         </View>
       ) : (
         <ScrollView
-          style={{ flex: 1, backgroundColor: c.bg }}
+          style={{ flex: 1, backgroundColor: colors.bg }}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.head}>
             <Avatar uri={user.avatar_url} name={displayName} size={68} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.displayName, { color: c.text, fontFamily: fonts.medium }]}>
+              <Text style={[styles.displayName, { color: colors.text, fontFamily: fonts.medium }]}>
                 {displayName}
               </Text>
               {user.location ? (
                 <View style={styles.locationRow}>
-                  <Ionicons name="location-outline" size={12} color={c.textMuted} />
+                  <Ionicons name="location-outline" size={12} color={colors.textMuted} />
                   <Text
-                    style={[styles.locationText, { color: c.textMuted, fontFamily: fonts.regular }]}
+                    style={[
+                      styles.locationText,
+                      { color: colors.textMuted, fontFamily: fonts.regular },
+                    ]}
                   >
                     {user.location}
                   </Text>
@@ -97,7 +103,7 @@ export default function PublicProfileScreen() {
               ) : null}
               {user.bio ? (
                 <Text
-                  style={[styles.bio, { color: c.text, fontFamily: fonts.regular }]}
+                  style={[styles.bio, { color: colors.text, fontFamily: fonts.regular }]}
                   numberOfLines={5}
                 >
                   {user.bio}
