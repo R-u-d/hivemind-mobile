@@ -141,7 +141,7 @@ export default function ProfileScreen() {
           style={styles.editBtn}
           accessibilityLabel="Edit profile"
         >
-          <Ionicons name="pencil-outline" size={20} color={c.textMuted} />
+          <Ionicons name="options-outline" size={22} color={c.textMuted} />
         </Pressable>
       </View>
 
