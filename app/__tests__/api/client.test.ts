@@ -19,6 +19,7 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
+  captureMessage: jest.fn(),
 }));
 
 const mock = new MockAdapter(client);
