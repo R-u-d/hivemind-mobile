@@ -30,9 +30,20 @@ export default function FormField({
       <Text style={[styles.label, { color: colors.textMuted, fontFamily: fonts.medium }]}>
         {label}
       </Text>
-      <View style={[styles.row, { borderColor, backgroundColor: colors.surface }]}>
+      <View
+        style={[
+          styles.row,
+          { borderColor, backgroundColor: colors.surface },
+          props.multiline && styles.rowMultiline,
+        ]}
+      >
         <TextInput
-          style={[styles.input, { color: colors.text, fontFamily: fonts.regular }, style]}
+          style={[
+            styles.input,
+            { color: colors.text, fontFamily: fonts.regular },
+            props.multiline && styles.inputMultiline,
+            style,
+          ]}
           placeholderTextColor={colors.textFaint}
           onFocus={e => {
             setFocused(true);
@@ -43,6 +54,7 @@ export default function FormField({
             onBlur?.(e);
           }}
           value={value ?? ''}
+          scrollEnabled={props.multiline ? false : undefined}
           {...props}
         />
         {rightAccessory}
@@ -67,10 +79,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.input,
     borderWidth: 1,
   },
+  rowMultiline: {
+    height: undefined,
+    minHeight: 48,
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+  },
   input: {
     flex: 1,
     fontSize: 15,
     letterSpacing: -0.1,
+    paddingVertical: 0,
+  },
+  inputMultiline: {
+    textAlignVertical: 'top',
     paddingVertical: 0,
   },
   error: { fontSize: 12 },

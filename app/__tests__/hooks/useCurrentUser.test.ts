@@ -17,6 +17,7 @@ const user: User = {
   email: 'test@example.com',
   display_name: 'Test User',
   bio: null,
+  location: null,
   avatar_url: null,
   created_at: '2026-01-01T00:00:00Z',
 };
