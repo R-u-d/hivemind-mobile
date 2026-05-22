@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Community, Membership
+from .models import Channel, Community, Membership
 
 
 class CommunityMinimalSerializer(serializers.ModelSerializer):
@@ -41,3 +41,10 @@ class MembershipSerializer(serializers.ModelSerializer):
 
 class RoleUpdateSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=[Membership.Role.MEMBER, Membership.Role.MODERATOR])
+
+
+class ChannelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Channel
+        fields = ["id", "community_id", "name", "description", "created_at"]
+        read_only_fields = ["id", "community_id", "created_at"]
