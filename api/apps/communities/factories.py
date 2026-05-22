@@ -2,7 +2,7 @@ import factory
 
 from users.factories import UserFactory
 
-from .models import Community
+from .models import Community, Membership
 
 
 class CommunityFactory(factory.django.DjangoModelFactory):
@@ -15,3 +15,12 @@ class CommunityFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
     cover_image_url = ""
     is_private = False
+
+
+class MembershipFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Membership
+
+    community = factory.SubFactory(CommunityFactory)
+    user = factory.SubFactory(UserFactory)
+    role = Membership.Role.MEMBER

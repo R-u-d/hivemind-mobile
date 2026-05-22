@@ -50,6 +50,11 @@
       "key": "avatar_public_url",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "member_user_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -396,6 +401,91 @@
               "raw": "{{base_url}}/communities/{{community_id}}/",
               "host": ["{{base_url}}"],
               "path": ["communities", "{{community_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Members",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/members/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "members", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Join Community",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('member_user_id', res.user_id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/join/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "join", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Community",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/leave/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "leave", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Member Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"moderator\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
             }
           },
           "response": []
