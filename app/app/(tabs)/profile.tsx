@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from '@/components/Avatar';
 import CommunityIcon from '@/components/CommunityIcon';
+import LoadingTail from '@/components/LoadingTail';
 import SkeletonBox from '@/components/SkeletonBox';
 import StatCard from '@/components/StatCard';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -40,6 +41,7 @@ function ProfileSkeleton() {
           <SkeletonBox width="60%" height={14} />
         </View>
       ))}
+      <LoadingTail caption="Tidying your cell…" />
     </ScrollView>
   );
 }
@@ -183,7 +185,10 @@ export default function ProfileScreen() {
         </Text>
 
         {commLoading ? (
-          <CommunityListSkeleton />
+          <>
+            <CommunityListSkeleton />
+            <LoadingTail caption="Counting your hives…" size={28} />
+          </>
         ) : communities.length > 0 ? (
           <View
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}

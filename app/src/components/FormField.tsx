@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TextInput,
+  type TextInputProps,
+  View,
+} from 'react-native';
 
 import { fonts, radius } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -10,6 +18,12 @@ interface FormFieldProps extends TextInputProps {
   labelColor?: string;
   rightAccessory?: React.ReactNode;
 }
+
+// Focus state renders a two-layer purple aura around the input. The outer
+// ring breathes while focused, tying the field to the same hex/halo motion
+// language used on the splash.
+
+const PRIMARY_RGB = '109, 40, 217'; // colors.primary #6D28D9
 
 export default function FormField({
   label,
@@ -25,7 +39,41 @@ export default function FormField({
   const colors = useTheme();
   const [focused, setFocused] = useState(false);
   const [multilineHeight, setMultilineHeight] = useState(0);
+  const glow = useRef(new Animated.Value(0)).current;
+  const breath = useRef(new Animated.Value(0)).current;
 
+  useEffect(() => {
+    Animated.timing(glow, {
+      toValue: focused ? 1 : 0,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [focused, glow]);
+
+  useEffect(() => {
+    if (!focused) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(breath, {
+          toValue: 1,
+          duration: 1600,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+        Animated.timing(breath, {
+          toValue: 0,
+          duration: 1600,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [focused, breath]);
+
+  const breathOpacity = breath.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] });
   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
 
   return (
@@ -35,39 +83,60 @@ export default function FormField({
       >
         {label}
       </Text>
-      <View
-        style={[
-          styles.row,
-          { borderColor, backgroundColor: colors.surface },
-          props.multiline ? styles.rowMultiline : styles.rowSingleLine,
-        ]}
-      >
-        <TextInput
+      <View style={styles.haloFrame}>
+        <Animated.View
+          pointerEvents="none"
           style={[
-            styles.input,
-            { color: colors.text, fontFamily: fonts.regular },
-            props.multiline && styles.inputMultiline,
-            style,
-            props.multiline && multilineHeight > 0 ? { height: multilineHeight } : undefined,
+            styles.glowOuter,
+            {
+              backgroundColor: `rgba(${PRIMARY_RGB}, 0.07)`,
+              opacity: Animated.multiply(glow, breathOpacity),
+            },
           ]}
-          underlineColorAndroid="transparent"
-          placeholderTextColor={colors.textFaint}
-          onFocus={e => {
-            setFocused(true);
-            onFocus?.(e);
-          }}
-          onBlur={e => {
-            setFocused(false);
-            onBlur?.(e);
-          }}
-          onContentSizeChange={
-            props.multiline ? e => setMultilineHeight(e.nativeEvent.contentSize.height) : undefined
-          }
-          value={value ?? ''}
-          scrollEnabled={props.multiline ? false : undefined}
-          {...props}
         />
-        {rightAccessory}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.glowInner,
+            { backgroundColor: `rgba(${PRIMARY_RGB}, 0.16)`, opacity: glow },
+          ]}
+        />
+        <View
+          style={[
+            styles.row,
+            { borderColor, backgroundColor: colors.surface },
+            props.multiline ? styles.rowMultiline : styles.rowSingleLine,
+          ]}
+        >
+          <TextInput
+            style={[
+              styles.input,
+              { color: colors.text, fontFamily: fonts.regular },
+              props.multiline && styles.inputMultiline,
+              style,
+              props.multiline && multilineHeight > 0 ? { height: multilineHeight } : undefined,
+            ]}
+            underlineColorAndroid="transparent"
+            placeholderTextColor={colors.textFaint}
+            onFocus={e => {
+              setFocused(true);
+              onFocus?.(e);
+            }}
+            onBlur={e => {
+              setFocused(false);
+              onBlur?.(e);
+            }}
+            onContentSizeChange={
+              props.multiline
+                ? e => setMultilineHeight(e.nativeEvent.contentSize.height)
+                : undefined
+            }
+            value={value ?? ''}
+            scrollEnabled={props.multiline ? false : undefined}
+            {...props}
+          />
+          {rightAccessory}
+        </View>
       </View>
       {error ? (
         <Text style={[styles.error, { color: colors.danger, fontFamily: fonts.regular }]}>
@@ -81,32 +150,38 @@ export default function FormField({
 const styles = StyleSheet.create({
   wrapper: { gap: 6 },
   label: { fontSize: 13, letterSpacing: 0.1 },
+  haloFrame: { position: 'relative' },
+  glowOuter: {
+    position: 'absolute',
+    top: -7,
+    left: -7,
+    right: -7,
+    bottom: -7,
+    borderRadius: radius.input + 7,
+  },
+  glowInner: {
+    position: 'absolute',
+    top: -3,
+    left: -3,
+    right: -3,
+    bottom: -3,
+    borderRadius: radius.input + 3,
+  },
   row: {
     flexDirection: 'row',
     paddingHorizontal: 14,
     borderRadius: radius.input,
     borderWidth: 1,
   },
-  rowSingleLine: {
-    height: 48,
-    alignItems: 'center',
-  },
-  rowMultiline: {
-    minHeight: 48,
-    alignItems: 'flex-start',
-    paddingVertical: 12,
-  },
+  rowSingleLine: { height: 48, alignItems: 'center' },
+  rowMultiline: { minHeight: 48, alignItems: 'flex-start', paddingVertical: 12 },
   input: {
     flex: 1,
     fontSize: 15,
     letterSpacing: -0.1,
     paddingVertical: 0,
-    // suppress native focus ring that creates a double-border on multiline inputs
     outlineStyle: 'none' as never,
   },
-  inputMultiline: {
-    textAlignVertical: 'top',
-    paddingVertical: 0,
-  },
+  inputMultiline: { textAlignVertical: 'top', paddingVertical: 0 },
   error: { fontSize: 12 },
 });

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from '@/components/Avatar';
+import LoadingTail from '@/components/LoadingTail';
 import SkeletonBox from '@/components/SkeletonBox';
 import StatCard from '@/components/StatCard';
 import { usePublicProfile } from '@/hooks/usePublicProfile';
@@ -28,6 +29,7 @@ function PublicProfileSkeleton() {
         <SkeletonBox height={72} style={{ flex: 1 }} borderRadius={radius.lg} />
         <SkeletonBox height={72} style={{ flex: 1 }} borderRadius={radius.lg} />
       </View>
+      <LoadingTail caption="Knocking on the comb…" />
     </ScrollView>
   );
 }
