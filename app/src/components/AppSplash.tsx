@@ -153,7 +153,7 @@ export default function AppSplash({ onDone }: Props) {
               <Rect width={320} height={320} fill="url(#hm-halo)" />
             </Svg>
           </Animated.View>
-          <HiveLogo size={72} color={colors.splashFg} animated glow />
+          <HiveLogo size={72} color={colors.splashFg} animated />
         </View>
         <Text style={styles.wordmark}>HiveMind</Text>
         <Text style={styles.tagline}>Join. Sync. Evolve.</Text>
