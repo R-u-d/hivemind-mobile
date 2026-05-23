@@ -135,7 +135,7 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
-        <Text style={[typography.screenTitle, { color: colors.text }]}>Profile</Text>
+        <Text style={[typography.display, { color: colors.text }]}>Profile</Text>
         <Pressable
           onPress={() => router.push('/profile/edit')}
           style={styles.editBtn}

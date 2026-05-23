@@ -72,10 +72,10 @@ export default function RegisterScreen() {
         {/* Header */}
         <View style={styles.header}>
           <HiveLogo size={32} color={colors.primary} />
-          <Text style={[styles.title, { color: colors.text, marginTop: spacing.lg }]}>
+          <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
             Create your account
           </Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing.xs }]}>
             Find your people. Join your first community in under a minute.
           </Text>
         </View>
@@ -234,8 +234,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
-  title: { ...typography.screenTitle },
-  subtitle: { ...typography.screenSubtitle, marginTop: spacing.xs },
   form: {
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.xl,

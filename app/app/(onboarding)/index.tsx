@@ -53,8 +53,8 @@ export default function OnboardingScreen() {
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>What are you into?</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+        <Text style={[typography.display, { color: colors.text }]}>What are you into?</Text>
+        <Text style={[typography.body, { color: colors.textMuted }]}>
           Pick a few — you'll join their hive. Don't see yours? Create one.
         </Text>
       </View>
@@ -102,8 +102,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     gap: 6,
   },
-  title: { ...typography.screenTitle },
-  subtitle: { ...typography.screenSubtitle },
   grid: {
     flex: 1,
     flexDirection: 'row',

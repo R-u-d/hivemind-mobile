@@ -70,6 +70,20 @@ export const communityTypeColors: Record<
   tech: { primary: '#4F46E5', background: '#E0E7FF', text: '#4F46E5' },
 };
 
+export const communityTypeLabels: Record<CommunityType, string> = {
+  student: 'Student',
+  gamer: 'Gamer',
+  hobby: 'Hobby',
+  sports: 'Sports',
+  music: 'Music',
+  books: 'Books',
+  outdoors: 'Outdoors',
+  travel: 'Travel',
+  photo: 'Photo',
+  foodie: 'Foodie',
+  tech: 'Tech',
+};
+
 // Token for the "create a new community" card/action — not a community type itself
 export const communityCreate = {
   primary: colors.primary,
@@ -111,13 +125,46 @@ export const fonts = {
   medium: 'Inter_500Medium',
 } as const;
 
+// Canonical 6-step ramp — matches design spec §2 (design/design-spec.md).
+// Names: display / title / heading / body / caption / overline.
+
 export const typography = {
-  title: { fontSize: 17, fontWeight: '500' as const, fontFamily: fonts.medium },
-  cardTitle: { fontSize: 13, fontWeight: '500' as const, fontFamily: fonts.medium },
-  body: { fontSize: 12, fontWeight: '400' as const, fontFamily: fonts.regular },
-  caption: { fontSize: 10, fontWeight: '400' as const, fontFamily: fonts.regular },
-  screenTitle: { fontSize: 26, letterSpacing: -0.6, fontFamily: fonts.medium },
-  screenSubtitle: { fontSize: 14, lineHeight: 14 * 1.45, fontFamily: fonts.regular },
+  display: {
+    fontSize: 28,
+    letterSpacing: -0.8,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  title: {
+    fontSize: 22,
+    letterSpacing: -0.4,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  heading: {
+    fontSize: 17,
+    letterSpacing: -0.2,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 15 * 1.45,
+    fontWeight: '400' as const,
+    fontFamily: fonts.regular,
+  },
+  caption: {
+    fontSize: 13,
+    fontWeight: '400' as const,
+    fontFamily: fonts.regular,
+  },
+  overline: {
+    fontSize: 11,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase' as const,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
 } as const;
 
 // ── Dark mode ─────────────────────────────────────────────────────────────
