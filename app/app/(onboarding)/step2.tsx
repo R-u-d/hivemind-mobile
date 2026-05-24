@@ -7,6 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import CommunityIcon from '@/components/CommunityIcon';
 import EmptyState from '@/components/EmptyState';
+import GhostButton from '@/components/GhostButton';
 import PrimaryButton from '@/components/PrimaryButton';
 import SkeletonBox from '@/components/SkeletonBox';
 import TypePill from '@/components/TypePill';
@@ -161,7 +162,7 @@ export default function OnboardingStep2() {
           icon="cloud-offline-outline"
           title="Couldn't reach the hive"
           message="Check your connection — we'll be right back."
-          action={<PrimaryButton label="Try again" onPress={() => refetch()} />}
+          action={<GhostButton label="Try again" onPress={() => refetch()} />}
         />
       );
     }

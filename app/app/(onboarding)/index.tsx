@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '@/components/PrimaryButton';
@@ -42,16 +42,16 @@ const CLUSTER: (CommunityType | 'create')[] = [
 const CELL_W = 84;
 const CELL_H = CELL_W * (Math.sqrt(3) / 2);
 const BBOX_W = 2.5 * CELL_W;
-const BBOX_H = 4 * CELL_H;
+const BBOX_H = 2.8 * CELL_H;
 
-// Positions relative to center [0, 0]. Create sits at center (index 3).
+// Positions for seamless flat-top hex tiling (no gaps). Create at center.
 const POSITIONS: [number, number][] = [
-  [0, -2 * CELL_H], // study     (top)
-  [-0.75 * CELL_W, -CELL_H], // gaming    (top-left)
-  [0.75 * CELL_W, -CELL_H], // sports    (top-right)
-  [0, 0], // create    (center)
-  [-0.75 * CELL_W, CELL_H], // creative  (bottom-left)
-  [0.75 * CELL_W, CELL_H], // social    (bottom-right)
+  [0, -CELL_H], // study (top)
+  [-0.75 * CELL_W, -0.5 * CELL_H], // gaming (top-left)
+  [0.75 * CELL_W, -0.5 * CELL_H], // sports (top-right)
+  [0, 0], // create (center)
+  [-0.75 * CELL_W, 0.5 * CELL_H], // creative (bottom-left)
+  [0.75 * CELL_W, 0.5 * CELL_H], // social (bottom-right)
 ];
 
 function hexPoints(w: number, h: number): string {
@@ -183,7 +183,7 @@ function HoneycombCluster({ selectedTypes, onToggle, scale }: HoneycombClusterPr
       {CLUSTER.map((type, i) => {
         const [cx, cy] = POSITIONS[i];
         const left = (cx + 0.75 * CELL_W) * scale;
-        const top = (cy + 2 * CELL_H) * scale;
+        const top = (cy + CELL_H) * scale;
 
         if (type === 'create') {
           return (
@@ -244,7 +244,7 @@ export default function OnboardingScreen() {
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <View style={styles.header}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => router.replace('/(auth)/login' as Href)}
           style={styles.backBtn}
           accessibilityLabel="Go back"
           accessibilityRole="button"
