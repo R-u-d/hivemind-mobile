@@ -1,15 +1,4 @@
-export type CommunityType =
-  | 'student'
-  | 'gamer'
-  | 'hobby'
-  | 'sports'
-  | 'music'
-  | 'books'
-  | 'outdoors'
-  | 'travel'
-  | 'photo'
-  | 'foodie'
-  | 'tech';
+export type CommunityType = 'study' | 'gaming' | 'sports' | 'creative' | 'social';
 
 // ── Colors ────────────────────────────────────────────────────────────────
 
@@ -57,31 +46,19 @@ export const communityTypeColors: Record<
   CommunityType,
   { primary: string; background: string; text: string }
 > = {
-  student: { primary: '#378ADD', background: '#E7F1FB', text: '#378ADD' },
-  gamer: { primary: '#D85A30', background: '#FBE9E1', text: '#D85A30' },
-  hobby: { primary: '#1D9E75', background: '#E1F2EC', text: '#1D9E75' },
+  study: { primary: '#378ADD', background: '#E7F1FB', text: '#378ADD' },
+  gaming: { primary: '#D85A30', background: '#FBE9E1', text: '#D85A30' },
   sports: { primary: '#EF9F27', background: '#FDF1DA', text: '#EF9F27' },
-  music: { primary: '#6D28D9', background: '#EDE9FE', text: '#6D28D9' },
-  books: { primary: '#92400E', background: '#FEF3C7', text: '#92400E' },
-  outdoors: { primary: '#65A30D', background: '#ECFCCB', text: '#65A30D' },
-  travel: { primary: '#0D9488', background: '#CCFBF1', text: '#0D9488' },
-  photo: { primary: '#DB2777', background: '#FCE7F3', text: '#DB2777' },
-  foodie: { primary: '#DC2626', background: '#FEE2E2', text: '#DC2626' },
-  tech: { primary: '#4F46E5', background: '#E0E7FF', text: '#4F46E5' },
+  creative: { primary: '#DB2777', background: '#FCE7F3', text: '#DB2777' },
+  social: { primary: '#0D9488', background: '#CCFBF1', text: '#0D9488' },
 };
 
 export const communityTypeLabels: Record<CommunityType, string> = {
-  student: 'Student',
-  gamer: 'Gamer',
-  hobby: 'Hobby',
+  study: 'Study',
+  gaming: 'Gaming',
   sports: 'Sports',
-  music: 'Music',
-  books: 'Books',
-  outdoors: 'Outdoors',
-  travel: 'Travel',
-  photo: 'Photo',
-  foodie: 'Foodie',
-  tech: 'Tech',
+  creative: 'Creative',
+  social: 'Social',
 };
 
 // Token for the "create a new community" card/action — not a community type itself

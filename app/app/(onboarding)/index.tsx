@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-na
 import Svg, { Polygon } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '@/components/PrimaryButton';
 import {
@@ -21,53 +22,36 @@ import { useTheme } from '@/theme/ThemeContext';
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 const ICONS: Record<CommunityType, IoniconsName> = {
-  student: 'school-outline',
-  gamer: 'game-controller-outline',
-  hobby: 'color-palette-outline',
+  study: 'school-outline',
+  gaming: 'game-controller-outline',
   sports: 'football-outline',
-  music: 'musical-notes-outline',
-  books: 'book-outline',
-  outdoors: 'leaf-outline',
-  travel: 'airplane-outline',
-  photo: 'camera-outline',
-  foodie: 'restaurant-outline',
-  tech: 'code-slash-outline',
+  creative: 'color-palette-outline',
+  social: 'people-outline',
 };
 
-// Cluster order: 11 community types + 'create' at index 8 (center)
+// Cluster order: 5 community types + 'create' at index 3 (center)
 const CLUSTER: (CommunityType | 'create')[] = [
-  'music',
-  'student',
-  'hobby',
-  'books',
+  'study',
+  'gaming',
   'sports',
-  'outdoors',
-  'gamer',
-  'travel',
   'create',
-  'photo',
-  'foodie',
-  'tech',
+  'creative',
+  'social',
 ];
 
 const CELL_W = 84;
 const CELL_H = CELL_W * (Math.sqrt(3) / 2);
-const BBOX_W = 4 * CELL_W;
+const BBOX_W = 2.5 * CELL_W;
 const BBOX_H = 4 * CELL_H;
 
+// Positions relative to center [0, 0]. Create sits at center (index 3).
 const POSITIONS: [number, number][] = [
-  [0, -2 * CELL_H],
-  [-0.75 * CELL_W, -1.5 * CELL_H],
-  [0.75 * CELL_W, -1.5 * CELL_H],
-  [-1.5 * CELL_W, -1 * CELL_H],
-  [0, -1 * CELL_H],
-  [1.5 * CELL_W, -1 * CELL_H],
-  [-0.75 * CELL_W, -0.5 * CELL_H],
-  [0.75 * CELL_W, -0.5 * CELL_H],
-  [0, 0],
-  [-0.75 * CELL_W, 0.5 * CELL_H],
-  [0.75 * CELL_W, 0.5 * CELL_H],
-  [0, 1 * CELL_H],
+  [0, -2 * CELL_H], // study     (top)
+  [-0.75 * CELL_W, -CELL_H], // gaming    (top-left)
+  [0.75 * CELL_W, -CELL_H], // sports    (top-right)
+  [0, 0], // create    (center)
+  [-0.75 * CELL_W, CELL_H], // creative  (bottom-left)
+  [0.75 * CELL_W, CELL_H], // social    (bottom-right)
 ];
 
 function hexPoints(w: number, h: number): string {
@@ -198,7 +182,7 @@ function HoneycombCluster({ selectedTypes, onToggle, scale }: HoneycombClusterPr
     <View style={{ position: 'relative', width: BBOX_W * scale, height: BBOX_H * scale }}>
       {CLUSTER.map((type, i) => {
         const [cx, cy] = POSITIONS[i];
-        const left = (cx + 1.5 * CELL_W) * scale;
+        const left = (cx + 0.75 * CELL_W) * scale;
         const top = (cy + 2 * CELL_H) * scale;
 
         if (type === 'create') {
@@ -229,6 +213,7 @@ function HoneycombCluster({ selectedTypes, onToggle, scale }: HoneycombClusterPr
 export default function OnboardingScreen() {
   const colors = useTheme();
   const { width } = useWindowDimensions();
+  const { bottom } = useSafeAreaInsets();
   const [selectedTypes, setSelectedTypes] = useState<Set<CommunityType>>(new Set());
 
   const scale = (width - 2 * spacing.xl - spacing.base) / BBOX_W;
@@ -286,7 +271,7 @@ export default function OnboardingScreen() {
         <HoneycombCluster selectedTypes={selectedTypes} onToggle={toggle} scale={scale} />
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(spacing.lg, bottom) }]}>
         <PrimaryButton
           label={buttonLabel}
           onPress={handleContinue}

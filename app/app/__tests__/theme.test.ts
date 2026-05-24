@@ -32,19 +32,7 @@ describe('darkColors', () => {
 });
 
 describe('communityTypeColors', () => {
-  const types = [
-    'student',
-    'gamer',
-    'hobby',
-    'sports',
-    'music',
-    'books',
-    'outdoors',
-    'travel',
-    'photo',
-    'foodie',
-    'tech',
-  ] as const;
+  const types = ['study', 'gaming', 'sports', 'creative', 'social'] as const;
 
   it.each(types)('%s has primary, background and text', type => {
     const c = communityTypeColors[type];
