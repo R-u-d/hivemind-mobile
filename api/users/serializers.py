@@ -38,6 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
             "display_name",
             "bio",
             "avatar_url",
+            "has_onboarded",
             "created_at",
         ]
         read_only_fields = ["id", "email", "created_at"]
