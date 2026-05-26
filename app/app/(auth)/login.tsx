@@ -17,7 +17,6 @@ import FormField from '@/components/FormField';
 import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
-import { tokenStorage } from '@/api/tokenStorage';
 import { useLogin } from '@/hooks/useLogin';
 import { fonts, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -44,9 +43,8 @@ export default function LoginScreen() {
   const onSubmit = (data: FormData) => {
     setServerError('');
     login(data, {
-      onSuccess: async () => {
-        const onboarded = await tokenStorage.isOnboarded();
-        router.replace((onboarded ? '/(tabs)/feed' : '/(onboarding)') as Href);
+      onSuccess: async ({ user }) => {
+        router.replace((user.has_onboarded ? '/(tabs)/feed' : '/(onboarding)') as Href);
       },
       onError: err => setServerError(extractDrfError(err)),
     });

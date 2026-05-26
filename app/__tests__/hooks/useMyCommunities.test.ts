@@ -16,7 +16,7 @@ const communities: Community[] = [
   {
     id: 'c-1',
     name: 'Chess Club',
-    type: 'hobby',
+    type: 'creative',
     member_count: 12,
     created_at: '2026-01-01T00:00:00Z',
   },

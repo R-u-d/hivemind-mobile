@@ -201,7 +201,7 @@ def test_join_already_member(auth_client):
     community = CommunityFactory()
     MembershipFactory(community=community, user=user)
     response = client.post(join_url(community.id))
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 # ---- LEAVE ----

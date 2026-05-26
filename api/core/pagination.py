@@ -11,3 +11,9 @@ class JoinedAtCursorPagination(CursorPagination):
     page_size = 20
     ordering = "joined_at"
     cursor_query_param = "cursor"
+
+
+class MemberCountCursorPagination(CursorPagination):
+    page_size = 20
+    ordering = ("-member_count", "name", "id")
+    cursor_query_param = "cursor"

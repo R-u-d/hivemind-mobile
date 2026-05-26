@@ -6,17 +6,11 @@ import { communityTypeColors, type CommunityType } from '@/theme';
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 const ICONS: Record<CommunityType, IoniconsName> = {
-  student: 'school-outline',
-  gamer: 'game-controller-outline',
-  hobby: 'color-palette-outline',
+  study: 'school-outline',
+  gaming: 'game-controller-outline',
   sports: 'football-outline',
-  music: 'musical-notes-outline',
-  books: 'book-outline',
-  outdoors: 'leaf-outline',
-  travel: 'airplane-outline',
-  photo: 'camera-outline',
-  foodie: 'restaurant-outline',
-  tech: 'code-slash-outline',
+  creative: 'color-palette-outline',
+  social: 'people-outline',
 };
 
 interface CommunityIconProps {

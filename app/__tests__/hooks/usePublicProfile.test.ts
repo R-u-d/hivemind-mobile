@@ -19,6 +19,7 @@ const publicUser: User = {
   bio: null,
   location: null,
   avatar_url: null,
+  has_onboarded: false,
   created_at: '2026-01-01T00:00:00Z',
 };
 

@@ -5,5 +5,6 @@ export interface User {
   bio: string | null;
   location: string | null;
   avatar_url: string | null;
+  has_onboarded: boolean;
   created_at: string;
 }

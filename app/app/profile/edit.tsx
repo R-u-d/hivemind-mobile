@@ -114,7 +114,7 @@ export default function EditProfileScreen() {
           title: 'Edit Profile',
           headerBackTitle: 'Back',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: colors.surface },
+          headerStyle: { backgroundColor: colors.bg },
           headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
           headerRight: () => (
@@ -123,7 +123,7 @@ export default function EditProfileScreen() {
               accessibilityLabel="Log out"
               style={styles.logoutBtn}
             >
-              <Ionicons name="log-out-outline" size={22} color={colors.danger} />
+              <Ionicons name="log-out-outline" size={20} color={colors.danger} />
             </Pressable>
           ),
         }}
@@ -272,5 +272,11 @@ const styles = StyleSheet.create({
   charCounter: { fontSize: 11, textAlign: 'right', marginTop: 4, paddingHorizontal: 2 },
   serverError: { fontSize: 13, paddingHorizontal: spacing.base, paddingTop: spacing.sm },
   footer: { paddingHorizontal: spacing.base, paddingTop: spacing.lg },
-  logoutBtn: { padding: 4, marginRight: spacing.base },
+  logoutBtn: {
+    width: 44,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.xs,
+  },
 });

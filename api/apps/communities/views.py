@@ -1,9 +1,10 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.pagination import CreatedAtCursorPagination, JoinedAtCursorPagination
+from core.pagination import JoinedAtCursorPagination, MemberCountCursorPagination
 
 from .models import Community, Membership
 from .permissions import IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
@@ -16,9 +17,17 @@ from .serializers import (
 
 
 class CommunityViewSet(viewsets.ModelViewSet):
-    queryset = Community.objects.select_related("owner").order_by("-created_at")
-    pagination_class = CreatedAtCursorPagination
+    pagination_class = MemberCountCursorPagination
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        qs = Community.objects.select_related("owner").annotate(
+            member_count=Count("memberships")
+        ).order_by("-member_count", "name")
+        types = self.request.query_params.getlist("type")
+        if types:
+            qs = qs.filter(community_type__in=types)
+        return qs
 
     def get_permissions(self):
         if self.action in ("list", "retrieve"):
@@ -56,14 +65,13 @@ class JoinView(APIView):
 
     def post(self, request, community_pk):
         community = get_object_or_404(Community, pk=community_pk)
-        if Membership.objects.filter(community=community, user=request.user).exists():
-            return Response({"detail": "Already a member."}, status=status.HTTP_400_BAD_REQUEST)
-        membership = Membership.objects.create(
+        membership, created = Membership.objects.get_or_create(
             community=community,
             user=request.user,
-            role=Membership.Role.MEMBER,
+            defaults={"role": Membership.Role.MEMBER},
         )
-        return Response(MembershipSerializer(membership).data, status=status.HTTP_201_CREATED)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(MembershipSerializer(membership).data, status=status_code)
 
 
 class LeaveView(APIView):
