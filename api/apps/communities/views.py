@@ -9,6 +9,7 @@ from core.pagination import JoinedAtCursorPagination, MemberCountCursorPaginatio
 from .models import Community, Membership
 from .permissions import IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
+    CommunityDetailSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
     MembershipSerializer,
@@ -55,6 +56,8 @@ class CommunityViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return CommunityMinimalSerializer
+        if self.action == "retrieve":
+            return CommunityDetailSerializer
         return CommunitySerializer
 
     def perform_create(self, serializer):
