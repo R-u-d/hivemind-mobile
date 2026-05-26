@@ -6,13 +6,14 @@ from rest_framework.views import APIView
 
 from core.pagination import JoinedAtCursorPagination, MemberCountCursorPagination
 
-from .models import Channel, Community, Membership
-from .permissions import IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
+from .models import Channel, Community, Membership, Post
+from .permissions import IsChannelCommunityMember, IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
     ChannelSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
     MembershipSerializer,
+    PostSerializer,
     RoleUpdateSerializer,
 )
 
@@ -68,6 +69,50 @@ class ChannelViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         community = get_object_or_404(Community, pk=self.kwargs["community_pk"])
         serializer.save(community=community)
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    pagination_class = CreatedAtCursorPagination
+    http_method_names = ["get", "post", "delete", "head", "options"]
+
+    def get_permissions(self):
+        return [permissions.IsAuthenticated(), IsChannelCommunityMember()]
+
+    def get_queryset(self):
+        channel = get_object_or_404(Channel, pk=self.kwargs["channel_pk"])
+        return Post.objects.filter(channel=channel).select_related("author", "channel__community")
+
+    def perform_create(self, serializer):
+        channel = get_object_or_404(Channel, pk=self.kwargs["channel_pk"])
+        if channel.channel_type == Channel.ChannelType.ANNOUNCEMENTS:
+            is_mod = Membership.objects.filter(
+                community=channel.community,
+                user=self.request.user,
+                role__in=[Membership.Role.MODERATOR, Membership.Role.OWNER],
+            ).exists()
+            if not is_mod:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Only moderators and owners can post in announcements channels.")
+        serializer.save(channel=channel, author=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        if post.author == request.user:
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        is_mod = Membership.objects.filter(
+            community=post.channel.community,
+            user=request.user,
+            role__in=[Membership.Role.MODERATOR, Membership.Role.OWNER],
+        ).exists()
+        if is_mod:
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": "You do not have permission to delete this post."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
 
 class MemberListView(generics.ListAPIView):

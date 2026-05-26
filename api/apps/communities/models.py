@@ -53,10 +53,15 @@ class Membership(models.Model):
 
 
 class Channel(models.Model):
+    class ChannelType(models.TextChoices):
+        GENERAL = "general", "General"
+        ANNOUNCEMENTS = "announcements", "Announcements"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="channels")
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    channel_type = models.CharField(max_length=20, choices=ChannelType.choices, default=ChannelType.GENERAL)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -64,3 +69,21 @@ class Channel(models.Model):
 
     def __str__(self):
         return f"#{self.name} ({self.community})"
+
+
+class Post(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name="posts")
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="posts",
+    )
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Post by {self.author} in #{self.channel.name}"
