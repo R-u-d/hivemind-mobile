@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { router, type Href } from 'expo-router';
 
 import FormField from '@/components/FormField';
+import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
 import { useRegister } from '@/hooks/useRegister';
@@ -70,11 +71,11 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.logoText, { color: colors.primary, fontFamily: fonts.medium }]}>
-            HiveMind
+          <HiveLogo size={32} color={colors.primary} />
+          <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
+            Create your account
           </Text>
-          <Text style={[styles.title, { color: colors.text }]}>Create your account</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing.xs }]}>
             Find your people. Join your first community in under a minute.
           </Text>
         </View>
@@ -233,9 +234,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
-  logoText: { fontSize: 15, letterSpacing: -0.3, marginBottom: spacing.lg },
-  title: { ...typography.screenTitle },
-  subtitle: { ...typography.screenSubtitle, marginTop: spacing.xs },
   form: {
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.xl,

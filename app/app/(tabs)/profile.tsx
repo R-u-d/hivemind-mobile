@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from '@/components/Avatar';
 import CommunityIcon from '@/components/CommunityIcon';
+import LoadingTail from '@/components/LoadingTail';
 import SkeletonBox from '@/components/SkeletonBox';
 import StatCard from '@/components/StatCard';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -15,11 +16,11 @@ import { useTheme } from '@/theme/ThemeContext';
 import type { Community } from '@/types/community';
 
 function ProfileSkeleton() {
-  const c = useTheme();
+  const colors = useTheme();
   const { top } = useSafeAreaInsets();
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: c.bg }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={[styles.content, { paddingTop: top + spacing.base }]}
     >
       <View style={styles.head}>
@@ -35,21 +36,22 @@ function ProfileSkeleton() {
         <SkeletonBox height={72} style={{ flex: 1 }} borderRadius={radius.lg} />
       </View>
       {[0, 1, 2].map(i => (
-        <View key={i} style={[styles.communityRow, { borderBottomColor: c.borderSoft }]}>
+        <View key={i} style={[styles.communityRow, { borderBottomColor: colors.borderSoft }]}>
           <SkeletonBox width={34} height={34} borderRadius={10} />
           <SkeletonBox width="60%" height={14} />
         </View>
       ))}
+      <LoadingTail caption="Tidying your cell…" />
     </ScrollView>
   );
 }
 
 function CommunityListSkeleton() {
-  const c = useTheme();
+  const colors = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       {[0, 1, 2].map(i => (
-        <View key={i} style={[styles.communityRow, { borderBottomColor: c.borderSoft }]}>
+        <View key={i} style={[styles.communityRow, { borderBottomColor: colors.borderSoft }]}>
           <SkeletonBox width={34} height={34} borderRadius={10} />
           <SkeletonBox width="60%" height={14} />
         </View>
@@ -65,15 +67,15 @@ const CommunityRow = memo(function CommunityRow({
   community: Community;
   isLast?: boolean;
 }) {
-  const c = useTheme();
+  const colors = useTheme();
   return (
     <Pressable
       style={({ pressed }) => [
         styles.communityRow,
         isLast && styles.lastRow,
         {
-          borderBottomColor: c.borderSoft,
-          backgroundColor: pressed ? c.surfaceSunk : 'transparent',
+          borderBottomColor: colors.borderSoft,
+          backgroundColor: pressed ? colors.surfaceSunk : 'transparent',
         },
       ]}
       onPress={() => router.push(`/community/${community.id}` as Href)}
@@ -81,18 +83,18 @@ const CommunityRow = memo(function CommunityRow({
     >
       <CommunityIcon type={community.type} size={34} />
       <Text
-        style={[styles.communityName, { color: c.text, fontFamily: fonts.medium }]}
+        style={[styles.communityName, { color: colors.text, fontFamily: fonts.medium }]}
         numberOfLines={1}
       >
         {community.name}
       </Text>
-      <Ionicons name="chevron-forward" size={14} color={c.textFaint} />
+      <Ionicons name="chevron-forward" size={14} color={colors.textFaint} />
     </Pressable>
   );
 });
 
 export default function ProfileScreen() {
-  const c = useTheme();
+  const colors = useTheme();
   const { top } = useSafeAreaInsets();
 
   const {
@@ -108,17 +110,17 @@ export default function ProfileScreen() {
 
   if (userError || !user) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg, paddingTop: top }]}>
-        <Ionicons name="alert-circle-outline" size={48} color={c.textMuted} />
-        <Text style={[styles.errorTitle, { color: c.text, fontFamily: fonts.medium }]}>
+      <View style={[styles.center, { backgroundColor: colors.bg, paddingTop: top }]}>
+        <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+        <Text style={[styles.errorTitle, { color: colors.text, fontFamily: fonts.medium }]}>
           Failed to load profile
         </Text>
         <Pressable
           onPress={() => refetchUser()}
-          style={[styles.retryBtn, { borderColor: c.border }]}
+          style={[styles.retryBtn, { borderColor: colors.border }]}
           accessibilityLabel="Retry loading profile"
         >
-          <Text style={[styles.retryText, { color: c.primary, fontFamily: fonts.medium }]}>
+          <Text style={[styles.retryText, { color: colors.primary, fontFamily: fonts.medium }]}>
             Try again
           </Text>
         </Pressable>
@@ -130,39 +132,42 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: c.bg }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={[styles.content, { paddingTop: top + spacing.base }]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
-        <Text style={[typography.screenTitle, { color: c.text }]}>Profile</Text>
+        <Text style={[typography.display, { color: colors.text }]}>Profile</Text>
         <Pressable
           onPress={() => router.push('/profile/edit')}
           style={styles.editBtn}
           accessibilityLabel="Edit profile"
         >
-          <Ionicons name="options-outline" size={22} color={c.textMuted} />
+          <Ionicons name="options-outline" size={22} color={colors.textMuted} />
         </Pressable>
       </View>
 
       <View style={styles.head}>
         <Avatar uri={user.avatar_url} name={displayName} size={68} />
         <View style={{ flex: 1 }}>
-          <Text style={[styles.displayName, { color: c.text, fontFamily: fonts.medium }]}>
+          <Text style={[styles.displayName, { color: colors.text, fontFamily: fonts.medium }]}>
             {displayName}
           </Text>
           {user.location ? (
             <View style={styles.locationRow}>
-              <Ionicons name="location-outline" size={12} color={c.textMuted} />
+              <Ionicons name="location-outline" size={12} color={colors.textMuted} />
               <Text
-                style={[styles.locationText, { color: c.textMuted, fontFamily: fonts.regular }]}
+                style={[
+                  styles.locationText,
+                  { color: colors.textMuted, fontFamily: fonts.regular },
+                ]}
               >
                 {user.location}
               </Text>
             </View>
           ) : null}
           {user.bio ? (
-            <Text style={[styles.bio, { color: c.textMuted, fontFamily: fonts.regular }]}>
+            <Text style={[styles.bio, { color: colors.textMuted, fontFamily: fonts.regular }]}>
               {user.bio}
             </Text>
           ) : null}
@@ -175,33 +180,45 @@ export default function ProfileScreen() {
       </View>
 
       <View>
-        <Text style={[styles.sectionLabel, { color: c.textMuted, fontFamily: fonts.medium }]}>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted, fontFamily: fonts.medium }]}>
           My communities
         </Text>
 
         {commLoading ? (
-          <CommunityListSkeleton />
+          <>
+            <CommunityListSkeleton />
+            <LoadingTail caption="Counting your hives…" size={28} />
+          </>
         ) : communities.length > 0 ? (
-          <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+          <View
+            style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
             {communities.map((comm, i) => (
               <CommunityRow key={comm.id} community={comm} isLast={i === communities.length - 1} />
             ))}
           </View>
         ) : (
-          <View style={[styles.emptyComm, { backgroundColor: c.surface, borderColor: c.border }]}>
-            <Ionicons name="people-outline" size={40} color={c.textFaint} />
-            <Text style={[styles.emptyTitle, { color: c.text, fontFamily: fonts.medium }]}>
+          <View
+            style={[
+              styles.emptyComm,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Ionicons name="people-outline" size={40} color={colors.textFaint} />
+            <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: fonts.medium }]}>
               No communities yet
             </Text>
-            <Text style={[styles.emptyBody, { color: c.textMuted, fontFamily: fonts.regular }]}>
+            <Text
+              style={[styles.emptyBody, { color: colors.textMuted, fontFamily: fonts.regular }]}
+            >
               Join a community to see it here.
             </Text>
             <Pressable
               onPress={() => router.push('/(tabs)/discover')}
-              style={[styles.ctaBtn, { backgroundColor: c.primary }]}
+              style={[styles.ctaBtn, { backgroundColor: colors.primary }]}
               accessibilityLabel="Discover communities"
             >
-              <Text style={[styles.ctaText, { color: c.onPrimary, fontFamily: fonts.medium }]}>
+              <Text style={[styles.ctaText, { color: colors.onPrimary, fontFamily: fonts.medium }]}>
                 Discover communities
               </Text>
             </Pressable>

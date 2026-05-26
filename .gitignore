@@ -54,3 +54,6 @@ CLAUDE.local.md
 .vscode/
 .idea/
 *.swp
+
+# ─── Design prototype (local-only source of truth) ───────────────────────────
+design/

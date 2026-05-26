@@ -76,8 +76,16 @@ describe('radius', () => {
 });
 
 describe('typography', () => {
-  it('title is 17/500', () => {
-    expect(typography.title.fontSize).toBe(17);
-    expect(typography.title.fontWeight).toBe('500');
+  it('uses the canonical 6-step ramp', () => {
+    expect(typography.display.fontSize).toBe(28);
+    expect(typography.title.fontSize).toBe(22);
+    expect(typography.heading.fontSize).toBe(17);
+    expect(typography.body.fontSize).toBe(15);
+    expect(typography.caption.fontSize).toBe(13);
+    expect(typography.overline.fontSize).toBe(11);
+  });
+
+  it('heading is medium weight', () => {
+    expect(typography.heading.fontWeight).toBe('500');
   });
 });

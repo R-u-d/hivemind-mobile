@@ -40,6 +40,15 @@ export const colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+
+  // Splash screen (always dark — do not flip in darkColors)
+  splash: '#130C2E',
+  splashBg: '#0A0420',
+  splashGradient: '#2E1065',
+  splashGradientMid: '#1A0B3D',
+  splashFg: '#F5F3FF',
+  splashTagline: 'rgba(216, 200, 255, 0.78)',
+  splashDot: '#C4B5FD',
 } as const;
 
 // ── Community type colors ─────────────────────────────────────────────────
@@ -52,13 +61,27 @@ export const communityTypeColors: Record<
   gamer: { primary: '#D85A30', background: '#FBE9E1', text: '#D85A30' },
   hobby: { primary: '#1D9E75', background: '#E1F2EC', text: '#1D9E75' },
   sports: { primary: '#EF9F27', background: '#FDF1DA', text: '#EF9F27' },
-  music: { primary: '#534AB7', background: '#EDE9FE', text: '#534AB7' },
+  music: { primary: '#6D28D9', background: '#EDE9FE', text: '#6D28D9' },
   books: { primary: '#92400E', background: '#FEF3C7', text: '#92400E' },
   outdoors: { primary: '#65A30D', background: '#ECFCCB', text: '#65A30D' },
   travel: { primary: '#0D9488', background: '#CCFBF1', text: '#0D9488' },
   photo: { primary: '#DB2777', background: '#FCE7F3', text: '#DB2777' },
   foodie: { primary: '#DC2626', background: '#FEE2E2', text: '#DC2626' },
   tech: { primary: '#4F46E5', background: '#E0E7FF', text: '#4F46E5' },
+};
+
+export const communityTypeLabels: Record<CommunityType, string> = {
+  student: 'Student',
+  gamer: 'Gamer',
+  hobby: 'Hobby',
+  sports: 'Sports',
+  music: 'Music',
+  books: 'Books',
+  outdoors: 'Outdoors',
+  travel: 'Travel',
+  photo: 'Photo',
+  foodie: 'Foodie',
+  tech: 'Tech',
 };
 
 // Token for the "create a new community" card/action — not a community type itself
@@ -102,13 +125,46 @@ export const fonts = {
   medium: 'Inter_500Medium',
 } as const;
 
+// Canonical 6-step ramp — matches design spec §2 (design/design-spec.md).
+// Names: display / title / heading / body / caption / overline.
+
 export const typography = {
-  title: { fontSize: 17, fontWeight: '500' as const, fontFamily: fonts.medium },
-  cardTitle: { fontSize: 13, fontWeight: '500' as const, fontFamily: fonts.medium },
-  body: { fontSize: 12, fontWeight: '400' as const, fontFamily: fonts.regular },
-  caption: { fontSize: 10, fontWeight: '400' as const, fontFamily: fonts.regular },
-  screenTitle: { fontSize: 26, letterSpacing: -0.6, fontFamily: fonts.medium },
-  screenSubtitle: { fontSize: 14, lineHeight: 14 * 1.45, fontFamily: fonts.regular },
+  display: {
+    fontSize: 28,
+    letterSpacing: -0.8,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  title: {
+    fontSize: 22,
+    letterSpacing: -0.4,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  heading: {
+    fontSize: 17,
+    letterSpacing: -0.2,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 15 * 1.45,
+    fontWeight: '400' as const,
+    fontFamily: fonts.regular,
+  },
+  caption: {
+    fontSize: 13,
+    fontWeight: '400' as const,
+    fontFamily: fonts.regular,
+  },
+  overline: {
+    fontSize: 11,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase' as const,
+    fontWeight: '500' as const,
+    fontFamily: fonts.medium,
+  },
 } as const;
 
 // ── Dark mode ─────────────────────────────────────────────────────────────
@@ -139,4 +195,13 @@ export const darkColors: Colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+
+  // Splash screen — same as light; splash is always dark
+  splash: '#130C2E',
+  splashBg: '#0A0420',
+  splashGradient: '#2E1065',
+  splashGradientMid: '#1A0B3D',
+  splashFg: '#F5F3FF',
+  splashTagline: 'rgba(216, 200, 255, 0.78)',
+  splashDot: '#C4B5FD',
 };
