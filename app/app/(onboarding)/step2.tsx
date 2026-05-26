@@ -100,7 +100,8 @@ export default function OnboardingStep2() {
     }
   })();
 
-  const { data: communities, isLoading, isError, refetch } = useCommunities(types);
+  const { data, isLoading, isError, refetch } = useCommunities({ types });
+  const communities = data?.pages.flatMap(p => p.results) ?? [];
   const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
 
   const { mutate: joinMutate } = useJoinCommunity(
