@@ -6,11 +6,21 @@ from .models import Community, Membership
 class CommunityMinimalSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source="community_type", read_only=True)
     member_count = serializers.IntegerField(read_only=True)
+    is_member = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Community
-        fields = ["id", "name", "type", "member_count", "cover_image_url", "is_private", "created_at"]
-        read_only_fields = ["id", "created_at"]
+        fields = [
+            "id",
+            "name",
+            "type",
+            "member_count",
+            "cover_image_url",
+            "is_private",
+            "created_at",
+            "is_member",
+        ]
+        read_only_fields = ["id", "created_at", "is_member"]
 
 
 class CommunitySerializer(serializers.ModelSerializer):
