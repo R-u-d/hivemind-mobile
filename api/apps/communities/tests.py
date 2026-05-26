@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock, patch
 from rest_framework.test import APIRequestFactory
 
 from users.factories import UserFactory
@@ -828,3 +829,102 @@ def test_post_delete_by_owner(auth_client):
     MembershipFactory(community=channel.community, user=post.author, role=Membership.Role.MEMBER)
     response = client.delete(post_detail_url(channel.id, post.id))
     assert response.status_code == 204
+
+
+# ---- COVER UPLOAD URL ----
+
+def cover_upload_url(community_pk):
+    return f"/api/communities/{community_pk}/cover-upload-url/"
+
+VALID_COVER_PAYLOAD = {"content_type": "image/jpeg", "file_size": 102400}
+
+
+@pytest.fixture(autouse=False)
+def reset_s3_singleton():
+    import core.s3
+    core.s3._s3_client = None
+    yield
+    core.s3._s3_client = None
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_unauthenticated(api_client):
+    community = CommunityFactory()
+    response = api_client.post(cover_upload_url(community.id), VALID_COVER_PAYLOAD)
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_non_member_forbidden(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    response = client.post(cover_upload_url(community.id), VALID_COVER_PAYLOAD)
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_plain_member_forbidden(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(cover_upload_url(community.id), VALID_COVER_PAYLOAD)
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+@patch("core.s3.boto3.client")
+def test_cover_upload_url_moderator(mock_boto3_client, auth_client, reset_s3_singleton):
+    mock_s3 = MagicMock()
+    mock_boto3_client.return_value = mock_s3
+    mock_s3.generate_presigned_url.return_value = "https://s3.amazonaws.com/fake-presigned"
+
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(cover_upload_url(community.id), VALID_COVER_PAYLOAD)
+    assert response.status_code == 200
+    assert response.data["upload_url"] == "https://s3.amazonaws.com/fake-presigned"
+    assert response.data["key"].startswith("covers/")
+    assert "public_url" in response.data
+
+
+@pytest.mark.django_db
+@patch("core.s3.boto3.client")
+def test_cover_upload_url_owner(mock_boto3_client, auth_client, reset_s3_singleton):
+    mock_s3 = MagicMock()
+    mock_boto3_client.return_value = mock_s3
+    mock_s3.generate_presigned_url.return_value = "https://s3.amazonaws.com/fake-presigned"
+
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    response = client.post(cover_upload_url(community.id), VALID_COVER_PAYLOAD)
+    assert response.status_code == 200
+    assert response.data["key"].startswith(f"covers/{community.id}/")
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_invalid_content_type(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    response = client.post(cover_upload_url(community.id), {"content_type": "application/pdf", "file_size": 1024})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_file_too_large(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    response = client.post(cover_upload_url(community.id), {"content_type": "image/jpeg", "file_size": 6 * 1024 * 1024})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_cover_upload_url_missing_fields(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    response = client.post(cover_upload_url(community.id), {})
+    assert response.status_code == 400

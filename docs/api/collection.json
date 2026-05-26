@@ -403,6 +403,26 @@
           "response": []
         },
         {
+          "name": "Get Cover Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/cover-upload-url/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "cover-upload-url", ""]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Delete Community",
           "request": {
             "method": "DELETE",

@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import ChannelViewSet, CommunityViewSet, JoinView, LeaveView, MemberDetailView, MemberListView, PostViewSet
+from .views import ChannelViewSet, CommunityViewSet, CoverUploadUrlView, JoinView, LeaveView, MemberDetailView, MemberListView, PostViewSet
 
 router = DefaultRouter()
 router.register("communities", CommunityViewSet, basename="community")
@@ -15,6 +15,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("communities/<uuid:community_pk>/channels/", channel_list, name="channel-list"),
     path("communities/<uuid:community_pk>/channels/<uuid:pk>/", channel_detail, name="channel-detail"),
+    path("communities/<uuid:community_pk>/cover-upload-url/", CoverUploadUrlView.as_view(), name="community-cover-upload-url"),
     path("communities/<uuid:community_pk>/members/", MemberListView.as_view(), name="community-members"),
     path("communities/<uuid:community_pk>/join/", JoinView.as_view(), name="community-join"),
     path("communities/<uuid:community_pk>/leave/", LeaveView.as_view(), name="community-leave"),
