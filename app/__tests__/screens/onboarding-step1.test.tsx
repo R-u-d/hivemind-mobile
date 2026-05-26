@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/theme/ThemeContext';
 import OnboardingScreen from '../../app/(onboarding)/index';
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), back: jest.fn() },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() },
 }));
 
 jest.mock('react-native', () => {
@@ -29,6 +29,11 @@ jest.mock('react-native-svg', () => {
     Polygon: mock('Polygon'),
   };
 });
+
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
@@ -117,8 +122,8 @@ it('selected hex has checked accessibilityState', () => {
   expect(getByLabelText('Study').props.accessibilityState?.checked).toBe(true);
 });
 
-it('pressing Back calls router.back', () => {
+it('pressing Back calls router.replace to login', () => {
   const { getByLabelText } = render(<OnboardingScreen />, { wrapper });
   fireEvent.press(getByLabelText('Go back'));
-  expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  expect(mockRouter.replace).toHaveBeenCalledWith('/(auth)/login');
 });
