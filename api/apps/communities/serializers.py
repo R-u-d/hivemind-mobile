@@ -43,6 +43,29 @@ class CommunitySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "owner_id", "created_at"]
 
 
+class CommunityDetailSerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source="community_type", read_only=True)
+    member_count = serializers.IntegerField(read_only=True)
+    is_member = serializers.BooleanField(read_only=True)
+    owner_id = serializers.UUIDField(source="owner.id", read_only=True)
+
+    class Meta:
+        model = Community
+        fields = [
+            "id",
+            "name",
+            "description",
+            "type",
+            "member_count",
+            "is_member",
+            "owner_id",
+            "cover_image_url",
+            "is_private",
+            "created_at",
+        ]
+        read_only_fields = ["id", "owner_id", "created_at", "is_member", "member_count"]
+
+
 class MembershipSerializer(serializers.ModelSerializer):
     user_id = serializers.UUIDField(source="user.id", read_only=True)
     display_name = serializers.CharField(source="user.display_name", read_only=True)

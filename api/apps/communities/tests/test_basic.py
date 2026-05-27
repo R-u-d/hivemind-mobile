@@ -101,6 +101,41 @@ def test_retrieve_authenticated(auth_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
+def test_retrieve_shape_unauthenticated(api_client):
+    community = CommunityFactory()
+    response = api_client.get(detail_url(community.id))
+    assert response.status_code == 200
+    data = response.data
+    assert "type" in data
+    assert "community_type" not in data
+    assert "member_count" in data
+    assert "is_member" in data
+    assert data["is_member"] is False
+    assert "description" in data
+    assert "owner_id" in data
+
+
+@pytest.mark.django_db
+def test_retrieve_is_member_false_for_non_member(auth_client):
+    client, _ = auth_client
+    community = CommunityFactory()
+    response = client.get(detail_url(community.id))
+    assert response.status_code == 200
+    assert response.data["is_member"] is False
+
+
+@pytest.mark.django_db
+def test_retrieve_is_member_true_for_member(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    response = client.get(detail_url(community.id))
+    assert response.status_code == 200
+    assert response.data["is_member"] is True
+    assert response.data["member_count"] >= 1
+
+
 # ---- UPDATE ----
 
 @pytest.mark.django_db

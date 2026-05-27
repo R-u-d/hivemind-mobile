@@ -10,6 +10,7 @@ from core.s3 import S3Error, generate_cover_presigned_url
 from .models import Channel, Community, Membership, Post
 from .permissions import IsChannelCommunityMember, IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
+    CommunityDetailSerializer,
     ChannelSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
@@ -59,6 +60,8 @@ class CommunityViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return CommunityMinimalSerializer
+        if self.action == "retrieve":
+            return CommunityDetailSerializer
         return CommunitySerializer
 
     def perform_create(self, serializer):
