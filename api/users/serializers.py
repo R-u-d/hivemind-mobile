@@ -79,6 +79,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
             "location",
             "avatar_url",
             "created_at",
+            "community_count",
+            "event_count",
         ]
 
     def get_community_count(self, obj):

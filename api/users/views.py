@@ -13,7 +13,7 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 
 from django.db.models import BooleanField, Count, Value
 
-from apps.communities.models import Community
+from apps.communities.models import Community, Membership
 from apps.communities.serializers import CommunityMinimalSerializer
 from core.s3 import S3Error, generate_avatar_presigned_url
 from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer, AvatarUploadSerializer
@@ -112,9 +112,14 @@ class MeCommunitiesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        my_community_ids = (
+            Membership.objects
+            .filter(user=request.user)
+            .values_list("community_id", flat=True)
+        )
         qs = (
             Community.objects
-            .filter(memberships__user=request.user)
+            .filter(id__in=my_community_ids)
             .annotate(
                 member_count=Count("memberships"),
                 is_member=Value(True, output_field=BooleanField()),

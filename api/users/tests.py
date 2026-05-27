@@ -329,6 +329,22 @@ def test_my_communities_response_has_expected_fields(auth_client):
     assert item["is_member"] is True
 
 
+@pytest.mark.django_db
+def test_my_communities_member_count_reflects_total_not_just_self(auth_client):
+    """member_count must be the community's total membership, not 1 (the requesting user's own row)."""
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+    # Add two more members so total is 3
+    MembershipFactory(community=community)
+    MembershipFactory(community=community)
+
+    response = client.get(MY_COMMUNITIES_URL)
+
+    assert response.status_code == 200
+    assert response.data[0]["member_count"] == 3
+
+
 # ---------------------------------------------------------------------------
 # POST /users/me/avatar-upload-url/
 # ---------------------------------------------------------------------------
