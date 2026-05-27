@@ -56,6 +56,9 @@ class Channel(models.Model):
     class ChannelType(models.TextChoices):
         GENERAL = "general", "General"
         ANNOUNCEMENTS = "announcements", "Announcements"
+        EVENTS = "events", "Events"
+        MEDIA = "media", "Media"
+        HELP = "help", "Help"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="channels")

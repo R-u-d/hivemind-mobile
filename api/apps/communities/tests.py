@@ -577,6 +577,38 @@ def test_channel_create_owner(auth_client):
     assert response.data["community_id"] == community.id
 
 
+# ---- CHANNELS: CHANNEL TYPES ----
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+def test_channel_create_new_types(auth_client, channel_type):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(channels_url(community.id), {"name": f"{channel_type}-channel", "channel_type": channel_type})
+    assert response.status_code == 201
+    assert response.data["channel_type"] == channel_type
+
+
+@pytest.mark.django_db
+def test_channel_create_invalid_type(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(channels_url(community.id), {"name": "x", "channel_type": "invalid"})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+def test_post_create_new_channel_types_member_allowed(auth_client, channel_type):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=channel_type)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 201
+
+
 # ---- CHANNELS: UPDATE ----
 
 @pytest.mark.django_db
