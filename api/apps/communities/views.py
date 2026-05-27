@@ -4,7 +4,7 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.pagination import JoinedAtCursorPagination, MemberCountCursorPagination
+from core.pagination import CreatedAtCursorPagination, JoinedAtCursorPagination, MemberCountCursorPagination
 
 from .models import Channel, Community, Membership, Post
 from .permissions import IsChannelCommunityMember, IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
