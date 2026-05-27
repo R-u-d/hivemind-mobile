@@ -6,9 +6,10 @@ from rest_framework.views import APIView
 
 from core.pagination import JoinedAtCursorPagination, MemberCountCursorPagination
 
-from .models import Community, Membership
-from .permissions import IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
+from .models import Channel, Community, Membership
+from .permissions import IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
+    ChannelSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
     MembershipSerializer,
@@ -48,6 +49,25 @@ class CommunityViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             role=Membership.Role.OWNER,
         )
+
+
+class ChannelViewSet(viewsets.ModelViewSet):
+    serializer_class = ChannelSerializer
+    pagination_class = CreatedAtCursorPagination
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [permissions.IsAuthenticated(), IsCommunityMember()]
+        return [permissions.IsAuthenticated(), IsCommunityModerator()]
+
+    def get_queryset(self):
+        community = get_object_or_404(Community, pk=self.kwargs["community_pk"])
+        return Channel.objects.filter(community=community)
+
+    def perform_create(self, serializer):
+        community = get_object_or_404(Community, pk=self.kwargs["community_pk"])
+        serializer.save(community=community)
 
 
 class MemberListView(generics.ListAPIView):

@@ -3,8 +3,8 @@ from rest_framework.test import APIRequestFactory
 
 from users.factories import UserFactory
 
-from .factories import CommunityFactory, MembershipFactory
-from .models import Community, Membership
+from .factories import ChannelFactory, CommunityFactory, MembershipFactory
+from .models import Channel, Community, Membership
 from .permissions import IsCommunityMember, IsCommunityModerator, IsCommunityOwner
 
 COMMUNITIES_URL = "/api/communities/"
@@ -12,6 +12,14 @@ COMMUNITIES_URL = "/api/communities/"
 
 def detail_url(pk):
     return f"/api/communities/{pk}/"
+
+
+def channels_url(community_pk):
+    return f"/api/communities/{community_pk}/channels/"
+
+
+def channel_detail_url(community_pk, channel_pk):
+    return f"/api/communities/{community_pk}/channels/{channel_pk}/"
 
 
 def members_url(community_pk):
@@ -469,3 +477,161 @@ def test_permission_owner_grants_owner(db):
     community = CommunityFactory()
     MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
     assert IsCommunityOwner().has_permission(_make_request(user), _MockView(community.pk))
+
+
+# ---- CHANNELS: LIST ----
+
+@pytest.mark.django_db
+def test_channel_list_unauthenticated(api_client):
+    community = CommunityFactory()
+    ChannelFactory.create_batch(2, community=community)
+    response = api_client.get(channels_url(community.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_channel_list_non_member(auth_client):
+    client, _ = auth_client
+    community = CommunityFactory()
+    ChannelFactory.create_batch(2, community=community)
+    response = client.get(channels_url(community.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_channel_list_member(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+    ChannelFactory.create_batch(3, community=community)
+    response = client.get(channels_url(community.id))
+    assert response.status_code == 200
+    assert len(response.data["results"]) == 3
+
+
+# ---- CHANNELS: RETRIEVE ----
+
+@pytest.mark.django_db
+def test_channel_retrieve_unauthenticated(api_client):
+    channel = ChannelFactory()
+    response = api_client.get(channel_detail_url(channel.community_id, channel.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_channel_retrieve_non_member(auth_client):
+    client, _ = auth_client
+    channel = ChannelFactory()
+    response = client.get(channel_detail_url(channel.community_id, channel.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_channel_retrieve_member(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+    channel = ChannelFactory(community=community)
+    response = client.get(channel_detail_url(community.id, channel.id))
+    assert response.status_code == 200
+    assert response.data["id"] == str(channel.id)
+    assert response.data["name"] == channel.name
+
+
+# ---- CHANNELS: CREATE ----
+
+@pytest.mark.django_db
+def test_channel_create_unauthenticated(api_client):
+    community = CommunityFactory()
+    response = api_client.post(channels_url(community.id), {"name": "general"})
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_channel_create_plain_member_forbidden(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(channels_url(community.id), {"name": "general"})
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_channel_create_moderator(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(channels_url(community.id), {"name": "general", "description": "Main channel"})
+    assert response.status_code == 201
+    assert response.data["name"] == "general"
+    assert Channel.objects.filter(community=community, name="general").exists()
+
+
+@pytest.mark.django_db
+def test_channel_create_owner(auth_client):
+    client, user = auth_client
+    community = CommunityFactory(owner=user)
+    MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
+    response = client.post(channels_url(community.id), {"name": "announcements"})
+    assert response.status_code == 201
+    assert response.data["community_id"] == community.id
+
+
+# ---- CHANNELS: UPDATE ----
+
+@pytest.mark.django_db
+def test_channel_update_unauthenticated(api_client):
+    channel = ChannelFactory()
+    response = api_client.patch(channel_detail_url(channel.community_id, channel.id), {"name": "new"})
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_channel_update_plain_member_forbidden(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    channel = ChannelFactory(community=community)
+    response = client.patch(channel_detail_url(community.id, channel.id), {"name": "hacked"})
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_channel_update_moderator(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    channel = ChannelFactory(community=community, name="old-name")
+    response = client.patch(channel_detail_url(community.id, channel.id), {"name": "new-name"})
+    assert response.status_code == 200
+    assert response.data["name"] == "new-name"
+
+
+# ---- CHANNELS: DELETE ----
+
+@pytest.mark.django_db
+def test_channel_delete_unauthenticated(api_client):
+    channel = ChannelFactory()
+    response = api_client.delete(channel_detail_url(channel.community_id, channel.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_channel_delete_plain_member_forbidden(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    channel = ChannelFactory(community=community)
+    response = client.delete(channel_detail_url(community.id, channel.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_channel_delete_moderator(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    channel = ChannelFactory(community=community)
+    response = client.delete(channel_detail_url(community.id, channel.id))
+    assert response.status_code == 204
+    assert not Channel.objects.filter(id=channel.id).exists()

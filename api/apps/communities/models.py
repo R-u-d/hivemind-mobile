@@ -50,3 +50,17 @@ class Membership(models.Model):
 
     def __str__(self):
         return f"{self.user} in {self.community} ({self.role})"
+
+
+class Channel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="channels")
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"#{self.name} ({self.community})"
