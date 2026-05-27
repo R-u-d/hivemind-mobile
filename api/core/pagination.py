@@ -17,3 +17,9 @@ class MemberCountCursorPagination(CursorPagination):
     page_size = 20
     ordering = ("-member_count", "name", "id")
     cursor_query_param = "cursor"
+
+
+class StartsAtCursorPagination(CursorPagination):
+    page_size = 20
+    ordering = ("start_datetime", "id")
+    cursor_query_param = "cursor"

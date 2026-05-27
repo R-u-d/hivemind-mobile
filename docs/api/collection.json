@@ -65,6 +65,11 @@
       "key": "post_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -240,13 +245,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"display_name\": \"New Name\",\n  \"bio\": \"Something about me\",\n  \"avatar_url\": \"\"\n}",
+              "raw": "{\n  \"display_name\": \"New Name\",\n  \"bio\": \"Something about me\",\n  \"location\": \"Berlin, Germany\",\n  \"avatar_url\": \"\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/users/me/",
               "host": ["{{base_url}}"],
               "path": ["users", "me", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Communities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/me/communities/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me", "communities", ""]
             }
           },
           "response": []
@@ -710,6 +728,136 @@
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/{{post_id}}/",
               "host": ["{{base_url}}"],
               "path": ["channels", "{{channel_id}}", "posts", "{{post_id}}", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/",
+              "host": ["{{base_url}}"],
+              "path": ["events", ""],
+              "query": [
+                {
+                  "key": "community",
+                  "value": "{{community_id}}",
+                  "description": "Filter by community UUID",
+                  "disabled": true
+                },
+                {
+                  "key": "date_from",
+                  "value": "",
+                  "description": "ISO 8601 datetime — include events starting on or after this",
+                  "disabled": true
+                },
+                {
+                  "key": "date_to",
+                  "value": "",
+                  "description": "ISO 8601 datetime — include events starting on or before this",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "Full-text search on title and description",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor from next/previous links",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('event_id', res.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Study Session\",\n  \"description\": \"Weekly group study.\",\n  \"location_text\": \"Library Room 3\",\n  \"lat\": null,\n  \"lng\": null,\n  \"start_datetime\": \"2026-06-01T14:00:00Z\",\n  \"end_datetime\": \"2026-06-01T16:00:00Z\",\n  \"capacity\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/",
+              "host": ["{{base_url}}"],
+              "path": ["events", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"location_text\": \"New Location\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", ""]
             }
           },
           "response": []
