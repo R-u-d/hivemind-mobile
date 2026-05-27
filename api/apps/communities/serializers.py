@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from core.s3 import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE
+
 from .models import Channel, Community, Membership, Post
 
 
@@ -51,6 +53,23 @@ class ChannelSerializer(serializers.ModelSerializer):
         model = Channel
         fields = ["id", "community_id", "name", "description", "channel_type", "created_at"]
         read_only_fields = ["id", "community_id", "created_at"]
+
+
+class CoverUploadSerializer(serializers.Serializer):
+    content_type = serializers.CharField()
+    file_size = serializers.IntegerField(min_value=1)
+
+    def validate_content_type(self, value):
+        if value not in ALLOWED_CONTENT_TYPES:
+            raise serializers.ValidationError(
+                "Only image/jpeg, image/png, and image/webp are allowed."
+            )
+        return value
+
+    def validate_file_size(self, value):
+        if value > MAX_FILE_SIZE:
+            raise serializers.ValidationError("File size must not exceed 5 MB.")
+        return value
 
 
 class PostSerializer(serializers.ModelSerializer):

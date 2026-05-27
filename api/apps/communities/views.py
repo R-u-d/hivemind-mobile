@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.pagination import CreatedAtCursorPagination, JoinedAtCursorPagination, MemberCountCursorPagination
+from core.s3 import S3Error, generate_cover_presigned_url
 
 from .models import Channel, Community, Membership, Post
 from .permissions import IsChannelCommunityMember, IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
@@ -12,6 +13,7 @@ from .serializers import (
     ChannelSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
+    CoverUploadSerializer,
     MembershipSerializer,
     PostSerializer,
     RoleUpdateSerializer,
@@ -113,6 +115,26 @@ class PostViewSet(viewsets.ModelViewSet):
             {"detail": "You do not have permission to delete this post."},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+
+class CoverUploadUrlView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsCommunityModerator]
+
+    def post(self, request, community_pk):
+        community = get_object_or_404(Community, pk=community_pk)
+        serializer = CoverUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result = generate_cover_presigned_url(
+                community_id=str(community.id),
+                content_type=serializer.validated_data["content_type"],
+                file_size=serializer.validated_data["file_size"],
+            )
+        except S3Error as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class MemberListView(generics.ListAPIView):
