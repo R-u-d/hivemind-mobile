@@ -19,6 +19,9 @@ const communities: Community[] = [
     type: 'creative',
     member_count: 12,
     created_at: '2026-01-01T00:00:00Z',
+    is_member: true,
+    cover_image_url: null,
+    is_private: false,
   },
 ];
 

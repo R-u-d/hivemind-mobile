@@ -331,10 +331,50 @@
             "url": {
               "raw": "{{base_url}}/communities/",
               "host": ["{{base_url}}"],
-              "path": ["communities", ""]
+              "path": ["communities", ""],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Filter by name (case-insensitive contains)",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "Filter by community_type. Repeatable: ?type=study&type=gaming. Choices: study, gaming, sports, creative, social",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor from next/previous links",
+                  "disabled": true
+                }
+              ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK — with is_member",
+              "originalRequest": {
+                "auth": { "type": "noauth" },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/communities/?search=study",
+                  "host": ["{{base_url}}"],
+                  "path": ["communities", ""],
+                  "query": [{ "key": "search", "value": "study" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"<uuid>\",\n      \"name\": \"Study Squad\",\n      \"type\": \"study\",\n      \"member_count\": 12,\n      \"cover_image_url\": \"\",\n      \"is_private\": false,\n      \"is_member\": true,\n      \"created_at\": \"2025-01-01T00:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Create Community",

@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import BooleanField, Count, Exists, OuterRef, Value
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
@@ -25,13 +25,29 @@ class CommunityViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
+        user = self.request.user
         qs = Community.objects.select_related("owner").annotate(
-            member_count=Count("memberships")
-        ).order_by("-member_count", "name")
+            member_count=Count("memberships"),
+        )
+
+        if user.is_authenticated:
+            qs = qs.annotate(
+                is_member=Exists(
+                    Membership.objects.filter(community=OuterRef("pk"), user=user)
+                )
+            )
+        else:
+            qs = qs.annotate(is_member=Value(False, output_field=BooleanField()))
+
         types = self.request.query_params.getlist("type")
         if types:
             qs = qs.filter(community_type__in=types)
-        return qs
+
+        search = self.request.query_params.get("search", "").strip()
+        if search:
+            qs = qs.filter(name__icontains=search)
+
+        return qs.order_by("-member_count", "name")
 
     def get_permissions(self):
         if self.action in ("list", "retrieve"):

@@ -120,7 +120,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseCommunities.mockReturnValue({
-    data: SAMPLE_COMMUNITIES,
+    data: {
+      pages: [{ next: null, previous: null, results: SAMPLE_COMMUNITIES }],
+      pageParams: [null],
+    },
     isLoading: false,
     isError: false,
     refetch: mockRefetch,

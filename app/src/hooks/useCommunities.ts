@@ -1,25 +1,42 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { client } from '@/api/client';
 import type { CommunityType } from '@/theme';
-import type { Community } from '@/types/community';
+import type { CommunityPage } from '@/types/community';
 
-interface PaginatedResponse {
-  results: Community[];
+export interface UseCommunitiesArgs {
+  types?: CommunityType[];
+  search?: string;
 }
 
-async function fetchCommunities(types: CommunityType[]): Promise<Community[]> {
+function buildPath(args: UseCommunitiesArgs, cursor: string | null): string {
   const params = new URLSearchParams();
-  types.forEach(t => params.append('type', t));
-  const { data } = await client.get<PaginatedResponse>(`/communities/?${params.toString()}`);
-  return data.results;
+  args.types?.forEach(t => params.append('type', t));
+  if (args.search) params.set('search', args.search);
+  if (cursor) params.set('cursor', cursor);
+  return `/communities/?${params.toString()}`;
 }
 
-export function useCommunities(types: CommunityType[]) {
-  return useQuery({
-    queryKey: ['communities', { types }],
-    queryFn: () => fetchCommunities(types),
-    enabled: types.length > 0,
+async function fetchPage(args: UseCommunitiesArgs, cursor: string | null): Promise<CommunityPage> {
+  const { data } = await client.get<CommunityPage>(buildPath(args, cursor));
+  return data;
+}
+
+function extractCursor(nextUrl: string | null): string | null {
+  if (!nextUrl) return null;
+  try {
+    return new URL(nextUrl).searchParams.get('cursor');
+  } catch {
+    return null;
+  }
+}
+
+export function useCommunities(args: UseCommunitiesArgs = {}) {
+  return useInfiniteQuery({
+    queryKey: ['communities', { types: args.types ?? [], search: args.search ?? '' }],
+    queryFn: ({ pageParam }) => fetchPage(args, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: last => extractCursor(last.next),
     retry: false,
   });
 }

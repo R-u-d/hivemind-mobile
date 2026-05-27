@@ -4,9 +4,9 @@ from rest_framework.test import APIRequestFactory
 
 from users.factories import UserFactory
 
-from .factories import ChannelFactory, CommunityFactory, MembershipFactory, PostFactory
-from .models import Channel, Community, Membership, Post
-from .permissions import IsCommunityMember, IsCommunityModerator, IsCommunityOwner
+from apps.communities.factories import ChannelFactory, CommunityFactory, MembershipFactory, PostFactory
+from apps.communities.models import Channel, Community, Membership, Post
+from apps.communities.permissions import IsCommunityMember, IsCommunityModerator, IsCommunityOwner
 
 COMMUNITIES_URL = "/api/communities/"
 
