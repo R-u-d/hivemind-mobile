@@ -7,6 +7,7 @@ from apps.communities.models import Channel, Community
 
 
 class Event(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="events")
     channel = models.ForeignKey(
@@ -37,3 +38,26 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class RSVP(models.Model):
+    class Status(models.TextChoices):
+        GOING = "going", "Going"
+        MAYBE = "maybe", "Maybe"
+        NOT_GOING = "not_going", "Not Going"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="rsvps")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="rsvps",
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.GOING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("event", "user")
+
+    def __str__(self):
+        return f"{self.user} → {self.event} ({self.status})"
