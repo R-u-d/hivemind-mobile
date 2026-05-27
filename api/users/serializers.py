@@ -37,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "display_name",
             "bio",
+            "location",
             "avatar_url",
             "has_onboarded",
             "created_at",
@@ -56,22 +57,35 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PublicUserSerializer(serializers.ModelSerializer):
+    community_count = serializers.SerializerMethodField()
+    event_count = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
             "id",
             "display_name",
             "bio",
+            "location",
             "avatar_url",
             "created_at",
+            "community_count",
+            "event_count",
         ]
         read_only_fields = [
             "id",
             "display_name",
             "bio",
+            "location",
             "avatar_url",
             "created_at",
         ]
+
+    def get_community_count(self, obj):
+        return obj.memberships.count()
+
+    def get_event_count(self, obj):
+        return 0
 
 
 class AvatarUploadSerializer(serializers.Serializer):

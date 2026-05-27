@@ -11,6 +11,10 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
+from django.db.models import BooleanField, Count, Value
+
+from apps.communities.models import Community
+from apps.communities.serializers import CommunityMinimalSerializer
 from core.s3 import S3Error, generate_avatar_presigned_url
 from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer, AvatarUploadSerializer
 from .throttles import AuthRateThrottle
@@ -99,6 +103,25 @@ class LogoutView(APIView):
             },
         )
         BlacklistedToken.objects.get_or_create(token=outstanding)
+
+
+# -------------------------
+# MY COMMUNITIES
+# -------------------------
+class MeCommunitiesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        qs = (
+            Community.objects
+            .filter(memberships__user=request.user)
+            .annotate(
+                member_count=Count("memberships"),
+                is_member=Value(True, output_field=BooleanField()),
+            )
+        )
+        serializer = CommunityMinimalSerializer(qs, many=True)
+        return Response(serializer.data)
 
 
 # -------------------------

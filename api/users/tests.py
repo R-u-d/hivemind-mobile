@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 from botocore.exceptions import ClientError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.communities.factories import CommunityFactory, MembershipFactory
+
 
 REGISTER_URL = "/api/auth/register/"
 LOGIN_URL = "/api/auth/login/"
@@ -218,6 +220,113 @@ def test_public_profile_nonexistent_returns_404(api_client):
     response = api_client.get(public_profile_url("00000000-0000-0000-0000-000000000000"))
 
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_public_profile_returns_community_and_event_counts(api_client, user):
+    community = CommunityFactory(owner=user)
+    MembershipFactory(community=community, user=user, role="owner")
+
+    response = api_client.get(public_profile_url(user.id))
+
+    assert response.status_code == 200
+    assert response.data["community_count"] == 1
+    assert response.data["event_count"] == 0
+
+
+@pytest.mark.django_db
+def test_public_profile_returns_location(api_client, user):
+    user.location = "Berlin, Germany"
+    user.save()
+
+    response = api_client.get(public_profile_url(user.id))
+
+    assert response.status_code == 200
+    assert response.data["location"] == "Berlin, Germany"
+
+
+# ---------------------------------------------------------------------------
+# PATCH /users/me/ — location field
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_patch_me_updates_location(auth_client):
+    client, _ = auth_client
+    response = client.patch(ME_URL, {"location": "Hamburg, Germany"})
+
+    assert response.status_code == 200
+    assert response.data["location"] == "Hamburg, Germany"
+
+
+@pytest.mark.django_db
+def test_me_returns_location_field(auth_client):
+    client, user = auth_client
+    user.location = "Munich"
+    user.save()
+
+    response = client.get(ME_URL)
+
+    assert response.status_code == 200
+    assert response.data["location"] == "Munich"
+
+
+# ---------------------------------------------------------------------------
+# GET /users/me/communities/
+# ---------------------------------------------------------------------------
+
+MY_COMMUNITIES_URL = "/api/users/me/communities/"
+
+
+@pytest.mark.django_db
+def test_my_communities_unauthenticated_returns_401(api_client):
+    response = api_client.get(MY_COMMUNITIES_URL)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_my_communities_returns_joined_communities(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+
+    response = client.get(MY_COMMUNITIES_URL)
+
+    assert response.status_code == 200
+    assert len(response.data) == 1
+    assert str(response.data[0]["id"]) == str(community.id)
+
+
+@pytest.mark.django_db
+def test_my_communities_excludes_non_member_communities(auth_client):
+    client, user = auth_client
+    joined = CommunityFactory()
+    MembershipFactory(community=joined, user=user)
+    CommunityFactory()  # not a member
+
+    response = client.get(MY_COMMUNITIES_URL)
+
+    assert response.status_code == 200
+    assert len(response.data) == 1
+    assert str(response.data[0]["id"]) == str(joined.id)
+
+
+@pytest.mark.django_db
+def test_my_communities_response_has_expected_fields(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+
+    response = client.get(MY_COMMUNITIES_URL)
+
+    assert response.status_code == 200
+    item = response.data[0]
+    assert "id" in item
+    assert "name" in item
+    assert "type" in item
+    assert "member_count" in item
+    assert "is_member" in item
+    assert item["is_member"] is True
 
 
 # ---------------------------------------------------------------------------
