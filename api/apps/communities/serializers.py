@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Channel, Community, Membership
+from .models import Channel, Community, Membership, Post
 
 
 class CommunityMinimalSerializer(serializers.ModelSerializer):
@@ -49,5 +49,24 @@ class RoleUpdateSerializer(serializers.Serializer):
 class ChannelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Channel
-        fields = ["id", "community_id", "name", "description", "created_at"]
+        fields = ["id", "community_id", "name", "description", "channel_type", "created_at"]
         read_only_fields = ["id", "community_id", "created_at"]
+
+
+class PostSerializer(serializers.ModelSerializer):
+    author_id = serializers.UUIDField(source="author.id", read_only=True)
+    author_display_name = serializers.CharField(source="author.display_name", read_only=True)
+    author_avatar_url = serializers.URLField(source="author.avatar_url", read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            "id",
+            "channel_id",
+            "author_id",
+            "author_display_name",
+            "author_avatar_url",
+            "body",
+            "created_at",
+        ]
+        read_only_fields = ["id", "channel_id", "author_id", "author_display_name", "author_avatar_url", "created_at"]

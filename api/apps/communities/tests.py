@@ -3,8 +3,8 @@ from rest_framework.test import APIRequestFactory
 
 from users.factories import UserFactory
 
-from .factories import ChannelFactory, CommunityFactory, MembershipFactory
-from .models import Channel, Community, Membership
+from .factories import ChannelFactory, CommunityFactory, MembershipFactory, PostFactory
+from .models import Channel, Community, Membership, Post
 from .permissions import IsCommunityMember, IsCommunityModerator, IsCommunityOwner
 
 COMMUNITIES_URL = "/api/communities/"
@@ -577,6 +577,38 @@ def test_channel_create_owner(auth_client):
     assert response.data["community_id"] == community.id
 
 
+# ---- CHANNELS: CHANNEL TYPES ----
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+def test_channel_create_new_types(auth_client, channel_type):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(channels_url(community.id), {"name": f"{channel_type}-channel", "channel_type": channel_type})
+    assert response.status_code == 201
+    assert response.data["channel_type"] == channel_type
+
+
+@pytest.mark.django_db
+def test_channel_create_invalid_type(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(channels_url(community.id), {"name": "x", "channel_type": "invalid"})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+def test_post_create_new_channel_types_member_allowed(auth_client, channel_type):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=channel_type)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 201
+
+
 # ---- CHANNELS: UPDATE ----
 
 @pytest.mark.django_db
@@ -635,3 +667,164 @@ def test_channel_delete_moderator(auth_client):
     response = client.delete(channel_detail_url(community.id, channel.id))
     assert response.status_code == 204
     assert not Channel.objects.filter(id=channel.id).exists()
+
+
+# ---- POSTS: helpers ----
+
+def posts_url(channel_pk):
+    return f"/api/channels/{channel_pk}/posts/"
+
+
+def post_detail_url(channel_pk, post_pk):
+    return f"/api/channels/{channel_pk}/posts/{post_pk}/"
+
+
+# ---- POSTS: LIST ----
+
+@pytest.mark.django_db
+def test_post_list_unauthenticated(api_client):
+    channel = ChannelFactory()
+    response = api_client.get(posts_url(channel.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_post_list_non_member_forbidden(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    response = client.get(posts_url(channel.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_post_list_member(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    PostFactory.create_batch(3, channel=channel)
+    response = client.get(posts_url(channel.id))
+    assert response.status_code == 200
+    assert len(response.data["results"]) == 3
+
+
+@pytest.mark.django_db
+def test_post_list_newest_first(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    p1 = PostFactory(channel=channel, body="first")
+    p2 = PostFactory(channel=channel, body="second")
+    response = client.get(posts_url(channel.id))
+    assert response.status_code == 200
+    ids = [r["id"] for r in response.data["results"]]
+    assert ids.index(str(p2.id)) < ids.index(str(p1.id))
+
+
+# ---- POSTS: CREATE ----
+
+@pytest.mark.django_db
+def test_post_create_unauthenticated(api_client):
+    channel = ChannelFactory()
+    response = api_client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_post_create_non_member_forbidden(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    response = client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_post_create_member_general_channel(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=Channel.ChannelType.GENERAL)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 201
+    assert response.data["body"] == "hello"
+    assert response.data["author_id"] == str(user.id)
+    assert Post.objects.filter(channel=channel, author=user).exists()
+
+
+@pytest.mark.django_db
+def test_post_create_member_announcements_forbidden(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=Channel.ChannelType.ANNOUNCEMENTS)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    response = client.post(posts_url(channel.id), {"body": "hello"})
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_post_create_moderator_announcements(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=Channel.ChannelType.ANNOUNCEMENTS)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MODERATOR)
+    response = client.post(posts_url(channel.id), {"body": "important update"})
+    assert response.status_code == 201
+    assert response.data["body"] == "important update"
+
+
+@pytest.mark.django_db
+def test_post_create_owner_announcements(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory(channel_type=Channel.ChannelType.ANNOUNCEMENTS)
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.OWNER)
+    response = client.post(posts_url(channel.id), {"body": "pinned notice"})
+    assert response.status_code == 201
+
+
+# ---- POSTS: DELETE ----
+
+@pytest.mark.django_db
+def test_post_delete_unauthenticated(api_client):
+    post = PostFactory()
+    MembershipFactory(community=post.channel.community, user=post.author, role=Membership.Role.MEMBER)
+    response = api_client.delete(post_detail_url(post.channel.id, post.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_post_delete_non_author_plain_member_forbidden(auth_client):
+    client, user = auth_client
+    post = PostFactory()
+    MembershipFactory(community=post.channel.community, user=user, role=Membership.Role.MEMBER)
+    response = client.delete(post_detail_url(post.channel.id, post.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_post_delete_by_author(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MEMBER)
+    post = PostFactory(channel=channel, author=user)
+    response = client.delete(post_detail_url(channel.id, post.id))
+    assert response.status_code == 204
+    assert not Post.objects.filter(id=post.id).exists()
+
+
+@pytest.mark.django_db
+def test_post_delete_by_moderator(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.MODERATOR)
+    post = PostFactory(channel=channel)
+    MembershipFactory(community=channel.community, user=post.author, role=Membership.Role.MEMBER)
+    response = client.delete(post_detail_url(channel.id, post.id))
+    assert response.status_code == 204
+    assert not Post.objects.filter(id=post.id).exists()
+
+
+@pytest.mark.django_db
+def test_post_delete_by_owner(auth_client):
+    client, user = auth_client
+    channel = ChannelFactory()
+    MembershipFactory(community=channel.community, user=user, role=Membership.Role.OWNER)
+    post = PostFactory(channel=channel)
+    MembershipFactory(community=channel.community, user=post.author, role=Membership.Role.MEMBER)
+    response = client.delete(post_detail_url(channel.id, post.id))
+    assert response.status_code == 204

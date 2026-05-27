@@ -60,6 +60,11 @@
       "key": "channel_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "post_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -582,6 +587,69 @@
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
               "host": ["{{base_url}}"],
               "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('post_id', res.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Hello, world!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/{{post_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", "{{post_id}}", ""]
             }
           },
           "response": []

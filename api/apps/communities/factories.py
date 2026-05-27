@@ -2,7 +2,7 @@ import factory
 
 from users.factories import UserFactory
 
-from .models import Channel, Community, Membership
+from .models import Channel, Community, Membership, Post
 
 
 class CommunityFactory(factory.django.DjangoModelFactory):
@@ -33,3 +33,13 @@ class ChannelFactory(factory.django.DjangoModelFactory):
     community = factory.SubFactory(CommunityFactory)
     name = factory.Sequence(lambda n: f"channel-{n}")
     description = ""
+    channel_type = Channel.ChannelType.GENERAL
+
+
+class PostFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Post
+
+    channel = factory.SubFactory(ChannelFactory)
+    author = factory.SubFactory(UserFactory)
+    body = factory.Sequence(lambda n: f"Post body {n}.")
