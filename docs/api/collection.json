@@ -55,6 +55,16 @@
       "key": "member_user_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "channel_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "post_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -433,6 +443,26 @@
           "response": []
         },
         {
+          "name": "Get Cover Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/cover-upload-url/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "cover-upload-url", ""]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Delete Community",
           "request": {
             "method": "DELETE",
@@ -526,6 +556,160 @@
               "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
               "host": ["{{base_url}}"],
               "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Channels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "channels", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Channel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('channel_id', res.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"general\",\n  \"description\": \"General discussion\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "channels", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Channel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Channel",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"general\",\n  \"description\": \"Updated description\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Channel",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('post_id', res.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Hello, world!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/posts/{{post_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "posts", "{{post_id}}", ""]
             }
           },
           "response": []
