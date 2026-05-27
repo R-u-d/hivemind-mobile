@@ -4,14 +4,18 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.pagination import JoinedAtCursorPagination, MemberCountCursorPagination
+from core.pagination import CreatedAtCursorPagination, JoinedAtCursorPagination, MemberCountCursorPagination
+from core.s3 import S3Error, generate_cover_presigned_url
 
-from .models import Community, Membership
-from .permissions import IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
+from .models import Channel, Community, Membership, Post
+from .permissions import IsChannelCommunityMember, IsCommunityMember, IsCommunityModerator, IsOwnerOrReadOnly, ROLE_RANK
 from .serializers import (
+    ChannelSerializer,
     CommunityMinimalSerializer,
     CommunitySerializer,
+    CoverUploadSerializer,
     MembershipSerializer,
+    PostSerializer,
     RoleUpdateSerializer,
 )
 
@@ -64,6 +68,89 @@ class CommunityViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             role=Membership.Role.OWNER,
         )
+
+
+class ChannelViewSet(viewsets.ModelViewSet):
+    serializer_class = ChannelSerializer
+    pagination_class = CreatedAtCursorPagination
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [permissions.IsAuthenticated(), IsCommunityMember()]
+        return [permissions.IsAuthenticated(), IsCommunityModerator()]
+
+    def get_queryset(self):
+        community = get_object_or_404(Community, pk=self.kwargs["community_pk"])
+        return Channel.objects.filter(community=community)
+
+    def perform_create(self, serializer):
+        community = get_object_or_404(Community, pk=self.kwargs["community_pk"])
+        serializer.save(community=community)
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    pagination_class = CreatedAtCursorPagination
+    http_method_names = ["get", "post", "delete", "head", "options"]
+
+    def get_permissions(self):
+        return [permissions.IsAuthenticated(), IsChannelCommunityMember()]
+
+    def get_queryset(self):
+        channel = get_object_or_404(Channel, pk=self.kwargs["channel_pk"])
+        return Post.objects.filter(channel=channel).select_related("author", "channel__community")
+
+    def perform_create(self, serializer):
+        channel = get_object_or_404(Channel, pk=self.kwargs["channel_pk"])
+        if channel.channel_type == Channel.ChannelType.ANNOUNCEMENTS:
+            is_mod = Membership.objects.filter(
+                community=channel.community,
+                user=self.request.user,
+                role__in=[Membership.Role.MODERATOR, Membership.Role.OWNER],
+            ).exists()
+            if not is_mod:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Only moderators and owners can post in announcements channels.")
+        serializer.save(channel=channel, author=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        if post.author == request.user:
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        is_mod = Membership.objects.filter(
+            community=post.channel.community,
+            user=request.user,
+            role__in=[Membership.Role.MODERATOR, Membership.Role.OWNER],
+        ).exists()
+        if is_mod:
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": "You do not have permission to delete this post."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+
+class CoverUploadUrlView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsCommunityModerator]
+
+    def post(self, request, community_pk):
+        community = get_object_or_404(Community, pk=community_pk)
+        serializer = CoverUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result = generate_cover_presigned_url(
+                community_id=str(community.id),
+                content_type=serializer.validated_data["content_type"],
+                file_size=serializer.validated_data["file_size"],
+            )
+        except S3Error as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class MemberListView(generics.ListAPIView):
