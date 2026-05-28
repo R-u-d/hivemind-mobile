@@ -23,6 +23,7 @@ class Community(models.Model):
     )
     cover_image_url = models.URLField(blank=True)
     is_private = models.BooleanField(default=False)
+    location = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

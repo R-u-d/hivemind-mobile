@@ -174,6 +174,15 @@ export default function DiscoverScreen() {
         onJoinPress={join}
         onLeavePress={leave}
       />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Create a new community"
+        onPress={() => router.push('/community/create' as never)}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+      >
+        <Ionicons name="add" size={26} color="#fff" />
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -191,4 +200,19 @@ const styles = StyleSheet.create({
   iconBtn: { padding: 4 },
   list: { padding: spacing.base, paddingBottom: 100 },
   footer: { paddingVertical: spacing.lg, alignItems: 'center' },
+  fab: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    right: spacing.base,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 });
