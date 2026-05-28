@@ -57,3 +57,5 @@ CLAUDE.local.md
 
 # ─── Design prototype (local-only source of truth) ───────────────────────────
 design/
+docs/superpowers/
+.superpowers/

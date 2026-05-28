@@ -9,6 +9,7 @@ export interface Community {
   is_member: boolean;
   cover_image_url: string | null;
   is_private: boolean;
+  location?: string;
 }
 
 export interface CommunityDetail extends Community {
