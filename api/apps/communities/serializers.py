@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
 from core.s3 import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE
+from users.models import User
 
 from .models import Channel, Community, Membership, Post
+
+
+class UserMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "display_name", "avatar_url"]
+        read_only_fields = ["id", "display_name", "avatar_url"]
 
 
 class CommunityMinimalSerializer(serializers.ModelSerializer):
@@ -106,19 +114,10 @@ class CoverUploadSerializer(serializers.Serializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author_id = serializers.UUIDField(source="author.id", read_only=True)
-    author_display_name = serializers.CharField(source="author.display_name", read_only=True)
-    author_avatar_url = serializers.URLField(source="author.avatar_url", read_only=True)
+    author = UserMinimalSerializer(read_only=True)
+    channel = serializers.UUIDField(source="channel_id", read_only=True)
 
     class Meta:
         model = Post
-        fields = [
-            "id",
-            "channel_id",
-            "author_id",
-            "author_display_name",
-            "author_avatar_url",
-            "body",
-            "created_at",
-        ]
-        read_only_fields = ["id", "channel_id", "author_id", "author_display_name", "author_avatar_url", "created_at"]
+        fields = ["id", "channel", "author", "body", "created_at"]
+        read_only_fields = ["id", "channel", "author", "created_at"]
