@@ -66,6 +66,40 @@ def generate_avatar_presigned_url(user_id: str, content_type: str, file_size: in
     return {"upload_url": upload_url, "key": key, "public_url": public_url}
 
 
+def generate_event_cover_presigned_url(event_id: str, content_type: str, file_size: int) -> dict:
+    ext = _EXTENSIONS.get(content_type)
+    if ext is None:
+        raise S3Error("Unsupported content type.")
+
+    event_id_str = str(event_id)
+    if "/" in event_id_str or ".." in event_id_str:
+        raise S3Error("Invalid event identifier.")
+
+    key = f"event-covers/{event_id_str}/{uuid.uuid4()}.{ext}"
+
+    try:
+        s3 = _get_s3_client()
+        upload_url = s3.generate_presigned_url(
+            "put_object",
+            Params={
+                "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                "Key": key,
+                "ContentType": content_type,
+                "ContentLength": file_size,
+            },
+            ExpiresIn=PRESIGNED_URL_EXPIRY_SECONDS,
+        )
+    except (BotoCoreError, ClientError) as exc:
+        logger.exception("Failed to generate event cover presigned URL")
+        raise S3Error("Could not generate upload URL.") from exc
+
+    public_url = (
+        f"https://{settings.AWS_STORAGE_BUCKET_NAME}"
+        f".s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
+    )
+    return {"upload_url": upload_url, "key": key, "public_url": public_url}
+
+
 def generate_cover_presigned_url(community_id: str, content_type: str, file_size: int) -> dict:
     ext = _EXTENSIONS.get(content_type)
     if ext is None:

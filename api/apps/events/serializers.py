@@ -1,6 +1,27 @@
 from rest_framework import serializers
 
+from core.s3 import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE
+
 from .models import Event, RSVP
+
+
+class CoverUploadSerializer(serializers.Serializer):
+    content_type = serializers.CharField()
+    file_size = serializers.IntegerField(min_value=1)
+
+    def validate_content_type(self, value):
+        if value not in ALLOWED_CONTENT_TYPES:
+            raise serializers.ValidationError(
+                "Only image/jpeg, image/png, and image/webp are allowed."
+            )
+        return value
+
+    def validate_file_size(self, value):
+        if value > MAX_FILE_SIZE:
+            raise serializers.ValidationError(
+                f"File size must not exceed {MAX_FILE_SIZE // (1024 * 1024)} MB."
+            )
+        return value
 
 
 class RSVPSerializer(serializers.ModelSerializer):
@@ -55,7 +76,6 @@ class EventSerializer(serializers.ModelSerializer):
             "organiser_id",
             "organiser_display_name",
             "organiser_avatar_url",
-            "cover_image_url",
             "attendee_count",
             "user_rsvp",
             "created_at",
@@ -109,4 +129,4 @@ class EventListSerializer(serializers.ModelSerializer):
             "organiser_id",
             "created_at",
         ]
-        read_only_fields = ["id", "organiser_id", "cover_image_url", "attendee_count", "created_at"]
+        read_only_fields = ["id", "organiser_id", "attendee_count", "created_at"]
