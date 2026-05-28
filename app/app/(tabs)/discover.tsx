@@ -121,7 +121,7 @@ export default function DiscoverScreen() {
           hitSlop={12}
           style={styles.iconBtn}
         >
-          <Ionicons name="search" size={22} color={colors.text} />
+          <Ionicons name="search" size={22} color={colors.ink} />
         </Pressable>
       </View>
 
