@@ -15,6 +15,7 @@ class CommunityFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
     cover_image_url = ""
     is_private = False
+    location = ""
 
 
 class MembershipFactory(factory.django.DjangoModelFactory):

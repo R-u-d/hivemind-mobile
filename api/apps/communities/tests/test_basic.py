@@ -963,3 +963,31 @@ def test_cover_upload_url_missing_fields(auth_client):
     MembershipFactory(community=community, user=user, role=Membership.Role.OWNER)
     response = client.post(cover_upload_url(community.id), {})
     assert response.status_code == 400
+
+
+# ---- COMMUNITY LOCATION FIELD ----
+
+@pytest.mark.django_db
+def test_create_community_with_location(auth_client):
+    client, user = auth_client
+    payload = {"name": "Local Club", "community_type": "social", "location": "Brooklyn, NY"}
+    response = client.post(COMMUNITIES_URL, payload)
+    assert response.status_code == 201
+    assert response.data["location"] == "Brooklyn, NY"
+
+
+@pytest.mark.django_db
+def test_create_community_location_optional(auth_client):
+    client, _ = auth_client
+    payload = {"name": "No Location Club", "community_type": "study"}
+    response = client.post(COMMUNITIES_URL, payload)
+    assert response.status_code == 201
+    assert response.data["location"] == ""
+
+
+@pytest.mark.django_db
+def test_retrieve_community_includes_location(api_client):
+    community = CommunityFactory(location="Williamsburg, NY")
+    response = api_client.get(detail_url(community.id))
+    assert response.status_code == 200
+    assert response.data["location"] == "Williamsburg, NY"
