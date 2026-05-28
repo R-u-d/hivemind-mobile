@@ -79,13 +79,20 @@
         {
           "name": "Health Check",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/health/",
-              "host": ["{{base_url}}"],
-              "path": ["health", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                ""
+              ]
             }
           },
           "response": []
@@ -112,20 +119,35 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"test@hivemind.com\",\n  \"password\": \"Str0ngPass123!\",\n  \"display_name\": \"Test User\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/register/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register",
+                ""
+              ]
             }
           },
           "response": []
@@ -146,20 +168,35 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"test@hivemind.com\",\n  \"password\": \"Str0ngPass123!\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/login/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login",
+                ""
+              ]
             }
           },
           "response": []
@@ -180,20 +217,36 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/token/refresh/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "token", "refresh", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token",
+                "refresh",
+                ""
+              ]
             }
           },
           "response": []
@@ -203,17 +256,30 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/logout/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "logout", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout",
+                ""
+              ]
             }
           },
           "response": []
@@ -230,8 +296,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/me/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                ""
+              ]
             }
           },
           "response": []
@@ -241,17 +313,30 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"display_name\": \"New Name\",\n  \"bio\": \"Something about me\",\n  \"location\": \"Berlin, Germany\",\n  \"avatar_url\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/users/me/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                ""
+              ]
             }
           },
           "response": []
@@ -263,8 +348,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/me/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", "communities", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "communities",
+                ""
+              ]
             }
           },
           "response": []
@@ -272,13 +364,21 @@
         {
           "name": "Get Public Profile",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -301,17 +401,31 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/users/me/avatar-upload-url/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", "avatar-upload-url", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "avatar-upload-url",
+                ""
+              ]
             }
           },
           "response": []
@@ -319,10 +433,15 @@
         {
           "name": "Upload Avatar to S3",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "image/jpeg" }
+              {
+                "key": "Content-Type",
+                "value": "image/jpeg"
+              }
             ],
             "body": {
               "mode": "file",
@@ -330,7 +449,9 @@
             },
             "url": {
               "raw": "{{avatar_upload_url}}",
-              "host": ["{{avatar_upload_url}}"]
+              "host": [
+                "{{avatar_upload_url}}"
+              ]
             }
           },
           "response": []
@@ -343,13 +464,20 @@
         {
           "name": "List Communities",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", ""],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                ""
+              ],
               "query": [
                 {
                   "key": "search",
@@ -374,22 +502,39 @@
           },
           "response": [
             {
-              "name": "200 OK — with is_member",
+              "name": "200 OK \u2014 with is_member",
               "originalRequest": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "GET",
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/communities/?search=study",
-                  "host": ["{{base_url}}"],
-                  "path": ["communities", ""],
-                  "query": [{ "key": "search", "value": "study" }]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "communities",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "study"
+                    }
+                  ]
                 }
               },
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
               "body": "{\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"<uuid>\",\n      \"name\": \"Study Squad\",\n      \"type\": \"study\",\n      \"member_count\": 12,\n      \"cover_image_url\": \"\",\n      \"is_private\": false,\n      \"is_member\": true,\n      \"created_at\": \"2025-01-01T00:00:00Z\"\n    }\n  ]\n}"
             }
           ]
@@ -411,17 +556,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Study Squad\",\n  \"description\": \"A place to study together.\",\n  \"community_type\": \"study\",\n  \"is_private\": false\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                ""
+              ]
             }
           },
           "response": []
@@ -429,13 +586,21 @@
         {
           "name": "Get Community",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -445,17 +610,30 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Updated Name\",\n  \"description\": \"Updated description.\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -465,17 +643,31 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/cover-upload-url/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "cover-upload-url", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "cover-upload-url",
+                ""
+              ]
             }
           },
           "response": []
@@ -487,8 +679,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -496,13 +694,22 @@
         {
           "name": "List Members",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                ""
+              ]
             }
           },
           "response": []
@@ -526,8 +733,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/join/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "join", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "join",
+                ""
+              ]
             }
           },
           "response": []
@@ -539,8 +753,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/leave/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "leave", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "leave",
+                ""
+              ]
             }
           },
           "response": []
@@ -550,17 +771,32 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"role\": \"moderator\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                "{{member_user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -572,8 +808,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                "{{member_user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -585,8 +829,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                ""
+              ]
             }
           },
           "response": []
@@ -608,17 +859,31 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"general\",\n  \"description\": \"General discussion\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                ""
+              ]
             }
           },
           "response": []
@@ -630,8 +895,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -641,17 +914,32 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"general\",\n  \"description\": \"Updated description\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -663,8 +951,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -681,8 +977,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                ""
+              ]
             }
           },
           "response": []
@@ -704,17 +1007,31 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"body\": \"Hello, world!\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                ""
+              ]
             }
           },
           "response": []
@@ -726,8 +1043,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/{{post_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", "{{post_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                "{{post_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -740,13 +1065,20 @@
         {
           "name": "List Events",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ],
               "query": [
                 {
                   "key": "community",
@@ -757,13 +1089,13 @@
                 {
                   "key": "date_from",
                   "value": "",
-                  "description": "ISO 8601 datetime — include events starting on or after this",
+                  "description": "ISO 8601 datetime \u2014 include events starting on or after this",
                   "disabled": true
                 },
                 {
                   "key": "date_to",
                   "value": "",
-                  "description": "ISO 8601 datetime — include events starting on or before this",
+                  "description": "ISO 8601 datetime \u2014 include events starting on or before this",
                   "disabled": true
                 },
                 {
@@ -800,17 +1132,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Study Session\",\n  \"description\": \"Weekly group study.\",\n  \"location_text\": \"Library Room 3\",\n  \"lat\": null,\n  \"lng\": null,\n  \"start_datetime\": \"2026-06-01T14:00:00Z\",\n  \"end_datetime\": \"2026-06-01T16:00:00Z\",\n  \"capacity\": 20\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
             }
           },
           "response": []
@@ -818,13 +1162,21 @@
         {
           "name": "Get Event",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -834,17 +1186,30 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Updated Title\",\n  \"location_text\": \"New Location\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -856,11 +1221,48 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "Get Home Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor for the next page (returned in the `next` field of a previous response)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a reverse-chronological feed of posts and events from communities the authenticated user belongs to. Each item has a `type` field (`post` or `event`) plus the fields from the corresponding serializer. Supports forward-only cursor pagination via the `cursor` query parameter."
+          }
         }
       ]
     }

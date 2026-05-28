@@ -9,4 +9,5 @@ urlpatterns = [
     path("api/", include("users.urls")),
     path("api/", include("apps.communities.urls")),
     path("api/", include("apps.events.urls")),
+    path("api/", include("apps.feed.urls")),
 ]
