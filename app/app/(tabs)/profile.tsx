@@ -21,7 +21,7 @@ function ProfileSkeleton() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={[styles.content, { paddingTop: top + spacing.base }]}
+      contentContainerStyle={[styles.content, { paddingTop: top + spacing.sm }]}
     >
       <View style={styles.head}>
         <SkeletonBox width={68} height={68} borderRadius={34} />
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={[styles.content, { paddingTop: top + spacing.base }]}
+      contentContainerStyle={[styles.content, { paddingTop: top + spacing.sm }]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
@@ -141,9 +141,10 @@ export default function ProfileScreen() {
         <Pressable
           onPress={() => router.push('/profile/edit')}
           style={styles.editBtn}
+          hitSlop={12}
           accessibilityLabel="Edit profile"
         >
-          <Ionicons name="options-outline" size={22} color={colors.textMuted} />
+          <Ionicons name="options-outline" size={22} color={colors.ink} />
         </Pressable>
       </View>
 
