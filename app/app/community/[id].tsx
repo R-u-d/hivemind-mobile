@@ -22,10 +22,11 @@ import type { Channel, Community, CommunityDetail, CommunityPage } from '@/types
 
 const COVER_HEIGHT = 168;
 const CHANNEL_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
-  announcement: 'megaphone-outline',
+  announcements: 'megaphone-outline',
   general: 'chatbubble-outline',
   events: 'calendar-outline',
   media: 'image-outline',
+  help: 'help-circle-outline',
 };
 
 interface InfiniteCommunityListData {
@@ -237,9 +238,12 @@ export default function CommunityDetailScreen() {
     },
   );
 
-  const handleChannelPress = useCallback((channelId: string) => {
-    router.push(`/channel/${channelId}` as never);
-  }, []);
+  const handleChannelPress = useCallback(
+    (channelId: string) => {
+      router.push(`/channel/${channelId}?communityId=${id}` as never);
+    },
+    [id],
+  );
 
   if (detailError) {
     return (

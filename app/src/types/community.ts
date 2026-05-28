@@ -22,7 +22,7 @@ export interface CommunityPage {
   results: Community[];
 }
 
-export type ChannelType = 'announcement' | 'general' | 'events' | 'media';
+export type ChannelType = 'announcements' | 'general' | 'events' | 'media' | 'help';
 
 export interface Channel {
   id: string;
@@ -36,6 +36,26 @@ export interface ChannelPage {
   next: string | null;
   previous: string | null;
   results: Channel[];
+}
+
+export interface PostAuthor {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
+export interface Post {
+  id: string;
+  channel: string;
+  author: PostAuthor;
+  body: string;
+  created_at: string;
+}
+
+export interface PostPage {
+  next: string | null;
+  previous: string | null;
+  results: Post[];
 }
 
 export interface Member {
