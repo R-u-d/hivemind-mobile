@@ -781,7 +781,7 @@ def test_post_create_member_general_channel(auth_client):
     response = client.post(posts_url(channel.id), {"body": "hello"})
     assert response.status_code == 201
     assert response.data["body"] == "hello"
-    assert response.data["author_id"] == str(user.id)
+    assert response.data["author"]["id"] == str(user.id)
     assert Post.objects.filter(channel=channel, author=user).exists()
 
 
