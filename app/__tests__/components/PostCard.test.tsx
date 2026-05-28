@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { ActionSheetIOS } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import PostCard from '@/components/PostCard';
@@ -7,6 +7,10 @@ import type { Post } from '@/types/community';
 
 jest.mock('@/utils/relativeTime', () => ({
   relativeTime: () => '2h',
+}));
+
+jest.mock('@expo/react-native-action-sheet', () => ({
+  useActionSheet: () => ({ showActionSheetWithOptions: jest.fn() }),
 }));
 
 const ACCENT = '#DB2777';
@@ -56,26 +60,30 @@ describe('PostCard', () => {
     expect(screen.queryByText('PINNED')).toBeNull();
   });
 
-  it('shows delete alert on long-press when post belongs to current user', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert');
+  it('shows action sheet on long-press when post belongs to current user', () => {
+    const sheetSpy = jest
+      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
+      .mockImplementation(jest.fn());
     renderCard({ currentUserId: 'user-alice' });
     fireEvent(screen.getByLabelText('Post by Alice'), 'longPress');
-    expect(alertSpy).toHaveBeenCalledWith(
-      'Delete post?',
-      undefined,
-      expect.arrayContaining([
-        expect.objectContaining({ text: 'Cancel' }),
-        expect.objectContaining({ text: 'Delete', style: 'destructive' }),
-      ]),
+    expect(sheetSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: ['Cancel', 'Delete Message'],
+        destructiveButtonIndex: 1,
+        cancelButtonIndex: 0,
+      }),
+      expect.any(Function),
     );
-    alertSpy.mockRestore();
+    sheetSpy.mockRestore();
   });
 
-  it("does not show delete alert on long-press for another user's post", () => {
-    const alertSpy = jest.spyOn(Alert, 'alert');
+  it("does not show action sheet on long-press for another user's post", () => {
+    const sheetSpy = jest
+      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
+      .mockImplementation(jest.fn());
     renderCard({ currentUserId: 'user-bob' });
     fireEvent(screen.getByLabelText('Post by Alice'), 'longPress');
-    expect(alertSpy).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
+    expect(sheetSpy).not.toHaveBeenCalled();
+    sheetSpy.mockRestore();
   });
 });
