@@ -28,7 +28,7 @@ class Event(models.Model):
     lat = models.FloatField(null=True, blank=True)
     lng = models.FloatField(null=True, blank=True)
     start_datetime = models.DateTimeField()
-    end_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField(null=True, blank=True)
     cover_image_url = models.URLField(blank=True, max_length=500)
     capacity = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

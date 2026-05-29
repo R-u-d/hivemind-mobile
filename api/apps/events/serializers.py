@@ -139,6 +139,8 @@ class EventListSerializer(serializers.ModelSerializer):
             "community",
             "title",
             "location_text",
+            "lat",
+            "lng",
             "start_datetime",
             "end_datetime",
             "cover_image_url",

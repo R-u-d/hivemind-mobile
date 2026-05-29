@@ -933,6 +933,9 @@ def test_cover_upload_url_moderator(mock_boto3_client, auth_client, reset_s3_sin
     assert response.data["key"].startswith("covers/")
     assert "public_url" in response.data
 
+    community.refresh_from_db()
+    assert community.cover_image_url == response.data["public_url"]
+
 
 @pytest.mark.django_db
 @patch("core.s3.boto3.client")

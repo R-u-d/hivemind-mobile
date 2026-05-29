@@ -163,6 +163,9 @@ class CoverUploadUrlView(APIView):
         except S3Error as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
+        community.cover_image_url = result["public_url"]
+        community.save(update_fields=["cover_image_url"])
+
         return Response(result, status=status.HTTP_200_OK)
 
 
