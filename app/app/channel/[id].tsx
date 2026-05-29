@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CommunityIcon from '@/components/CommunityIcon';
 import EmptyState from '@/components/EmptyState';
+import EventCard from '@/components/EventCard';
 import HexLoader from '@/components/HexLoader';
 import LoadingTail from '@/components/LoadingTail';
 import PostCard from '@/components/PostCard';
@@ -23,9 +24,16 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useChannelPosts, useCreatePost, useDeletePost } from '@/hooks/useChannelPosts';
 import { useCommunityChannels } from '@/hooks/useCommunityChannels';
 import { useCommunityDetail } from '@/hooks/useCommunityDetail';
+import { useEvents } from '@/hooks/useEvents';
 import { communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Post } from '@/types/community';
+import type { Event } from '@/types/event';
+
+// Channel feed items: text posts and (in events channels) events, interleaved.
+type FeedItem =
+  | { type: 'post'; data: Post; ts: number }
+  | { type: 'event'; data: Event; ts: number };
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
@@ -51,7 +59,7 @@ export default function ChannelScreen() {
     ? rawParams.communityId[0]
     : rawParams.communityId;
 
-  const flashListRef = useRef<FlashListRef<Post>>(null);
+  const flashListRef = useRef<FlashListRef<FeedItem>>(null);
   const pendingScrollRef = useRef(false);
   const [isFocused, setIsFocused] = useState(true);
   useFocusEffect(
@@ -109,6 +117,30 @@ export default function ChannelScreen() {
 
   // Backend returns newest-first; scaleY(-1) on container renders newest at bottom
   const posts = useMemo(() => postsData?.pages.flatMap(p => p.results) ?? [], [postsData]);
+
+  const isEventsChannel = channel?.channel_type === 'events';
+
+  // Events channels surface their events interleaved with posts.
+  const { data: eventsData } = useEvents(
+    { channel: channelId ?? '' },
+    !!channelId && isEventsChannel && isFocused,
+  );
+  const events = useMemo(() => eventsData?.pages.flatMap(p => p.results) ?? [], [eventsData]);
+
+  const feed = useMemo<FeedItem[]>(() => {
+    const items: FeedItem[] = posts.map(p => ({
+      type: 'post',
+      data: p,
+      ts: new Date(p.created_at).getTime(),
+    }));
+    if (isEventsChannel) {
+      for (const e of events) {
+        items.push({ type: 'event', data: e, ts: new Date(e.created_at).getTime() });
+      }
+      items.sort((a, b) => b.ts - a.ts); // newest first, matching the inverted list
+    }
+    return items;
+  }, [posts, events, isEventsChannel]);
 
   const accentColor = community ? communityTypeColors[community.type].primary : colors.primary;
 
@@ -244,25 +276,35 @@ export default function ChannelScreen() {
           <ChannelSkeleton />
         ) : (
           <View style={styles.invertedContainer}>
-            <FlashList<Post>
+            <FlashList<FeedItem>
               ref={flashListRef}
-              data={posts}
+              data={feed}
               keyboardDismissMode="none"
-              keyExtractor={item => item.id}
+              keyExtractor={item => `${item.type}:${item.data.id}`}
               renderItem={({ item }) => (
                 <View style={styles.invertedItem}>
-                  <PostCard
-                    post={item}
-                    currentUserId={currentUser?.id}
-                    accentColor={accentColor}
-                    isAnnouncementsChannel={isAnnouncementsChannel}
-                    onDelete={deletePost}
-                  />
+                  {item.type === 'event' ? (
+                    <EventCard
+                      event={item.data}
+                      onPress={id => router.push(`/event/${id}` as never)}
+                    />
+                  ) : (
+                    <PostCard
+                      post={item.data}
+                      currentUserId={currentUser?.id}
+                      accentColor={accentColor}
+                      isAnnouncementsChannel={isAnnouncementsChannel}
+                      onDelete={deletePost}
+                    />
+                  )}
                 </View>
               )}
               ListEmptyComponent={
                 <View style={styles.emptyWrap}>
-                  <EmptyState icon="chatbubble-outline" title="No posts yet" />
+                  <EmptyState
+                    icon={isEventsChannel ? 'calendar-outline' : 'chatbubble-outline'}
+                    title={isEventsChannel ? 'Nothing here yet' : 'No posts yet'}
+                  />
                 </View>
               }
               ListFooterComponent={

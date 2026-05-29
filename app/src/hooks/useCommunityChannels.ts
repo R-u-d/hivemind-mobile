@@ -8,10 +8,11 @@ async function fetchChannels(communityId: string): Promise<ChannelPage> {
   return data;
 }
 
-export function useCommunityChannels(communityId: string) {
+export function useCommunityChannels(communityId: string, enabled = true) {
   return useQuery({
     queryKey: ['communities', communityId, 'channels'],
     queryFn: () => fetchChannels(communityId),
+    enabled: enabled && !!communityId,
     retry: false,
   });
 }

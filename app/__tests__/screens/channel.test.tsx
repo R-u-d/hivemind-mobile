@@ -158,3 +158,51 @@ it('hides compose bar for non-members', async () => {
   });
   expect(screen.queryByLabelText('Message input')).toBeNull();
 });
+
+it('renders events in an events-type channel', async () => {
+  const eventsChannel = {
+    id: 'ch-1',
+    name: 'events',
+    channel_type: 'events',
+    description: '',
+    created_at: '',
+  };
+  const event = {
+    id: 'ev-1',
+    title: 'Community Picnic',
+    community: { id: 'com-1', name: 'Linocut Club', type: 'creative' },
+    location_text: 'The Park',
+    start_datetime: '2099-06-01T17:00:00Z',
+    end_datetime: null,
+    cover_image_url: null,
+    capacity: null,
+    going_count: 0,
+    interested_count: 0,
+    rsvp_status: null,
+    created_at: '2026-05-29T10:00:00Z',
+  };
+
+  mockClient.get.mockImplementation((url: string) => {
+    if (url.includes('/communities/com-1/channels')) {
+      return Promise.resolve({ data: { next: null, previous: null, results: [eventsChannel] } });
+    }
+    if (url.includes('/communities/com-1')) {
+      return Promise.resolve({ data: baseCommunity });
+    }
+    if (url.includes('/channels/ch-1/posts')) {
+      return Promise.resolve({ data: emptyPosts });
+    }
+    if (url.includes('/events/')) {
+      return Promise.resolve({ data: { next: null, previous: null, results: [event] } });
+    }
+    if (url.includes('/users/me')) {
+      return Promise.resolve({ data: { id: 'user-1', display_name: 'Alice', avatar_url: null } });
+    }
+    return Promise.reject(new Error(`Unexpected: ${url}`));
+  });
+
+  render(createElement(ChannelScreen), { wrapper: makeWrapper() });
+  await waitFor(() => {
+    expect(screen.getByText('Community Picnic')).toBeTruthy();
+  });
+});

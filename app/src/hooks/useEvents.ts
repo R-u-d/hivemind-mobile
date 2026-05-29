@@ -10,14 +10,16 @@ export interface UseEventsArgs {
   upcoming?: boolean;
   dateFrom?: string;
   dateTo?: string;
+  channel?: string;
 }
 
 function buildPath(args: UseEventsArgs, cursor: string | null): string {
   const params = new URLSearchParams();
   if (args.rsvp) params.set('rsvp', args.rsvp);
-  params.set('upcoming', args.upcoming === false ? 'false' : 'true');
+  if (args.upcoming !== undefined) params.set('upcoming', args.upcoming ? 'true' : 'false');
   if (args.dateFrom) params.set('date_from', args.dateFrom);
   if (args.dateTo) params.set('date_to', args.dateTo);
+  if (args.channel) params.set('channel', args.channel);
   if (cursor) params.set('cursor', cursor);
   return `/events/?${params.toString()}`;
 }
@@ -36,20 +38,22 @@ function extractCursor(nextUrl: string | null): string | null {
   }
 }
 
-export function useEvents(args: UseEventsArgs = {}) {
+export function useEvents(args: UseEventsArgs = {}, enabled = true) {
   return useInfiniteQuery({
     queryKey: [
       'events',
       {
         rsvp: args.rsvp ?? null,
-        upcoming: args.upcoming ?? true,
+        upcoming: args.upcoming ?? null,
         dateFrom: args.dateFrom ?? null,
         dateTo: args.dateTo ?? null,
+        channel: args.channel ?? null,
       },
     ],
     queryFn: ({ pageParam }) => fetchPage(args, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: last => extractCursor(last.next),
+    enabled,
     retry: false,
   });
 }
@@ -64,6 +68,63 @@ export function useEvent(id: string) {
       return data;
     },
     retry: false,
+  });
+}
+
+// ── Create event ────────────────────────────────────────────────────────────
+
+export interface CreateEventPayload {
+  community: string;
+  channel?: string | null;
+  title: string;
+  description?: string;
+  location_text?: string;
+  lat?: number | null;
+  lng?: number | null;
+  start_datetime: string;
+  end_datetime?: string | null;
+  capacity?: number | null;
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: CreateEventPayload) => {
+      const { data } = await client.post<Event>('/events/', payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+}
+
+// ── Cover upload ──────────────────────────────────────────────────────────────
+
+interface PresignedUrlResponse {
+  upload_url: string;
+  public_url: string;
+  key: string;
+}
+
+export function useEventCoverUpload() {
+  return useMutation({
+    mutationFn: async ({ localUri, eventId }: { localUri: string; eventId: string }) => {
+      const blob = await (await fetch(localUri)).blob();
+      const contentType = blob.type || 'image/jpeg';
+
+      const { data: presigned } = await client.post<PresignedUrlResponse>(
+        `/events/${eventId}/cover-upload-url/`,
+        { content_type: contentType, file_size: blob.size },
+      );
+
+      await fetch(presigned.upload_url, {
+        method: 'PUT',
+        body: blob,
+        headers: { 'Content-Type': contentType },
+      });
+      return presigned.public_url;
+    },
   });
 }
 

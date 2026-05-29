@@ -153,6 +153,13 @@ function EventCard({ event, onPress }: EventCardProps) {
   const day = date.getDate();
   const isPast = date < new Date();
 
+  // Fall back to coordinates when there's no address text but a pin was dropped.
+  const locationLabel =
+    event.location_text ||
+    (event.lat != null && event.lng != null
+      ? `${event.lat.toFixed(2)}, ${event.lng.toFixed(2)}`
+      : null);
+
   return (
     <>
       <Pressable
@@ -207,7 +214,7 @@ function EventCard({ event, onPress }: EventCardProps) {
                 {formatTime(event.start_datetime)}
               </Text>
             </View>
-            {event.location_text ? (
+            {locationLabel ? (
               <>
                 <Text style={[styles.metaSep, { color: themeColors.textMuted }]}>·</Text>
                 <View style={styles.locationItem}>
@@ -216,7 +223,7 @@ function EventCard({ event, onPress }: EventCardProps) {
                     style={[styles.metaText, styles.metaLocation, { color: themeColors.textMuted }]}
                     numberOfLines={1}
                   >
-                    {event.location_text}
+                    {locationLabel}
                   </Text>
                 </View>
               </>

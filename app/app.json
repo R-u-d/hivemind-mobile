@@ -39,7 +39,14 @@
           "organization": "hivemind-ak"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "HiveMind uses your location to place events on the map."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
