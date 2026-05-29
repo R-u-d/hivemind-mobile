@@ -1,9 +1,12 @@
 import pytest
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 from botocore.exceptions import ClientError
+from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.communities.factories import CommunityFactory, MembershipFactory
+from users.models import PasswordResetToken
 
 
 REGISTER_URL = "/api/auth/register/"
@@ -11,6 +14,9 @@ LOGIN_URL = "/api/auth/login/"
 REFRESH_URL = "/api/auth/token/refresh/"
 LOGOUT_URL = "/api/auth/logout/"
 ME_URL = "/api/users/me/"
+FORGOT_PASSWORD_URL = "/api/auth/forgot-password/"
+VERIFY_RESET_CODE_URL = "/api/auth/verify-reset-code/"
+RESET_PASSWORD_URL = "/api/auth/reset-password/"
 
 
 def public_profile_url(user_id):
@@ -505,3 +511,214 @@ def test_patch_me_rejects_avatar_url_outside_bucket(auth_client, settings):
 
     assert response.status_code == 400
     assert "avatar_url" in response.data
+
+
+# ---------------------------------------------------------------------------
+# POST /api/auth/forgot-password/
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+@patch("users.views.send_mail")
+def test_forgot_password_known_email_returns_200(mock_send_mail, api_client, user):
+    response = api_client.post(FORGOT_PASSWORD_URL, {"email": user.email})
+
+    assert response.status_code == 200
+    mock_send_mail.assert_called_once()
+
+
+@pytest.mark.django_db
+@patch("users.views.send_mail")
+def test_forgot_password_creates_reset_token(mock_send_mail, api_client, user):
+    api_client.post(FORGOT_PASSWORD_URL, {"email": user.email})
+
+    assert PasswordResetToken.objects.filter(user=user).count() == 1
+
+
+@pytest.mark.django_db
+@patch("users.views.send_mail")
+def test_forgot_password_unknown_email_returns_400(mock_send_mail, api_client):
+    response = api_client.post(FORGOT_PASSWORD_URL, {"email": "ghost@nowhere.com"})
+
+    assert response.status_code == 400
+    assert "email" in response.data
+    mock_send_mail.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_forgot_password_invalid_email_returns_400(api_client):
+    response = api_client.post(FORGOT_PASSWORD_URL, {"email": "not-an-email"})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+@patch("users.views.send_mail")
+def test_forgot_password_missing_email_returns_400(mock_send_mail, api_client):
+    response = api_client.post(FORGOT_PASSWORD_URL, {})
+
+    assert response.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# POST /api/auth/verify-reset-code/
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_verify_reset_code_valid_returns_200(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    response = api_client.post(VERIFY_RESET_CODE_URL, {"token": reset_token.token})
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_verify_reset_code_invalid_returns_400(api_client):
+    response = api_client.post(VERIFY_RESET_CODE_URL, {"token": "not-a-real-token"})
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_verify_reset_code_used_returns_400(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    reset_token.used = True
+    reset_token.save()
+
+    response = api_client.post(VERIFY_RESET_CODE_URL, {"token": reset_token.token})
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_verify_reset_code_expired_returns_400(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    reset_token.expires_at = timezone.now() - timedelta(seconds=1)
+    reset_token.save()
+
+    response = api_client.post(VERIFY_RESET_CODE_URL, {"token": reset_token.token})
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_verify_reset_code_does_not_consume_token(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    api_client.post(VERIFY_RESET_CODE_URL, {"token": reset_token.token})
+
+    reset_token.refresh_from_db()
+    assert reset_token.used is False
+
+
+@pytest.mark.django_db
+def test_verify_reset_code_missing_token_returns_400(api_client):
+    response = api_client.post(VERIFY_RESET_CODE_URL, {})
+
+    assert response.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# POST /api/auth/reset-password/
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_reset_password_success(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    new_password = "NewStr0ngPass!"
+
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": new_password}
+    )
+
+    assert response.status_code == 200
+    user.refresh_from_db()
+    assert user.check_password(new_password)
+
+
+@pytest.mark.django_db
+def test_reset_password_marks_token_used(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+
+    api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": "NewStr0ngPass!"}
+    )
+
+    reset_token.refresh_from_db()
+    assert reset_token.used is True
+
+
+@pytest.mark.django_db
+def test_reset_password_invalid_token_returns_400(api_client):
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": "not-a-real-token", "password": "NewStr0ngPass!"}
+    )
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_reset_password_used_token_returns_400(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    reset_token.used = True
+    reset_token.save()
+
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": "NewStr0ngPass!"}
+    )
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_reset_password_expired_token_returns_400(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+    reset_token.expires_at = timezone.now() - timedelta(seconds=1)
+    reset_token.save()
+
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": "NewStr0ngPass!"}
+    )
+
+    assert response.status_code == 400
+    assert "token" in response.data
+
+
+@pytest.mark.django_db
+def test_reset_password_weak_password_returns_400(api_client, user):
+    reset_token = PasswordResetToken.create_for_user(user)
+
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": "123"}
+    )
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_reset_password_missing_fields_returns_400(api_client):
+    response = api_client.post(RESET_PASSWORD_URL, {})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_reset_password_blacklists_existing_sessions(api_client, user):
+    from rest_framework_simplejwt.tokens import RefreshToken
+    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+    # Issue a refresh token to simulate an attacker session
+    refresh = RefreshToken.for_user(user)
+    jti = refresh["jti"]
+
+    reset_token = PasswordResetToken.create_for_user(user)
+    response = api_client.post(
+        RESET_PASSWORD_URL, {"token": reset_token.token, "password": "NewStr0ngPass!"}
+    )
+
+    assert response.status_code == 200
+    outstanding = OutstandingToken.objects.get(jti=jti)
+    assert BlacklistedToken.objects.filter(token=outstanding).exists()

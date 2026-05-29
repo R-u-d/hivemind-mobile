@@ -1,6 +1,8 @@
 from datetime import datetime, timezone as dt_timezone
 
+from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
@@ -16,7 +18,16 @@ from django.db.models import BooleanField, Count, Value
 from apps.communities.models import Community, Membership
 from apps.communities.serializers import CommunityMinimalSerializer
 from core.s3 import S3Error, generate_avatar_presigned_url
-from .serializers import RegisterSerializer, UserSerializer, PublicUserSerializer, AvatarUploadSerializer
+from .models import PasswordResetToken
+from .serializers import (
+    AvatarUploadSerializer,
+    ForgotPasswordSerializer,
+    PublicUserSerializer,
+    RegisterSerializer,
+    ResetPasswordSerializer,
+    UserSerializer,
+    VerifyResetCodeSerializer,
+)
 from .throttles import AuthRateThrottle
 
 User = get_user_model()
@@ -127,6 +138,119 @@ class MeCommunitiesView(APIView):
         )
         serializer = CommunityMinimalSerializer(qs, many=True)
         return Response(serializer.data)
+
+
+# -------------------------
+# FORGOT PASSWORD
+# -------------------------
+class ForgotPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"email": ["An account with this email doesn't exist."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reset_token = PasswordResetToken.create_for_user(user)
+
+        send_mail(
+            subject="Reset your HiveMind password",
+            message=(
+                f"Hi {user.display_name},\n\n"
+                f"Use the code below to reset your password. It expires in 1 hour.\n\n"
+                f"  {reset_token.token}\n\n"
+                f"If you didn't request this, you can safely ignore this email."
+            ),
+            from_email=getattr(django_settings, "DEFAULT_FROM_EMAIL", "noreply@hivemind.app"),
+            recipient_list=[email],
+            fail_silently=True,
+        )
+
+        return Response(status=status.HTTP_200_OK)
+
+
+# -------------------------
+# VERIFY RESET CODE
+# -------------------------
+class VerifyResetCodeView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        serializer = VerifyResetCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token_value = serializer.validated_data["token"]
+
+        try:
+            reset_token = PasswordResetToken.objects.get(token=token_value)
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {"token": ["Invalid or expired reset code."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not reset_token.is_valid:
+            return Response(
+                {"token": ["Invalid or expired reset code."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(status=status.HTTP_200_OK)
+
+
+# -------------------------
+# RESET PASSWORD
+# -------------------------
+class ResetPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token_value = serializer.validated_data["token"]
+        new_password = serializer.validated_data["password"]
+
+        try:
+            reset_token = PasswordResetToken.objects.select_related("user").get(token=token_value)
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {"token": ["Invalid or expired reset code."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not reset_token.is_valid:
+            return Response(
+                {"token": ["Invalid or expired reset code."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = reset_token.user
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        reset_token.used = True
+        reset_token.save(update_fields=["used"])
+
+        # Invalidate all outstanding refresh tokens so any attacker session is cut off
+        outstanding = OutstandingToken.objects.filter(user=user)
+        BlacklistedToken.objects.bulk_create(
+            [BlacklistedToken(token=t) for t in outstanding],
+            ignore_conflicts=True,
+        )
+
+        return Response(status=status.HTTP_200_OK)
 
 
 # -------------------------
