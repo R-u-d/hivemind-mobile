@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +12,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import FormField from '@/components/FormField';
 import HiveLogo from '@/components/HiveLogo';
@@ -40,6 +41,13 @@ export default function ResetPasswordScreen() {
   const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => router.replace('/(auth)/login' as Href), 3000);
+    return () => clearTimeout(timer);
+  }, [success]);
 
   const {
     control,
@@ -52,11 +60,30 @@ export default function ResetPasswordScreen() {
     resetPassword(
       { token: token ?? '', ...data },
       {
-        onSuccess: () => router.replace('/(auth)/login' as Href),
+        onSuccess: () => setSuccess(true),
         onError: err => setServerError(extractDrfError(err)),
       },
     );
   };
+
+  if (success) {
+    return (
+      <View style={[styles.flex, styles.successContainer, { backgroundColor: colors.surface }]}>
+        <Ionicons name="checkmark-circle" size={64} color={colors.primary} />
+        <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
+          Password updated!
+        </Text>
+        <Text
+          style={[
+            typography.body,
+            { color: colors.textMuted, marginTop: spacing.xs, textAlign: 'center' },
+          ]}
+        >
+          Taking you to sign in…
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -188,6 +215,7 @@ export default function ResetPasswordScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  successContainer: { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
   scroll: { flexGrow: 1, paddingTop: 54 },
   header: {
     paddingTop: spacing.lg,

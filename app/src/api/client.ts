@@ -44,6 +44,10 @@ client.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // No refresh token means we're unauthenticated — let the 401 propagate without redirecting
+    const storedRefresh = await tokenStorage.getRefresh();
+    if (!storedRefresh) return Promise.reject(error);
+
     original._retry = true;
 
     try {
