@@ -20,7 +20,8 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Event.objects.select_related("organiser", "community", "channel").annotate(
-            attendee_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING))
+            going_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING)),
+            interested_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.INTERESTED)),
         )
 
         community_id = self.request.query_params.get("community")
@@ -34,6 +35,16 @@ class EventViewSet(viewsets.ModelViewSet):
         date_to = self.request.query_params.get("date_to")
         if date_to:
             qs = qs.filter(start_datetime__lte=date_to)
+
+        upcoming = self.request.query_params.get("upcoming")
+        if upcoming == "true":
+            qs = qs.filter(start_datetime__gte=timezone.now())
+        elif upcoming == "false":
+            qs = qs.filter(start_datetime__lt=timezone.now())
+
+        rsvp_filter = self.request.query_params.get("rsvp")
+        if rsvp_filter and self.request.user.is_authenticated:
+            qs = qs.filter(rsvps__user=self.request.user, rsvps__status=rsvp_filter)
 
         q = self.request.query_params.get("q", "").strip()
         if q:

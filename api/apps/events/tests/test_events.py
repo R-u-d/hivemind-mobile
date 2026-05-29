@@ -109,7 +109,8 @@ def test_retrieve_event_public(api_client):
     response = api_client.get(event_url(event.id))
     assert response.status_code == 200
     assert response.data["id"] == str(event.id)
-    assert "organiser_display_name" in response.data
+    assert "organiser" in response.data
+    assert "display_name" in response.data["organiser"]
 
 
 # ─── Create ──────────────────────────────────────────────────────────────────
@@ -136,7 +137,7 @@ def test_create_event_member(auth_client):
     MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
     response = client.post(EVENTS_URL, make_event_payload(community), format="json")
     assert response.status_code == 201
-    assert response.data["organiser_id"] == str(user.id)
+    assert response.data["organiser"]["id"] == str(user.id)
 
 
 @pytest.mark.django_db

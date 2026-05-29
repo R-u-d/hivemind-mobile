@@ -122,7 +122,7 @@ def test_feed_type_discriminator_present(auth_client):
 
 
 @pytest.mark.django_db
-def test_feed_event_has_attendee_count(auth_client):
+def test_feed_event_has_going_count(auth_client):
     client, user = auth_client
     community = CommunityFactory()
     MembershipFactory(user=user, community=community)
@@ -130,8 +130,10 @@ def test_feed_event_has_attendee_count(auth_client):
 
     response = client.get(FEED_URL)
     event_item = next(i for i in response.data["results"] if i["type"] == "event")
-    assert "attendee_count" in event_item
-    assert event_item["attendee_count"] == 0
+    assert "going_count" in event_item
+    assert event_item["going_count"] == 0
+    assert "interested_count" in event_item
+    assert event_item["interested_count"] == 0
 
 
 # ─── Ordering ────────────────────────────────────────────────────────────────

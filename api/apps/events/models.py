@@ -43,7 +43,7 @@ class Event(models.Model):
 class RSVP(models.Model):
     class Status(models.TextChoices):
         GOING = "going", "Going"
-        MAYBE = "maybe", "Maybe"
+        INTERESTED = "interested", "Interested"
         NOT_GOING = "not_going", "Not Going"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
