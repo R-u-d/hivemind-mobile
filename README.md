@@ -29,13 +29,13 @@ at WBS Coding School.
 
 | Layer | Technology |
 |---|---|
-| Mobile app | React Native + Expo SDK 51 |
+| Mobile app | React Native + Expo SDK 54 |
 | Routing | Expo Router (file-based) |
 | Language | TypeScript (strict) |
 | HTTP client | Axios with JWT interceptors |
 | Server state | TanStack Query v5 |
 | Forms | React Hook Form + Zod |
-| Backend | Django 4.2 + Django REST Framework |
+| Backend | Django 5.2 + Django REST Framework |
 | Auth | JWT via djangorestframework-simplejwt |
 | Database | PostgreSQL (AWS RDS or Azure) |
 | File storage | AWS S3 (presigned URLs) or Azure |
@@ -188,8 +188,8 @@ then register a user and log in — the login request automatically sets `auth_t
 
 | Name | Role | GitHub |
 |---|---|---|
-| Name | Frontend lead | [@your-handle](https://github.com/your-handle) |
-| Name | Backend lead | [@their-handle](https://github.com/their-handle) |
+| Waqar | Frontend lead | [@waqvirk](https://github.com/waqvirk) |
+| Rud | Backend lead | [@R-u-d](https://github.com/R-u-d) |
 
 ---
 
