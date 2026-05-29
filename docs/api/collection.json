@@ -1,9 +1,8 @@
 {
   "info": {
-    "_postman_id": "4f8d1036-fcd1-4fe2-a504-6029735c7a3b",
+    "_postman_id": "7be6991e-2e73-412f-8a60-ca5aa809b7e4",
     "name": "HiveMind API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "54879437"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
     "type": "bearer",
@@ -18,58 +17,47 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://127.0.0.1:8000/api",
-      "type": "string"
+      "value": "http://127.0.0.1:8000/api"
     },
     {
       "key": "access_token",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "refresh_token",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "user_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "community_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "avatar_upload_url",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "avatar_public_url",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "member_user_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "channel_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "post_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "event_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     }
   ],
   "item": [
@@ -500,44 +488,7 @@
               ]
             }
           },
-          "response": [
-            {
-              "name": "200 OK \u2014 with is_member",
-              "originalRequest": {
-                "auth": {
-                  "type": "noauth"
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/communities/?search=study",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "communities",
-                    ""
-                  ],
-                  "query": [
-                    {
-                      "key": "search",
-                      "value": "study"
-                    }
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"<uuid>\",\n      \"name\": \"Study Squad\",\n      \"type\": \"study\",\n      \"member_count\": 12,\n      \"cover_image_url\": \"\",\n      \"is_private\": false,\n      \"is_member\": true,\n      \"created_at\": \"2025-01-01T00:00:00Z\"\n    }\n  ]\n}"
-            }
-          ]
+          "response": []
         },
         {
           "name": "Create Community",
@@ -889,27 +840,6 @@
           "response": []
         },
         {
-          "name": "Get Channel",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "communities",
-                "{{community_id}}",
-                "channels",
-                "{{channel_id}}",
-                ""
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Update Channel",
           "request": {
             "method": "PATCH",
@@ -1230,6 +1160,424 @@
                 ""
               ]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event \u2014 Non-Member (\u2192 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Unauthorised Event\",\n  \"description\": \"This should be rejected.\",\n  \"location_text\": \"Nowhere\",\n  \"start_datetime\": \"2026-06-10T18:00:00Z\",\n  \"end_datetime\": \"2026-06-10T20:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
+            },
+            "description": "Send with a token for a user who is NOT a member of the community. Expects 403: \"You must be a member of the community to create an event.\""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event \u2014 Bad Dates (\u2192 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Bad Dates Event\",\n  \"description\": \"End is before start \u2014 should fail.\",\n  \"location_text\": \"Anywhere\",\n  \"start_datetime\": \"2026-06-10T20:00:00Z\",\n  \"end_datetime\": \"2026-06-10T18:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
+            },
+            "description": "end_datetime is before start_datetime. Expects 400: {\"end_datetime\": [\"end_datetime must be after start_datetime.\"]}"
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Set Going (\u2192 201 / 200 upsert)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"going\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Returns 201 on first call, 200 if already RSVPd (upsert). Capacity enforced: if event is full, returns 400."
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Set Maybe (\u2192 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"maybe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Sets RSVP to 'maybe'. Not counted toward capacity \u2014 allowed even when event is full."
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Set Not Going (\u2192 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"not_going\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Default No Status (\u2192 201 going)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "POST with no status field \u2014 defaults to 'going'. Shows default behaviour when client omits the status key."
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Invalid Status (\u2192 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"yes_please\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Unrecognised status value. Expects 400: {\"status\": \"Invalid status.\"}"
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Past Event Guard (\u2192 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"going\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Point event_id at an event whose start_datetime is in the past. Expects 400: {\"detail\": \"Cannot RSVP to a past event.\"}"
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Capacity Full (\u2192 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"going\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Create an event with capacity=1, RSVP one user as going to fill it, then send this with a second user's token. Expects 400: {\"detail\": \"Event is at capacity.\"}. Repeat with 'maybe' to show it still succeeds (201)."
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Delete (\u2192 204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Removes the authenticated user's RSVP entirely. Returns 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "RSVP \u2014 Delete Not Found (\u2192 404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
+            },
+            "description": "Run immediately after Delete \u2014 user has no RSVP left. Expects 404: {\"detail\": \"No RSVP found.\"}"
+          },
+          "response": []
+        },
+        {
+          "name": "Attendees \u2014 List Going",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/attendees/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "attendees",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Public endpoint. Cursor-paginated list of users with status 'going' only. Users with 'maybe' or 'not_going' are excluded."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Cover Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/cover-upload-url/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "cover-upload-url",
+                ""
+              ]
+            },
+            "description": "Organiser or community moderator/owner only. Returns a presigned S3 PUT URL valid for 5 minutes. After uploading, PATCH the event with the returned public_url as cover_image_url."
           },
           "response": []
         }

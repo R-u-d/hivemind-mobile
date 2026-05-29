@@ -30,7 +30,7 @@ class User(AbstractUser):
     display_name = models.CharField(max_length=50)
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=100, blank=True)
-    avatar_url = models.URLField(blank=True)
+    avatar_url = models.URLField(blank=True, max_length=500)
     has_onboarded = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

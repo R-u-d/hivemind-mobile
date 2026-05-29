@@ -7,10 +7,11 @@ from rest_framework.response import Response
 
 from apps.communities.models import Membership
 from core.pagination import CreatedAtCursorPagination, StartsAtCursorPagination
+from core.s3 import S3Error, generate_event_cover_presigned_url
 
 from .models import Event, RSVP
 from .permissions import IsEventOrganiserOrModerator
-from .serializers import AttendeeSerializer, EventListSerializer, EventSerializer, RSVPSerializer
+from .serializers import AttendeeSerializer, CoverUploadSerializer, EventListSerializer, EventSerializer, RSVPSerializer
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -46,6 +47,23 @@ class EventViewSet(viewsets.ModelViewSet):
         if self.action in ("create", "rsvp"):
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), IsEventOrganiserOrModerator()]
+
+    @action(detail=True, methods=["post"], url_path="cover-upload-url")
+    def cover_upload_url(self, request, pk=None):
+        event = self.get_object()
+        serializer = CoverUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result = generate_event_cover_presigned_url(
+                event_id=str(event.id),
+                content_type=serializer.validated_data["content_type"],
+                file_size=serializer.validated_data["file_size"],
+            )
+        except S3Error as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response(result, status=status.HTTP_200_OK)
 
     def get_serializer_class(self):
         if self.action == "list":
