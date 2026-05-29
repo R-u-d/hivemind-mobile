@@ -17,6 +17,8 @@ interface FormFieldProps extends TextInputProps {
   error?: string;
   labelColor?: string;
   rightAccessory?: React.ReactNode;
+  /** Floor height for multiline fields. Defaults to ~3 lines. */
+  minHeight?: number;
 }
 
 // Focus state renders a two-layer purple aura around the input. The outer
@@ -24,6 +26,10 @@ interface FormFieldProps extends TextInputProps {
 // language used on the splash.
 
 const PRIMARY_RGB = '109, 40, 217'; // colors.primary #6D28D9
+
+// Single source of truth for the default multiline height (~3 lines) so every
+// textarea-style field (event description, bio, community description) matches.
+export const MULTILINE_MIN_HEIGHT = 56;
 
 export default function FormField({
   label,
@@ -34,11 +40,11 @@ export default function FormField({
   onBlur,
   value,
   style,
+  minHeight,
   ...props
 }: FormFieldProps) {
   const colors = useTheme();
   const [focused, setFocused] = useState(false);
-  const [multilineHeight, setMultilineHeight] = useState(0);
   const glow = useRef(new Animated.Value(0)).current;
   const breath = useRef(new Animated.Value(0)).current;
 
@@ -113,8 +119,8 @@ export default function FormField({
               styles.input,
               { color: colors.text, fontFamily: fonts.regular },
               props.multiline && styles.inputMultiline,
+              props.multiline ? { minHeight: minHeight ?? MULTILINE_MIN_HEIGHT } : undefined,
               style,
-              props.multiline && multilineHeight > 0 ? { height: multilineHeight } : undefined,
             ]}
             underlineColorAndroid="transparent"
             placeholderTextColor={colors.textFaint}
@@ -126,11 +132,6 @@ export default function FormField({
               setFocused(false);
               onBlur?.(e);
             }}
-            onContentSizeChange={
-              props.multiline
-                ? e => setMultilineHeight(e.nativeEvent.contentSize.height)
-                : undefined
-            }
             value={value ?? ''}
             scrollEnabled={props.multiline ? false : undefined}
             {...props}
