@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from decouple import config
 import dj_database_url
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "apps.communities",
     "apps.events",
     "apps.feed",
+    "apps.notifications",
 ]
 
 # -------------------------------------------------------------------
@@ -192,3 +194,22 @@ if SENTRY_DSN:
         traces_sample_rate=1.0,
         send_default_pii=False,
     )
+
+# -------------------------------------------------------------------
+# CELERY
+# -------------------------------------------------------------------
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TIMEZONE = "UTC"
+# Notifications are fire-and-forget — no result backend needed.
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TASK_STORE_EAGER_RESULT = False
+# Run tasks synchronously under pytest (no broker/worker required).
+CELERY_TASK_ALWAYS_EAGER = config(
+    "CELERY_TASK_ALWAYS_EAGER", default="pytest" in sys.modules, cast=bool
+)
+CELERY_TASK_EAGER_PROPAGATES = True
+
+# Expo push API endpoint.
+EXPO_PUSH_URL = config("EXPO_PUSH_URL", default="https://exp.host/--/api/v2/push/send")

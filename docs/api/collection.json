@@ -57,6 +57,11 @@
     },
     {
       "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notification_id",
       "value": ""
     }
   ],
@@ -488,7 +493,45 @@
               ]
             }
           },
-          "response": []
+          "response": [
+          "response": [
+            {
+              "name": "200 OK \u2014 with is_member",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/communities/?search=study",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "communities",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "study"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": \"<uuid>\",\n      \"name\": \"Study Squad\",\n      \"type\": \"study\",\n      \"member_count\": 12,\n      \"cover_image_url\": \"\",\n      \"is_private\": false,\n      \"is_member\": true,\n      \"created_at\": \"2025-01-01T00:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Create Community",
@@ -833,6 +876,27 @@
                 "communities",
                 "{{community_id}}",
                 "channels",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Channel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
                 ""
               ]
             }
@@ -1611,6 +1675,159 @@
             },
             "description": "Returns a reverse-chronological feed of posts and events from communities the authenticated user belongs to. Each item has a `type` field (`post` or `event`) plus the fields from the corresponding serializer. Supports forward-only cursor pagination via the `cursor` query parameter."
           }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Register Push Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\",\n  \"platform\": \"ios\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/push-tokens/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "push-tokens",
+                ""
+              ]
+            },
+            "description": "Register (or re-assign) the calling device's Expo push token. Idempotent by token."
+          },
+          "response": []
+        },
+        {
+          "name": "Deregister Push Token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/push-tokens/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "push-tokens",
+                ""
+              ]
+            },
+            "description": "Remove the calling user's registration for the given token."
+          },
+          "response": []
+        },
+        {
+          "name": "List Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.results && res.results.length) {",
+                  "  pm.collectionVariables.set('notification_id', res.results[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor from next/previous links",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List the authenticated user's notifications, newest first (cursor-paginated)."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}/read/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notification_id}}",
+                "read",
+                ""
+              ]
+            },
+            "description": "Mark a single notification as read."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/read_all/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "read_all",
+                ""
+              ]
+            },
+            "description": "Mark all of the user's unread notifications as read."
+          },
+          "response": []
         }
       ]
     }
