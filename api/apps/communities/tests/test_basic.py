@@ -202,6 +202,17 @@ def test_create_community_creates_owner_membership(auth_client):
     ).exists()
 
 
+@pytest.mark.django_db
+def test_create_community_creates_default_channels(auth_client):
+    client, _ = auth_client
+    response = client.post(COMMUNITIES_URL, {"name": "Test Club", "community_type": "social"})
+    assert response.status_code == 201
+    community_id = response.data["id"]
+    channels = Channel.objects.filter(community_id=community_id)
+    names = set(channels.values_list("name", flat=True))
+    assert names == {"general", "announcements", "resources", "help"}
+
+
 # ---- LIST MEMBERS ----
 
 @pytest.mark.django_db
@@ -616,7 +627,7 @@ def test_channel_create_owner(auth_client):
 # ---- CHANNELS: CHANNEL TYPES ----
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+@pytest.mark.parametrize("channel_type", ["events", "resources", "help"])
 def test_channel_create_new_types(auth_client, channel_type):
     client, user = auth_client
     community = CommunityFactory()
@@ -636,7 +647,7 @@ def test_channel_create_invalid_type(auth_client):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("channel_type", ["events", "media", "help"])
+@pytest.mark.parametrize("channel_type", ["events", "resources", "help"])
 def test_post_create_new_channel_types_member_allowed(auth_client, channel_type):
     client, user = auth_client
     channel = ChannelFactory(channel_type=channel_type)

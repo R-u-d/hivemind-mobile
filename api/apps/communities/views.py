@@ -71,6 +71,16 @@ class CommunityViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             role=Membership.Role.OWNER,
         )
+        default_channels = [
+            ("general", Channel.ChannelType.GENERAL),
+            ("announcements", Channel.ChannelType.ANNOUNCEMENTS),
+            ("resources", Channel.ChannelType.RESOURCES),
+            ("help", Channel.ChannelType.HELP),
+        ]
+        Channel.objects.bulk_create([
+            Channel(community=community, name=name, channel_type=ct)
+            for name, ct in default_channels
+        ])
 
 
 class ChannelViewSet(viewsets.ModelViewSet):

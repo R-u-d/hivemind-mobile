@@ -15,17 +15,50 @@
     ]
   },
   "variable": [
-    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
-    { "key": "access_token", "value": "" },
-    { "key": "refresh_token", "value": "" },
-    { "key": "user_id", "value": "" },
-    { "key": "community_id", "value": "" },
-    { "key": "avatar_upload_url", "value": "" },
-    { "key": "avatar_public_url", "value": "" },
-    { "key": "member_user_id", "value": "" },
-    { "key": "channel_id", "value": "" },
-    { "key": "post_id", "value": "" },
-    { "key": "event_id", "value": "" }
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "community_id",
+      "value": ""
+    },
+    {
+      "key": "avatar_upload_url",
+      "value": ""
+    },
+    {
+      "key": "avatar_public_url",
+      "value": ""
+    },
+    {
+      "key": "member_user_id",
+      "value": ""
+    },
+    {
+      "key": "channel_id",
+      "value": ""
+    },
+    {
+      "key": "post_id",
+      "value": ""
+    },
+    {
+      "key": "event_id",
+      "value": ""
+    }
   ],
   "item": [
     {
@@ -34,13 +67,20 @@
         {
           "name": "Health Check",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/health/",
-              "host": ["{{base_url}}"],
-              "path": ["health", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                ""
+              ]
             }
           },
           "response": []
@@ -67,18 +107,35 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"test@hivemind.com\",\n  \"password\": \"Str0ngPass123!\",\n  \"display_name\": \"Test User\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/register/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register",
+                ""
+              ]
             }
           },
           "response": []
@@ -99,18 +156,35 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"test@hivemind.com\",\n  \"password\": \"Str0ngPass123!\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/login/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login",
+                ""
+              ]
             }
           },
           "response": []
@@ -131,18 +205,36 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/token/refresh/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "token", "refresh", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token",
+                "refresh",
+                ""
+              ]
             }
           },
           "response": []
@@ -151,16 +243,31 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/auth/logout/",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "logout", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout",
+                ""
+              ]
             }
           },
           "response": []
@@ -177,8 +284,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/me/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                ""
+              ]
             }
           },
           "response": []
@@ -187,16 +300,31 @@
           "name": "Update My Profile",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"display_name\": \"New Name\",\n  \"bio\": \"Something about me\",\n  \"location\": \"Berlin, Germany\",\n  \"avatar_url\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/users/me/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                ""
+              ]
             }
           },
           "response": []
@@ -208,8 +336,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/me/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", "communities", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "communities",
+                ""
+              ]
             }
           },
           "response": []
@@ -217,13 +352,21 @@
         {
           "name": "Get Public Profile",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -245,16 +388,32 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/users/me/avatar-upload-url/",
-              "host": ["{{base_url}}"],
-              "path": ["users", "me", "avatar-upload-url", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "avatar-upload-url",
+                ""
+              ]
             }
           },
           "response": []
@@ -262,13 +421,25 @@
         {
           "name": "Upload Avatar to S3",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "image/jpeg" }],
-            "body": { "mode": "file", "file": {} },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "image/jpeg"
+              }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {}
+            },
             "url": {
               "raw": "{{avatar_upload_url}}",
-              "host": ["{{avatar_upload_url}}"]
+              "host": [
+                "{{avatar_upload_url}}"
+              ]
             }
           },
           "response": []
@@ -281,17 +452,39 @@
         {
           "name": "List Communities",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", ""],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                ""
+              ],
               "query": [
-                { "key": "search", "value": "", "description": "Filter by name (case-insensitive contains)", "disabled": true },
-                { "key": "type", "value": "", "description": "Filter by community_type. Repeatable: ?type=study&type=gaming. Choices: study, gaming, sports, creative, social", "disabled": true },
-                { "key": "cursor", "value": "", "description": "Pagination cursor from next/previous links", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Filter by name (case-insensitive contains)",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "Filter by community_type. Repeatable: ?type=study&type=gaming. Choices: study, gaming, sports, creative, social",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor from next/previous links",
+                  "disabled": true
+                }
               ]
             }
           },
@@ -313,16 +506,30 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Study Squad\",\n  \"description\": \"A place to study together.\",\n  \"community_type\": \"study\",\n  \"is_private\": false\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                ""
+              ]
             }
           },
           "response": []
@@ -330,13 +537,21 @@
         {
           "name": "Get Community",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -345,16 +560,31 @@
           "name": "Update Community",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Updated Name\",\n  \"description\": \"Updated description.\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -363,16 +593,32 @@
           "name": "Get Cover Upload URL",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/cover-upload-url/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "cover-upload-url", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "cover-upload-url",
+                ""
+              ]
             }
           },
           "response": []
@@ -384,8 +630,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -393,13 +645,22 @@
         {
           "name": "List Members",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                ""
+              ]
             }
           },
           "response": []
@@ -423,8 +684,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/join/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "join", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "join",
+                ""
+              ]
             }
           },
           "response": []
@@ -436,8 +704,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/leave/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "leave", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "leave",
+                ""
+              ]
             }
           },
           "response": []
@@ -446,16 +721,33 @@
           "name": "Change Member Role",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"role\": \"moderator\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                "{{member_user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -467,8 +759,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/members/{{member_user_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "members", "{{member_user_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "members",
+                "{{member_user_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -480,8 +780,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                ""
+              ]
             }
           },
           "response": []
@@ -502,16 +809,32 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"general\",\n  \"description\": \"General discussion\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                ""
+              ]
             }
           },
           "response": []
@@ -520,16 +843,33 @@
           "name": "Update Channel",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"general\",\n  \"description\": \"Updated description\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -541,8 +881,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/communities/{{community_id}}/channels/{{channel_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["communities", "{{community_id}}", "channels", "{{channel_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "channels",
+                "{{channel_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -559,8 +907,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                ""
+              ]
             }
           },
           "response": []
@@ -581,16 +936,32 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"body\": \"Hello, world!\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                ""
+              ]
             }
           },
           "response": []
@@ -602,8 +973,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/posts/{{post_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "posts", "{{post_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "channels",
+                "{{channel_id}}",
+                "posts",
+                "{{post_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -616,19 +995,51 @@
         {
           "name": "List Events",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ],
               "query": [
-                { "key": "community", "value": "{{community_id}}", "description": "Filter by community UUID", "disabled": true },
-                { "key": "date_from", "value": "", "description": "ISO 8601 datetime — include events starting on or after this", "disabled": true },
-                { "key": "date_to", "value": "", "description": "ISO 8601 datetime — include events starting on or before this", "disabled": true },
-                { "key": "q", "value": "", "description": "Full-text search on title and description", "disabled": true },
-                { "key": "cursor", "value": "", "description": "Pagination cursor from next/previous links", "disabled": true }
+                {
+                  "key": "community",
+                  "value": "{{community_id}}",
+                  "description": "Filter by community UUID",
+                  "disabled": true
+                },
+                {
+                  "key": "date_from",
+                  "value": "",
+                  "description": "ISO 8601 datetime \u2014 include events starting on or after this",
+                  "disabled": true
+                },
+                {
+                  "key": "date_to",
+                  "value": "",
+                  "description": "ISO 8601 datetime \u2014 include events starting on or before this",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "Full-text search on title and description",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Pagination cursor from next/previous links",
+                  "disabled": true
+                }
               ]
             }
           },
@@ -650,16 +1061,30 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Study Session\",\n  \"description\": \"Weekly group study.\",\n  \"location_text\": \"Library Room 3\",\n  \"lat\": null,\n  \"lng\": null,\n  \"start_datetime\": \"2026-06-01T14:00:00Z\",\n  \"end_datetime\": \"2026-06-01T16:00:00Z\",\n  \"capacity\": 20\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
             }
           },
           "response": []
@@ -667,13 +1092,21 @@
         {
           "name": "Get Event",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -682,16 +1115,31 @@
           "name": "Update Event",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Updated Title\",\n  \"location_text\": \"New Location\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
@@ -703,222 +1151,395 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                ""
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "Create Event — Non-Member (→ 403)",
+          "name": "Create Event \u2014 Non-Member (\u2192 403)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Unauthorised Event\",\n  \"description\": \"This should be rejected.\",\n  \"location_text\": \"Nowhere\",\n  \"start_datetime\": \"2026-06-10T18:00:00Z\",\n  \"end_datetime\": \"2026-06-10T20:00:00Z\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
             },
             "description": "Send with a token for a user who is NOT a member of the community. Expects 403: \"You must be a member of the community to create an event.\""
           },
           "response": []
         },
         {
-          "name": "Create Event — Bad Dates (→ 400)",
+          "name": "Create Event \u2014 Bad Dates (\u2192 400)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Bad Dates Event\",\n  \"description\": \"End is before start — should fail.\",\n  \"location_text\": \"Anywhere\",\n  \"start_datetime\": \"2026-06-10T20:00:00Z\",\n  \"end_datetime\": \"2026-06-10T18:00:00Z\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"community\": \"{{community_id}}\",\n  \"title\": \"Bad Dates Event\",\n  \"description\": \"End is before start \u2014 should fail.\",\n  \"location_text\": \"Anywhere\",\n  \"start_datetime\": \"2026-06-10T20:00:00Z\",\n  \"end_datetime\": \"2026-06-10T18:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/",
-              "host": ["{{base_url}}"],
-              "path": ["events", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
             },
             "description": "end_datetime is before start_datetime. Expects 400: {\"end_datetime\": [\"end_datetime must be after start_datetime.\"]}"
           },
           "response": []
         },
         {
-          "name": "RSVP — Set Going (→ 201 / 200 upsert)",
+          "name": "RSVP \u2014 Set Going (\u2192 201 / 200 upsert)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"going\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
             "description": "Returns 201 on first call, 200 if already RSVPd (upsert). Capacity enforced: if event is full, returns 400."
           },
           "response": []
         },
         {
-          "name": "RSVP — Set Maybe (→ 201)",
+          "name": "RSVP \u2014 Set Maybe (\u2192 201)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"maybe\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
-            "description": "Sets RSVP to 'maybe'. Not counted toward capacity — allowed even when event is full."
+            "description": "Sets RSVP to 'maybe'. Not counted toward capacity \u2014 allowed even when event is full."
           },
           "response": []
         },
         {
-          "name": "RSVP — Set Not Going (→ 201)",
+          "name": "RSVP \u2014 Set Not Going (\u2192 201)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"not_going\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             }
           },
           "response": []
         },
         {
-          "name": "RSVP — Default No Status (→ 201 going)",
+          "name": "RSVP \u2014 Default No Status (\u2192 201 going)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
-            "description": "POST with no status field — defaults to 'going'. Shows default behaviour when client omits the status key."
+            "description": "POST with no status field \u2014 defaults to 'going'. Shows default behaviour when client omits the status key."
           },
           "response": []
         },
         {
-          "name": "RSVP — Invalid Status (→ 400)",
+          "name": "RSVP \u2014 Invalid Status (\u2192 400)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"yes_please\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
             "description": "Unrecognised status value. Expects 400: {\"status\": \"Invalid status.\"}"
           },
           "response": []
         },
         {
-          "name": "RSVP — Past Event Guard (→ 400)",
+          "name": "RSVP \u2014 Past Event Guard (\u2192 400)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"going\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
             "description": "Point event_id at an event whose start_datetime is in the past. Expects 400: {\"detail\": \"Cannot RSVP to a past event.\"}"
           },
           "response": []
         },
         {
-          "name": "RSVP — Capacity Full (→ 400)",
+          "name": "RSVP \u2014 Capacity Full (\u2192 400)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"going\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
             "description": "Create an event with capacity=1, RSVP one user as going to fill it, then send this with a second user's token. Expects 400: {\"detail\": \"Event is at capacity.\"}. Repeat with 'maybe' to show it still succeeds (201)."
           },
           "response": []
         },
         {
-          "name": "RSVP — Delete (→ 204)",
+          "name": "RSVP \u2014 Delete (\u2192 204)",
           "request": {
             "method": "DELETE",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
             "description": "Removes the authenticated user's RSVP entirely. Returns 204 No Content."
           },
           "response": []
         },
         {
-          "name": "RSVP — Delete Not Found (→ 404)",
+          "name": "RSVP \u2014 Delete Not Found (\u2192 404)",
           "request": {
             "method": "DELETE",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/rsvp/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "rsvp", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "rsvp",
+                ""
+              ]
             },
-            "description": "Run immediately after Delete — user has no RSVP left. Expects 404: {\"detail\": \"No RSVP found.\"}"
+            "description": "Run immediately after Delete \u2014 user has no RSVP left. Expects 404: {\"detail\": \"No RSVP found.\"}"
           },
           "response": []
         },
         {
-          "name": "Attendees — List Going",
+          "name": "Attendees \u2014 List Going",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/attendees/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "attendees", ""],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "attendees",
+                ""
+              ],
               "query": [
-                { "key": "cursor", "value": "", "disabled": true }
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "Public endpoint. Cursor-paginated list of users with status 'going' only. Users with 'maybe' or 'not_going' are excluded."
@@ -929,20 +1550,67 @@
           "name": "Get Event Cover Upload URL",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 102400\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/events/{{event_id}}/cover-upload-url/",
-              "host": ["{{base_url}}"],
-              "path": ["events", "{{event_id}}", "cover-upload-url", ""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}",
+                "cover-upload-url",
+                ""
+              ]
             },
             "description": "Organiser or community moderator/owner only. Returns a presigned S3 PUT URL valid for 5 minutes. After uploading, PATCH the event with the returned public_url as cover_image_url."
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "Get Home Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feed/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "description": "Cursor for the next page (returned in the `next` field of a previous response)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a reverse-chronological feed of posts and events from communities the authenticated user belongs to. Each item has a `type` field (`post` or `event`) plus the fields from the corresponding serializer. Supports forward-only cursor pagination via the `cursor` query parameter."
+          }
         }
       ]
     }
