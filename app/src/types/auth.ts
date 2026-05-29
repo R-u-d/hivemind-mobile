@@ -30,3 +30,16 @@ export interface RefreshResponse {
   access: string;
   refresh?: string; // returned only when ROTATE_REFRESH_TOKENS=True
 }
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface VerifyResetCodeRequest {
+  token: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}

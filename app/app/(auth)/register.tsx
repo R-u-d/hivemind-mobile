@@ -195,6 +195,13 @@ export default function RegisterScreen() {
             </Text>
           ) : null}
 
+          <PrimaryButton
+            label="Create account"
+            loadingLabel="Creating account…"
+            loading={isPending}
+            onPress={handleSubmit(onSubmit)}
+          />
+
           <View style={styles.switchRow}>
             <Text
               style={[styles.switchText, { color: colors.textMuted, fontFamily: fonts.regular }]}
@@ -212,13 +219,6 @@ export default function RegisterScreen() {
               </Text>
             </Pressable>
           </View>
-
-          <PrimaryButton
-            label="Create account"
-            loadingLabel="Creating account…"
-            loading={isPending}
-            onPress={handleSubmit(onSubmit)}
-          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

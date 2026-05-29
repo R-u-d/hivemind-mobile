@@ -11,28 +11,35 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { router, type Href } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 
 import FormField from '@/components/FormField';
 import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
-import { useLogin } from '@/hooks/useLogin';
+import { useResetPassword } from '@/hooks/useResetPassword';
 import { fonts, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 
-const schema = z.object({
-  email: z.string().email('Enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+const schema = z
+  .object({
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirm_password: z.string(),
+  })
+  .refine(data => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ['confirm_password'],
+  });
 
 type FormData = z.infer<typeof schema>;
 
-export default function LoginScreen() {
+export default function ResetPasswordScreen() {
   const colors = useTheme();
-  const { mutate: login, isPending } = useLogin();
+  const { token } = useLocalSearchParams<{ token: string }>();
+  const { mutate: resetPassword, isPending } = useResetPassword();
   const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     control,
@@ -40,14 +47,15 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = ({ confirm_password: _cp, ...data }: FormData) => {
     setServerError('');
-    login(data, {
-      onSuccess: async ({ user }) => {
-        router.replace((user.has_onboarded ? '/(tabs)/feed' : '/(onboarding)') as Href);
+    resetPassword(
+      { token: token ?? '', ...data },
+      {
+        onSuccess: () => router.replace('/(auth)/login' as Href),
+        onError: err => setServerError(extractDrfError(err)),
       },
-      onError: err => setServerError(extractDrfError(err)),
-    });
+    );
   };
 
   return (
@@ -64,10 +72,10 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <HiveLogo size={32} color={colors.primary} />
           <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
-            Welcome back
+            Choose a new password
           </Text>
           <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing.xs }]}>
-            Sign in to pick up where you left off.
+            Pick something strong. You won't be prompted again.
           </Text>
         </View>
 
@@ -75,39 +83,19 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <Controller
             control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormField
-                label="Email"
-                placeholder="you@university.edu"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.email?.message}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                accessibilityLabel="Email address"
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <FormField
-                label="Password"
-                placeholder="••••••••"
+                label="New password"
+                placeholder="At least 8 characters"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 error={errors.password?.message}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
-                autoComplete="password"
-                accessibilityLabel="Password"
+                autoComplete="new-password"
+                accessibilityLabel="New password"
                 rightAccessory={
                   <Pressable
                     onPress={() => setShowPassword(v => !v)}
@@ -125,15 +113,39 @@ export default function LoginScreen() {
             )}
           />
 
-          <Pressable
-            style={styles.forgotRow}
-            onPress={() => router.push('/(auth)/forgot-password' as Href)}
-            accessibilityLabel="Forgot password"
-          >
-            <Text style={[styles.forgotLink, { color: colors.primary, fontFamily: fonts.medium }]}>
-              Forgot password?
-            </Text>
-          </Pressable>
+          <Controller
+            control={control}
+            name="confirm_password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <FormField
+                label="Confirm new password"
+                placeholder="Repeat password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.confirm_password?.message}
+                secureTextEntry={!showConfirm}
+                autoCapitalize="none"
+                autoComplete="new-password"
+                accessibilityLabel="Confirm new password"
+                rightAccessory={
+                  <Pressable
+                    onPress={() => setShowConfirm(v => !v)}
+                    accessibilityLabel={
+                      showConfirm ? 'Hide confirm password' : 'Show confirm password'
+                    }
+                    hitSlop={8}
+                  >
+                    <Text
+                      style={[styles.showHide, { color: colors.primary, fontFamily: fonts.medium }]}
+                    >
+                      {showConfirm ? 'Hide' : 'Show'}
+                    </Text>
+                  </Pressable>
+                }
+              />
+            )}
+          />
         </View>
 
         {/* Footer */}
@@ -145,8 +157,8 @@ export default function LoginScreen() {
           ) : null}
 
           <PrimaryButton
-            label="Sign in"
-            loadingLabel="Signing in…"
+            label="Reset password"
+            loadingLabel="Resetting…"
             loading={isPending}
             onPress={handleSubmit(onSubmit)}
           />
@@ -155,16 +167,16 @@ export default function LoginScreen() {
             <Text
               style={[styles.switchText, { color: colors.textMuted, fontFamily: fonts.regular }]}
             >
-              No account?{' '}
+              Remember it?{' '}
             </Text>
             <Pressable
-              onPress={() => router.push('/(auth)/register' as Href)}
-              accessibilityLabel="Register"
+              onPress={() => router.replace('/(auth)/login' as Href)}
+              accessibilityLabel="Sign in"
             >
               <Text
                 style={[styles.switchLink, { color: colors.primary, fontFamily: fonts.medium }]}
               >
-                Register
+                Sign in
               </Text>
             </Pressable>
           </View>
@@ -189,8 +201,6 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   showHide: { fontSize: 13 },
-  forgotRow: { alignSelf: 'flex-end' },
-  forgotLink: { fontSize: 13 },
   footer: {
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.sm,

@@ -17,22 +17,20 @@ import FormField from '@/components/FormField';
 import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
-import { useLogin } from '@/hooks/useLogin';
+import { useForgotPassword } from '@/hooks/useForgotPassword';
 import { fonts, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
 });
 
 type FormData = z.infer<typeof schema>;
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const colors = useTheme();
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
   const [serverError, setServerError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
@@ -40,12 +38,10 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (_data: FormData) => {
     setServerError('');
-    login(data, {
-      onSuccess: async ({ user }) => {
-        router.replace((user.has_onboarded ? '/(tabs)/feed' : '/(onboarding)') as Href);
-      },
+    forgotPassword(_data, {
+      onSuccess: () => router.push('/(auth)/verify-code' as Href),
       onError: err => setServerError(extractDrfError(err)),
     });
   };
@@ -64,10 +60,10 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <HiveLogo size={32} color={colors.primary} />
           <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
-            Welcome back
+            Forgot your password?
           </Text>
           <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing.xs }]}>
-            Sign in to pick up where you left off.
+            {"Enter your email and we'll send you a reset code."}
           </Text>
         </View>
 
@@ -92,48 +88,6 @@ export default function LoginScreen() {
               />
             )}
           />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormField
-                label="Password"
-                placeholder="••••••••"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoComplete="password"
-                accessibilityLabel="Password"
-                rightAccessory={
-                  <Pressable
-                    onPress={() => setShowPassword(v => !v)}
-                    accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                    hitSlop={8}
-                  >
-                    <Text
-                      style={[styles.showHide, { color: colors.primary, fontFamily: fonts.medium }]}
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </Pressable>
-                }
-              />
-            )}
-          />
-
-          <Pressable
-            style={styles.forgotRow}
-            onPress={() => router.push('/(auth)/forgot-password' as Href)}
-            accessibilityLabel="Forgot password"
-          >
-            <Text style={[styles.forgotLink, { color: colors.primary, fontFamily: fonts.medium }]}>
-              Forgot password?
-            </Text>
-          </Pressable>
         </View>
 
         {/* Footer */}
@@ -145,8 +99,8 @@ export default function LoginScreen() {
           ) : null}
 
           <PrimaryButton
-            label="Sign in"
-            loadingLabel="Signing in…"
+            label="Send reset code"
+            loadingLabel="Sending…"
             loading={isPending}
             onPress={handleSubmit(onSubmit)}
           />
@@ -155,16 +109,16 @@ export default function LoginScreen() {
             <Text
               style={[styles.switchText, { color: colors.textMuted, fontFamily: fonts.regular }]}
             >
-              No account?{' '}
+              Already Reset?{' '}
             </Text>
             <Pressable
-              onPress={() => router.push('/(auth)/register' as Href)}
-              accessibilityLabel="Register"
+              onPress={() => router.replace('/(auth)/login' as Href)}
+              accessibilityLabel="Sign in"
             >
               <Text
                 style={[styles.switchLink, { color: colors.primary, fontFamily: fonts.medium }]}
               >
-                Register
+                Sign in
               </Text>
             </Pressable>
           </View>
@@ -188,9 +142,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     gap: 14,
   },
-  showHide: { fontSize: 13 },
-  forgotRow: { alignSelf: 'flex-end' },
-  forgotLink: { fontSize: 13 },
   footer: {
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.sm,
