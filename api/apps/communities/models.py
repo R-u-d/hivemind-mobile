@@ -21,7 +21,7 @@ class Community(models.Model):
         on_delete=models.PROTECT,
         related_name="owned_communities",
     )
-    cover_image_url = models.URLField(blank=True)
+    cover_image_url = models.URLField(blank=True, max_length=500)
     is_private = models.BooleanField(default=False)
     location = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
