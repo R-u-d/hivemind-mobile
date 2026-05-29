@@ -37,12 +37,12 @@ def test_rsvp_going_creates_rsvp(auth_client):
 
 
 @pytest.mark.django_db
-def test_rsvp_maybe(auth_client):
+def test_rsvp_interested(auth_client):
     client, user = auth_client
     event = EventFactory()
-    response = client.post(rsvp_url(event.id), {"status": "maybe"}, format="json")
+    response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 201
-    assert response.data["status"] == "maybe"
+    assert response.data["status"] == "interested"
 
 
 @pytest.mark.django_db
@@ -76,10 +76,10 @@ def test_rsvp_update_status_returns_200(auth_client):
     client, user = auth_client
     event = EventFactory()
     RSVPFactory(event=event, user=user, status=RSVP.Status.GOING)
-    response = client.post(rsvp_url(event.id), {"status": "maybe"}, format="json")
+    response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 200
-    assert response.data["status"] == "maybe"
-    assert RSVP.objects.filter(event=event, user=user, status=RSVP.Status.MAYBE).exists()
+    assert response.data["status"] == "interested"
+    assert RSVP.objects.filter(event=event, user=user, status=RSVP.Status.INTERESTED).exists()
 
 
 # ─── RSVP past-event guard ───────────────────────────────────────────────────
@@ -111,11 +111,11 @@ def test_rsvp_at_capacity_rejected(auth_client):
 
 
 @pytest.mark.django_db
-def test_rsvp_maybe_allowed_when_at_capacity(auth_client):
+def test_rsvp_interested_allowed_when_at_capacity(auth_client):
     client, user = auth_client
     event = EventFactory(capacity=1)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
-    response = client.post(rsvp_url(event.id), {"status": "maybe"}, format="json")
+    response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 201
 
 
@@ -169,7 +169,7 @@ def test_attendees_public(api_client):
 def test_attendees_shows_only_going(api_client):
     event = EventFactory()
     RSVPFactory(event=event, status=RSVP.Status.GOING)
-    RSVPFactory(event=event, status=RSVP.Status.MAYBE)
+    RSVPFactory(event=event, status=RSVP.Status.INTERESTED)
     RSVPFactory(event=event, status=RSVP.Status.NOT_GOING)
     response = api_client.get(attendees_url(event.id))
     assert response.status_code == 200
@@ -187,52 +187,89 @@ def test_attendees_includes_user_fields(api_client):
     assert "avatar_url" in result
 
 
-# ─── attendee_count in event serializers ─────────────────────────────────────
+# ─── going_count in event serializers ────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_attendee_count_in_event_list(api_client):
+def test_going_count_in_event_list(api_client):
     event = EventFactory()
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
-    RSVPFactory(event=event, status=RSVP.Status.MAYBE)
+    RSVPFactory(event=event, status=RSVP.Status.INTERESTED)
     response = api_client.get("/api/events/")
     assert response.status_code == 200
-    assert response.data["results"][0]["attendee_count"] == 2
+    assert response.data["results"][0]["going_count"] == 2
 
 
 @pytest.mark.django_db
-def test_attendee_count_in_event_detail(api_client):
+def test_going_count_in_event_detail(api_client):
     event = EventFactory()
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     response = api_client.get(event_url(event.id))
     assert response.status_code == 200
-    assert response.data["attendee_count"] == 1
+    assert response.data["going_count"] == 1
 
 
-# ─── user_rsvp on event detail ───────────────────────────────────────────────
+# ─── rsvp_status on event detail ─────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_user_rsvp_null_for_anonymous(api_client):
+def test_rsvp_status_null_for_anonymous(api_client):
     event = EventFactory()
     response = api_client.get(event_url(event.id))
     assert response.status_code == 200
-    assert response.data["user_rsvp"] is None
+    assert response.data["rsvp_status"] is None
 
 
 @pytest.mark.django_db
-def test_user_rsvp_shows_own_status(auth_client):
+def test_rsvp_status_shows_own_status(auth_client):
     client, user = auth_client
     event = EventFactory()
-    RSVPFactory(event=event, user=user, status=RSVP.Status.MAYBE)
+    RSVPFactory(event=event, user=user, status=RSVP.Status.INTERESTED)
     response = client.get(event_url(event.id))
     assert response.status_code == 200
-    assert response.data["user_rsvp"] == "maybe"
+    assert response.data["rsvp_status"] == "interested"
 
 
 @pytest.mark.django_db
-def test_user_rsvp_null_when_not_rsvpd(auth_client):
+def test_rsvp_status_null_when_not_rsvpd(auth_client):
     client, _ = auth_client
     event = EventFactory()
     response = client.get(event_url(event.id))
     assert response.status_code == 200
-    assert response.data["user_rsvp"] is None
+    assert response.data["rsvp_status"] is None
+
+
+# ─── community nested in response ────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_event_detail_returns_nested_community(api_client):
+    event = EventFactory()
+    response = api_client.get(event_url(event.id))
+    assert response.status_code == 200
+    community = response.data["community"]
+    assert "id" in community
+    assert "name" in community
+    assert "type" in community
+
+
+@pytest.mark.django_db
+def test_event_list_returns_nested_community(api_client):
+    EventFactory()
+    response = api_client.get("/api/events/")
+    assert response.status_code == 200
+    community = response.data["results"][0]["community"]
+    assert "id" in community
+    assert "name" in community
+    assert "type" in community
+
+
+# ─── organiser nested in event detail ────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_event_detail_returns_nested_organiser(api_client):
+    event = EventFactory()
+    response = api_client.get(event_url(event.id))
+    assert response.status_code == 200
+    organiser = response.data["organiser"]
+    assert "id" in organiser
+    assert "display_name" in organiser
+    assert "avatar_url" in organiser

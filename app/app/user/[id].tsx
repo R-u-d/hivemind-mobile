@@ -37,7 +37,7 @@ function PublicProfileSkeleton() {
 export default function PublicProfileScreen() {
   const colors = useTheme();
   const { top } = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, backTitle } = useLocalSearchParams<{ id: string; backTitle?: string }>();
 
   const { data: user, isLoading, isError, refetch } = usePublicProfile(id);
 
@@ -49,11 +49,12 @@ export default function PublicProfileScreen() {
     <>
       <Stack.Screen
         options={{
-          title: displayName,
+          title: 'Profile',
           headerShadowVisible: false,
           headerStyle: { backgroundColor: colors.bg },
           headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
+          headerBackTitle: backTitle ?? 'Back',
         }}
       />
 
@@ -126,7 +127,12 @@ export default function PublicProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.base, paddingBottom: spacing.xxxl, gap: spacing.base },
+  content: {
+    padding: spacing.base,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xxxl,
+    gap: spacing.base,
+  },
   head: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
   displayName: { fontSize: 19, letterSpacing: -0.3, marginBottom: 2 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 4 },

@@ -5,9 +5,9 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Mask, Pattern, Polygon, Rect, Stop } from 'react-native-svg';
 
 import EmptyState from '@/components/EmptyState';
+import HexCover from '@/components/HexCover';
 import LoadingTail from '@/components/LoadingTail';
 import MembersSheet from '@/components/MembersSheet';
 import SkeletonBox from '@/components/SkeletonBox';
@@ -16,7 +16,7 @@ import { useCommunityChannels } from '@/hooks/useCommunityChannels';
 import { useCommunityDetail } from '@/hooks/useCommunityDetail';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
-import { communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
+import { fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Channel, Community, CommunityDetail, CommunityPage } from '@/types/community';
 
@@ -32,53 +32,6 @@ const CHANNEL_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name'
 interface InfiniteCommunityListData {
   pages: CommunityPage[];
   pageParams: unknown[];
-}
-
-// ── Cover ────────────────────────────────────────────────────────────────────
-
-function DefaultCover({ type }: { type: CommunityDetail['type'] }) {
-  const colors = useTheme();
-  const typeColor = communityTypeColors[type]?.primary ?? colors.primary;
-  return (
-    <View style={[styles.coverDefault, { backgroundColor: typeColor }]}>
-      {/* Flat hex grid with vertical fade — no perspective tilt */}
-      <View style={styles.hexGrid} pointerEvents="none">
-        <Svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice">
-          <Defs>
-            <Pattern id="cd-hex" width={31.17} height={54} patternUnits="userSpaceOnUse">
-              <Polygon
-                points="15.585,0 31.17,9 31.17,27 15.585,36 0,27 0,9"
-                fill="none"
-                stroke="#fff"
-                strokeWidth={1}
-              />
-              <Polygon
-                points="0,27 15.585,36 15.585,54 0,63 -15.585,54 -15.585,36"
-                fill="none"
-                stroke="#fff"
-                strokeWidth={1}
-              />
-              <Polygon
-                points="31.17,27 46.755,36 46.755,54 31.17,63 15.585,54 15.585,36"
-                fill="none"
-                stroke="#fff"
-                strokeWidth={1}
-              />
-            </Pattern>
-            <LinearGradient id="cd-fade" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#fff" stopOpacity={0.2} />
-              <Stop offset="0.5" stopColor="#fff" stopOpacity={0.7} />
-              <Stop offset="1" stopColor="#fff" stopOpacity={1} />
-            </LinearGradient>
-            <Mask id="cd-mask">
-              <Rect width={400} height={200} fill="url(#cd-fade)" />
-            </Mask>
-          </Defs>
-          <Rect width={400} height={200} fill="url(#cd-hex)" mask="url(#cd-mask)" />
-        </Svg>
-      </View>
-    </View>
-  );
 }
 
 // ── Channel row ───────────────────────────────────────────────────────────────
@@ -309,7 +262,7 @@ export default function CommunityDetailScreen() {
               accessibilityLabel={`${community.name} cover`}
             />
           ) : community ? (
-            <DefaultCover type={community.type} />
+            <HexCover type={community.type} height={COVER_HEIGHT} />
           ) : null}
 
           {/* Back button */}
@@ -468,17 +421,7 @@ export default function CommunityDetailScreen() {
 const styles = StyleSheet.create({
   errorContainer: { flex: 1 },
   coverContainer: { height: COVER_HEIGHT, position: 'relative', overflow: 'hidden' },
-  coverDefault: { flex: 1 },
   coverImage: { width: '100%', height: COVER_HEIGHT },
-  hexGrid: {
-    position: 'absolute',
-    top: '-30%',
-    left: '-20%',
-    right: '-20%',
-    bottom: '-20%',
-    opacity: 0.35,
-    transform: [{ perspective: 1100 }, { rotateX: '30deg' }],
-  },
   backBtn: { position: 'absolute', left: spacing.base },
   backBtnInner: {
     width: 34,

@@ -29,6 +29,7 @@ export interface Event {
   organiser: EventOrganiser;
   capacity: number | null;
   going_count: number;
+  interested_count: number;
   rsvp_status: RsvpStatus | null;
   created_at: string;
 }
@@ -37,4 +38,17 @@ export interface EventPage {
   next: string | null;
   previous: string | null;
   results: Event[];
+}
+
+export interface Attendee {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+export interface AttendeePage {
+  next: string | null;
+  previous: string | null;
+  results: Attendee[];
 }

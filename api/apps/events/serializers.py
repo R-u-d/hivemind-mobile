@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.communities.models import Community
 from core.s3 import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE
 
 from .models import Event, RSVP
@@ -24,6 +25,20 @@ class CoverUploadSerializer(serializers.Serializer):
         return value
 
 
+class CommunityMinimalSerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source="community_type", read_only=True)
+
+    class Meta:
+        model = Community
+        fields = ["id", "name", "type"]
+
+
+class OrganiserSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    display_name = serializers.CharField()
+    avatar_url = serializers.URLField(allow_null=True)
+
+
 class RSVPSerializer(serializers.ModelSerializer):
     class Meta:
         model = RSVP
@@ -34,7 +49,7 @@ class RSVPSerializer(serializers.ModelSerializer):
 class AttendeeSerializer(serializers.ModelSerializer):
     user_id = serializers.UUIDField(source="user.id", read_only=True)
     display_name = serializers.CharField(source="user.display_name", read_only=True)
-    avatar_url = serializers.URLField(source="user.avatar_url", read_only=True)
+    avatar_url = serializers.URLField(source="user.avatar_url", read_only=True, allow_null=True)
 
     class Meta:
         model = RSVP
@@ -43,11 +58,10 @@ class AttendeeSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    organiser_id = serializers.UUIDField(source="organiser.id", read_only=True)
-    organiser_display_name = serializers.CharField(source="organiser.display_name", read_only=True)
-    organiser_avatar_url = serializers.URLField(source="organiser.avatar_url", read_only=True)
-    attendee_count = serializers.IntegerField(read_only=True)
-    user_rsvp = serializers.SerializerMethodField()
+    community = serializers.PrimaryKeyRelatedField(queryset=Community.objects.all(), write_only=True)
+    going_count = serializers.IntegerField(read_only=True)
+    interested_count = serializers.IntegerField(read_only=True)
+    rsvp_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -55,9 +69,6 @@ class EventSerializer(serializers.ModelSerializer):
             "id",
             "community",
             "channel",
-            "organiser_id",
-            "organiser_display_name",
-            "organiser_avatar_url",
             "title",
             "description",
             "location_text",
@@ -67,21 +78,21 @@ class EventSerializer(serializers.ModelSerializer):
             "end_datetime",
             "cover_image_url",
             "capacity",
-            "attendee_count",
-            "user_rsvp",
+            "going_count",
+            "interested_count",
+            "rsvp_status",
             "created_at",
         ]
         read_only_fields = [
             "id",
-            "organiser_id",
-            "organiser_display_name",
-            "organiser_avatar_url",
-            "attendee_count",
-            "user_rsvp",
+            "cover_image_url",
+            "going_count",
+            "interested_count",
+            "rsvp_status",
             "created_at",
         ]
 
-    def get_user_rsvp(self, obj):
+    def get_rsvp_status(self, obj):
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return None
@@ -89,6 +100,12 @@ class EventSerializer(serializers.ModelSerializer):
             return obj.rsvps.get(user=request.user).status
         except RSVP.DoesNotExist:
             return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["community"] = CommunityMinimalSerializer(instance.community).data
+        data["organiser"] = OrganiserSerializer(instance.organiser).data
+        return data
 
     def validate(self, data):
         channel = data.get("channel") or (self.instance.channel if self.instance else None)
@@ -111,8 +128,9 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class EventListSerializer(serializers.ModelSerializer):
-    organiser_id = serializers.UUIDField(source="organiser.id", read_only=True)
-    attendee_count = serializers.IntegerField(read_only=True)
+    going_count = serializers.IntegerField(read_only=True)
+    interested_count = serializers.IntegerField(read_only=True)
+    rsvp_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -125,8 +143,30 @@ class EventListSerializer(serializers.ModelSerializer):
             "end_datetime",
             "cover_image_url",
             "capacity",
-            "attendee_count",
-            "organiser_id",
+            "going_count",
+            "interested_count",
+            "rsvp_status",
             "created_at",
         ]
-        read_only_fields = ["id", "organiser_id", "attendee_count", "created_at"]
+        read_only_fields = [
+            "id",
+            "cover_image_url",
+            "going_count",
+            "interested_count",
+            "rsvp_status",
+            "created_at",
+        ]
+
+    def get_rsvp_status(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+        try:
+            return obj.rsvps.get(user=request.user).status
+        except RSVP.DoesNotExist:
+            return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["community"] = CommunityMinimalSerializer(instance.community).data
+        return data

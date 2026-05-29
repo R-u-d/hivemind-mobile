@@ -48,7 +48,10 @@ class FeedView(APIView):
         events_qs = (
             Event.objects.filter(community_id__in=community_ids)
             .select_related("organiser", "community", "channel")
-            .annotate(attendee_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING)))
+            .annotate(
+                going_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING)),
+                interested_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.INTERESTED)),
+            )
             .order_by("-created_at")
         )
 
