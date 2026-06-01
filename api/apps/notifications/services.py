@@ -13,13 +13,14 @@ from django.conf import settings
 from .models import Notification, PushToken
 
 
-def notify(recipient_ids, notification_type, title, body="", data=None):
-    """Create a Notification row per recipient and queue push delivery for each.
+def notify(recipient_ids, notification_type, title, body="", data=None, push=True):
+    """Create a Notification row per recipient and optionally queue push delivery.
 
     `recipient_ids` is an iterable of user id strings (kept as ids rather than
-    User instances so this is callable from a Celery task). Returns the created
-    Notification ids. The task import is deferred to avoid a circular import
-    (tasks -> services -> tasks).
+    User instances so this is callable from a Celery task). Pass `push=False`
+    to create the in-app row without sending a device push (digest suppression).
+    Returns the created Notification ids. The task import is deferred to avoid
+    a circular import (tasks -> services -> tasks).
     """
     from .tasks import dispatch_notification
 
@@ -34,7 +35,8 @@ def notify(recipient_ids, notification_type, title, body="", data=None):
             data=data,
         )
         notification_ids.append(str(notification.id))
-        dispatch_notification.delay(str(notification.id))
+        if push:
+            dispatch_notification.delay(str(notification.id))
     return notification_ids
 
 

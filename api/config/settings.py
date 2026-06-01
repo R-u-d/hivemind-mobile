@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",
 
     # local apps
     "core",
@@ -213,3 +214,13 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # Expo push API endpoint.
 EXPO_PUSH_URL = config("EXPO_PUSH_URL", default="https://exp.host/--/api/v2/push/send")
+
+# Celery Beat — periodic tasks.
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+from celery.schedules import crontab  # noqa: E402
+CELERY_BEAT_SCHEDULE = {
+    "send-event-reminders-daily": {
+        "task": "apps.notifications.tasks.send_event_reminders",
+        "schedule": crontab(hour=9, minute=0),  # 09:00 UTC daily
+    },
+}

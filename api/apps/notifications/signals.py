@@ -1,3 +1,4 @@
+import django.core.cache as cache_module
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -6,6 +7,10 @@ from apps.events.models import RSVP, Event
 
 from .models import Notification
 from .tasks import fan_out
+
+_cache = cache_module.cache
+
+POST_DIGEST_TIMEOUT = 60 * 60  # 1 hour — suppress repeat post pushes per community
 
 
 def _community_member_ids(community, exclude_user_id):
@@ -25,6 +30,9 @@ def notify_new_post(sender, instance, created, **kwargs):
     recipient_ids = _community_member_ids(community, instance.author_id)
     if not recipient_ids:
         return
+
+    digest_key = f"notif:digest:{community.id}"
+    already_sent = _cache.get(digest_key)
     fan_out.delay(
         recipient_ids,
         Notification.Type.NEW_POST,
@@ -34,8 +42,11 @@ def notify_new_post(sender, instance, created, **kwargs):
             "community_id": str(community.id),
             "channel_id": str(instance.channel_id),
             "post_id": str(instance.id),
+            "push": not already_sent,
         },
     )
+    if not already_sent:
+        _cache.set(digest_key, True, POST_DIGEST_TIMEOUT)
 
 
 @receiver(post_save, sender=Event)
@@ -56,7 +67,6 @@ def notify_new_event(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=RSVP)
 def notify_rsvp(sender, instance, created, **kwargs):
-    # Only on first RSVP, only "going", and never notify the organiser about themselves.
     if not created or instance.status != RSVP.Status.GOING:
         return
     event = instance.event
@@ -68,4 +78,30 @@ def notify_rsvp(sender, instance, created, **kwargs):
         f"{instance.user.display_name} is going to {event.title}",
         "",
         {"event_id": str(event.id), "user_id": str(instance.user_id)},
+    )
+
+
+@receiver(post_save, sender=Membership)
+def notify_member_join(sender, instance, created, **kwargs):
+    # Only on initial join, not role updates. Ignore owner auto-membership on community create.
+    if not created or instance.role != Membership.Role.MEMBER:
+        return
+    community = instance.community
+    mod_ids = [
+        str(uid)
+        for uid in Membership.objects.filter(
+            community=community,
+            role__in=[Membership.Role.MODERATOR, Membership.Role.OWNER],
+        )
+        .exclude(user_id=instance.user_id)
+        .values_list("user_id", flat=True)
+    ]
+    if not mod_ids:
+        return
+    fan_out.delay(
+        mod_ids,
+        Notification.Type.MEMBER_JOIN,
+        f"{instance.user.display_name} joined {community.name}",
+        "",
+        {"community_id": str(community.id), "user_id": str(instance.user_id)},
     )

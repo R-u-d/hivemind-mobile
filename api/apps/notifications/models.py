@@ -38,6 +38,7 @@ class Notification(models.Model):
         NEW_EVENT = "new_event", "New Event"
         EVENT_REMINDER = "event_reminder", "Event Reminder"
         RSVP = "rsvp", "RSVP"
+        MEMBER_JOIN = "member_join", "Member Join"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     recipient = models.ForeignKey(
