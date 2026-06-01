@@ -17,22 +17,20 @@ import FormField from '@/components/FormField';
 import HiveLogo from '@/components/HiveLogo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
-import { useLogin } from '@/hooks/useLogin';
+import { useVerifyResetCode } from '@/hooks/useVerifyResetCode';
 import { fonts, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 
 const schema = z.object({
-  email: z.string().email('Enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+  token: z.string().min(1, 'Reset code is required'),
 });
 
 type FormData = z.infer<typeof schema>;
 
-export default function LoginScreen() {
+export default function VerifyCodeScreen() {
   const colors = useTheme();
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: verifyResetCode, isPending } = useVerifyResetCode();
   const [serverError, setServerError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
@@ -42,10 +40,9 @@ export default function LoginScreen() {
 
   const onSubmit = (data: FormData) => {
     setServerError('');
-    login(data, {
-      onSuccess: async ({ user }) => {
-        router.replace((user.has_onboarded ? '/(tabs)/feed' : '/(onboarding)') as Href);
-      },
+    verifyResetCode(data, {
+      onSuccess: () =>
+        router.push(`/(auth)/reset-password?token=${encodeURIComponent(data.token)}` as Href),
       onError: err => setServerError(extractDrfError(err)),
     });
   };
@@ -64,10 +61,10 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <HiveLogo size={32} color={colors.primary} />
           <Text style={[typography.display, { color: colors.text, marginTop: spacing.lg }]}>
-            Welcome back
+            Enter reset code
           </Text>
           <Text style={[typography.body, { color: colors.textMuted, marginTop: spacing.xs }]}>
-            Sign in to pick up where you left off.
+            Check your email and paste the reset code below.
           </Text>
         </View>
 
@@ -75,65 +72,21 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <Controller
             control={control}
-            name="email"
+            name="token"
             render={({ field: { onChange, onBlur, value } }) => (
               <FormField
-                label="Email"
-                placeholder="you@university.edu"
+                label="Reset code"
+                placeholder="Paste code from email"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                error={errors.email?.message}
-                keyboardType="email-address"
+                error={errors.token?.message}
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoComplete="email"
-                accessibilityLabel="Email address"
+                accessibilityLabel="Reset code"
               />
             )}
           />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormField
-                label="Password"
-                placeholder="••••••••"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoComplete="password"
-                accessibilityLabel="Password"
-                rightAccessory={
-                  <Pressable
-                    onPress={() => setShowPassword(v => !v)}
-                    accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                    hitSlop={8}
-                  >
-                    <Text
-                      style={[styles.showHide, { color: colors.primary, fontFamily: fonts.medium }]}
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </Pressable>
-                }
-              />
-            )}
-          />
-
-          <Pressable
-            style={styles.forgotRow}
-            onPress={() => router.push('/(auth)/forgot-password' as Href)}
-            accessibilityLabel="Forgot password"
-          >
-            <Text style={[styles.forgotLink, { color: colors.primary, fontFamily: fonts.medium }]}>
-              Forgot password?
-            </Text>
-          </Pressable>
         </View>
 
         {/* Footer */}
@@ -145,8 +98,8 @@ export default function LoginScreen() {
           ) : null}
 
           <PrimaryButton
-            label="Sign in"
-            loadingLabel="Signing in…"
+            label="Verify code"
+            loadingLabel="Verifying…"
             loading={isPending}
             onPress={handleSubmit(onSubmit)}
           />
@@ -155,16 +108,13 @@ export default function LoginScreen() {
             <Text
               style={[styles.switchText, { color: colors.textMuted, fontFamily: fonts.regular }]}
             >
-              No account?{' '}
+              {"Didn't get a code? "}
             </Text>
-            <Pressable
-              onPress={() => router.push('/(auth)/register' as Href)}
-              accessibilityLabel="Register"
-            >
+            <Pressable onPress={() => router.back()} accessibilityLabel="Try again">
               <Text
                 style={[styles.switchLink, { color: colors.primary, fontFamily: fonts.medium }]}
               >
-                Register
+                Try again
               </Text>
             </Pressable>
           </View>
@@ -188,9 +138,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     gap: 14,
   },
-  showHide: { fontSize: 13 },
-  forgotRow: { alignSelf: 'flex-end' },
-  forgotLink: { fontSize: 13 },
   footer: {
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.sm,

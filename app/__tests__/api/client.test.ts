@@ -93,17 +93,16 @@ it('saves rotated refresh token when server returns a new one', async () => {
   expect(ts.setTokens).toHaveBeenCalledWith('new-access', 'rotated-refresh');
 });
 
-it('clears tokens and redirects to login when no refresh token stored', async () => {
-  ts.getAccess.mockResolvedValue('expired-access');
+it('propagates 401 silently when no refresh token stored (unauthenticated)', async () => {
+  ts.getAccess.mockResolvedValue(null);
   ts.getRefresh.mockResolvedValue(null);
-  ts.clear.mockResolvedValue([undefined, undefined]);
 
   mock.onGet('/protected').reply(401);
 
   await expect(client.get('/protected')).rejects.toThrow();
 
-  expect(ts.clear).toHaveBeenCalled();
-  expect(router.replace).toHaveBeenCalledWith('/(auth)/login');
+  expect(ts.clear).not.toHaveBeenCalled();
+  expect(router.replace).not.toHaveBeenCalledWith('/(auth)/login');
 });
 
 // ── Refresh failure → logout ──────────────────────────────────────────────────

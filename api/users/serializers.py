@@ -90,6 +90,23 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return 0
 
 
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class VerifyResetCodeSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=64)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=64)
+    password = serializers.CharField(write_only=True)
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+
 class AvatarUploadSerializer(serializers.Serializer):
     content_type = serializers.CharField()
     file_size = serializers.IntegerField(min_value=1)

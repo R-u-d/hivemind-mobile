@@ -1,5 +1,9 @@
+import secrets
+from datetime import timedelta
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 import uuid
 
 
@@ -41,3 +45,27 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class PasswordResetToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="password_reset_tokens"
+    )
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @classmethod
+    def create_for_user(cls, user):
+        token = secrets.token_hex(32)
+        expires_at = timezone.now() + timedelta(hours=1)
+        return cls.objects.create(user=user, token=token, expires_at=expires_at)
+
+    @property
+    def is_valid(self):
+        return not self.used and timezone.now() < self.expires_at
