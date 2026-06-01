@@ -209,7 +209,7 @@ def test_going_count_in_event_detail(api_client):
     assert response.data["going_count"] == 1
 
 
-# ─── rsvp_status on event detail ─────────────────────────────────────────────
+# ─── rsvp_status on event responses ──────────────────────────────────────────
 
 @pytest.mark.django_db
 def test_rsvp_status_null_for_anonymous(api_client):

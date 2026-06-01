@@ -49,7 +49,7 @@ export default function DiscoverScreen() {
   const patchPages = useCallback(
     (id: string, patch: (c: Community) => Community) => {
       queryClient.setQueriesData<InfiniteCommunityData>({ queryKey: ['communities'] }, old => {
-        if (!old) return old;
+        if (!old || !old.pages) return old;
         return {
           ...old,
           pages: old.pages.map(page => ({

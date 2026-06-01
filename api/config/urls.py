@@ -10,4 +10,5 @@ urlpatterns = [
     path("api/", include("apps.communities.urls")),
     path("api/", include("apps.events.urls")),
     path("api/", include("apps.feed.urls")),
+    path("api/", include("apps.notifications.urls")),
 ]
