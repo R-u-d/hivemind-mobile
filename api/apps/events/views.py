@@ -20,8 +20,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Event.objects.select_related("organiser", "community", "channel").annotate(
-            going_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING)),
-            interested_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.INTERESTED)),
+            going_count=Count("rsvps", filter=Q(rsvps__status=RSVP.Status.GOING))
         )
 
         community_id = self.request.query_params.get("community")

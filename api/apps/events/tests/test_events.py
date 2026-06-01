@@ -18,7 +18,7 @@ def make_event_payload(community, **kwargs):
     start = timezone.now() + timezone.timedelta(days=1)
     end = start + timezone.timedelta(hours=2)
     return {
-        "community": str(community.id),
+        "community_id": str(community.id),
         "title": "Test Event",
         "description": "A description.",
         "location_text": "Some Place",

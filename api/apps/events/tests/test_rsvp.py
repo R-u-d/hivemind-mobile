@@ -209,7 +209,7 @@ def test_going_count_in_event_detail(api_client):
     assert response.data["going_count"] == 1
 
 
-# ─── rsvp_status on event detail ─────────────────────────────────────────────
+# ─── rsvp_status on event responses ──────────────────────────────────────────
 
 @pytest.mark.django_db
 def test_rsvp_status_null_for_anonymous(api_client):
@@ -236,6 +236,7 @@ def test_rsvp_status_null_when_not_rsvpd(auth_client):
     response = client.get(event_url(event.id))
     assert response.status_code == 200
     assert response.data["rsvp_status"] is None
+<<<<<<< HEAD
 
 
 # ─── community nested in response ────────────────────────────────────────────
@@ -262,14 +263,13 @@ def test_event_list_returns_nested_community(api_client):
     assert "type" in community
 
 
-# ─── organiser nested in event detail ────────────────────────────────────────
+# ─── organiser fields in event detail ────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_event_detail_returns_nested_organiser(api_client):
+def test_event_detail_returns_organiser_fields(api_client):
     event = EventFactory()
     response = api_client.get(event_url(event.id))
     assert response.status_code == 200
-    organiser = response.data["organiser"]
-    assert "id" in organiser
-    assert "display_name" in organiser
-    assert "avatar_url" in organiser
+    assert "organiser_id" in response.data
+    assert "organiser_display_name" in response.data
+    assert "organiser_avatar_url" in response.data
