@@ -70,6 +70,9 @@ def test_cover_upload_organiser(mock_boto3_client, auth_client, reset_s3_singlet
     assert response.data["key"].startswith(f"event-covers/{event.id}/")
     assert "public_url" in response.data
 
+    event.refresh_from_db()
+    assert event.cover_image_url == response.data["public_url"]
+
 
 @pytest.mark.django_db
 @patch("core.s3.boto3.client")

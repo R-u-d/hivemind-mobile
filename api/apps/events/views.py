@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from apps.communities.models import Membership
+from apps.communities.models import Channel, Membership
 from core.pagination import CreatedAtCursorPagination, StartsAtCursorPagination
 from core.s3 import S3Error, generate_event_cover_presigned_url
 
@@ -27,6 +27,10 @@ class EventViewSet(viewsets.ModelViewSet):
         community_id = self.request.query_params.get("community")
         if community_id:
             qs = qs.filter(community_id=community_id)
+
+        channel_id = self.request.query_params.get("channel")
+        if channel_id:
+            qs = qs.filter(channel_id=channel_id)
 
         date_from = self.request.query_params.get("date_from")
         if date_from:
@@ -74,6 +78,9 @@ class EventViewSet(viewsets.ModelViewSet):
         except S3Error as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
+        event.cover_image_url = result["public_url"]
+        event.save(update_fields=["cover_image_url"])
+
         return Response(result, status=status.HTTP_200_OK)
 
     def get_serializer_class(self):
@@ -88,7 +95,19 @@ class EventViewSet(viewsets.ModelViewSet):
         ).exists()
         if not is_member:
             raise PermissionDenied("You must be a member of the community to create an event.")
-        serializer.save(organiser=self.request.user)
+
+        # When no channel is chosen, surface the event in the community's events
+        # channel so it shows up alongside posts there.
+        channel = serializer.validated_data.get("channel")
+        if channel is None:
+            channel = (
+                Channel.objects.filter(
+                    community=community, channel_type=Channel.ChannelType.EVENTS
+                )
+                .order_by("created_at")
+                .first()
+            )
+        serializer.save(organiser=self.request.user, channel=channel)
 
     @action(detail=True, methods=["post", "delete"])
     def rsvp(self, request, pk=None):

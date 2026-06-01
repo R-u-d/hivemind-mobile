@@ -461,8 +461,10 @@ export default function EventDetailScreen() {
   }
 
   const dateTimeStr = formatDateTime(event.start_datetime, event.end_datetime);
-  const hasLocation = !!event.location_text;
   const hasCoords = event.lat !== null && event.lng !== null;
+  // Fall back to coordinates when there's no address text but a pin was dropped.
+  const locationLabel =
+    event.location_text || (hasCoords ? `${event.lat!.toFixed(2)}, ${event.lng!.toFixed(2)}` : '');
   const showCapacityBar = event.capacity !== null && event.going_count / event.capacity >= 0.8;
   const isPast = new Date(event.start_datetime) < new Date();
 
@@ -488,17 +490,17 @@ export default function EventDetailScreen() {
                 {dateTimeStr}
               </Text>
             </View>
-            {hasLocation && (
+            {locationLabel ? (
               <View style={styles.metaRow}>
                 <Ionicons name="location-outline" size={15} color={colors.textMuted} />
                 <Text
                   style={[styles.metaText, { color: colors.textMuted, fontFamily: fonts.regular }]}
                   numberOfLines={2}
                 >
-                  {event.location_text}
+                  {locationLabel}
                 </Text>
               </View>
-            )}
+            ) : null}
           </View>
         </View>
 
@@ -508,7 +510,7 @@ export default function EventDetailScreen() {
             lat={event.lat!}
             lng={event.lng!}
             title={event.title}
-            onPress={() => openInMaps(event.lat!, event.lng!, event.location_text)}
+            onPress={() => openInMaps(event.lat!, event.lng!, locationLabel)}
           />
         )}
 

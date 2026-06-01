@@ -39,6 +39,16 @@ def test_list_events_public(api_client):
 
 
 @pytest.mark.django_db
+def test_list_returns_coordinates(api_client):
+    EventFactory(lat=40.71, lng=-73.99)
+    response = api_client.get(EVENTS_URL)
+    assert response.status_code == 200
+    result = response.data["results"][0]
+    assert result["lat"] == 40.71
+    assert result["lng"] == -73.99
+
+
+@pytest.mark.django_db
 def test_list_filter_by_community(api_client):
     community = CommunityFactory()
     EventFactory.create_batch(2, community=community)
@@ -141,6 +151,18 @@ def test_create_event_member(auth_client):
 
 
 @pytest.mark.django_db
+def test_create_event_without_end_datetime(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    payload = make_event_payload(community)
+    payload.pop("end_datetime")
+    response = client.post(EVENTS_URL, payload, format="json")
+    assert response.status_code == 201
+    assert response.data["end_datetime"] is None
+
+
+@pytest.mark.django_db
 def test_create_event_end_before_start_rejected(auth_client):
     client, user = auth_client
     community = CommunityFactory()
@@ -153,6 +175,45 @@ def test_create_event_end_before_start_rejected(auth_client):
     )
     response = client.post(EVENTS_URL, payload, format="json")
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_event_auto_assigns_events_channel(auth_client):
+    from apps.communities.factories import ChannelFactory
+    from apps.communities.models import Channel
+
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+    events_channel = ChannelFactory(community=community, channel_type=Channel.ChannelType.EVENTS)
+    ChannelFactory(community=community, channel_type=Channel.ChannelType.GENERAL)
+
+    response = client.post(EVENTS_URL, make_event_payload(community), format="json")
+    assert response.status_code == 201
+    assert str(response.data["channel"]) == str(events_channel.id)
+
+
+@pytest.mark.django_db
+def test_create_event_no_events_channel_leaves_null(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user)
+
+    response = client.post(EVENTS_URL, make_event_payload(community), format="json")
+    assert response.status_code == 201
+    assert response.data["channel"] is None
+
+
+@pytest.mark.django_db
+def test_list_filter_by_channel(api_client):
+    from apps.communities.factories import ChannelFactory
+
+    channel = ChannelFactory()
+    EventFactory.create_batch(2, community=channel.community, channel=channel)
+    EventFactory(community=channel.community)
+    response = api_client.get(EVENTS_URL, {"channel": str(channel.id)})
+    assert response.status_code == 200
+    assert len(response.data["results"]) == 2
 
 
 @pytest.mark.django_db

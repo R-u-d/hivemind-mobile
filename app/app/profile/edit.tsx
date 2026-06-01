@@ -208,7 +208,6 @@ export default function EditProfileScreen() {
                     error={errors.bio?.message}
                     multiline
                     maxLength={200}
-                    style={styles.bioInput}
                     accessibilityLabel="Bio"
                   />
                   <Text
@@ -268,7 +267,6 @@ const styles = StyleSheet.create({
   },
   changePhotoText: { fontSize: 13 },
   form: { paddingHorizontal: spacing.base, gap: 14 },
-  bioInput: { minHeight: 54 },
   charCounter: { fontSize: 11, textAlign: 'right', marginTop: 4, paddingHorizontal: 2 },
   serverError: { fontSize: 13, paddingHorizontal: spacing.base, paddingTop: spacing.sm },
   footer: { paddingHorizontal: spacing.base, paddingTop: spacing.lg },
