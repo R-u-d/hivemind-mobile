@@ -1,4 +1,11 @@
-import { QueryClient } from '@tanstack/react-query';
+import { AppState, type AppStateStatus } from 'react-native';
+import { QueryClient, focusManager } from '@tanstack/react-query';
+
+// Tell TanStack Query to treat app foreground transitions as a focus event,
+// enabling refetchOnWindowFocus to work on React Native.
+AppState.addEventListener('change', (status: AppStateStatus) => {
+  focusManager.setFocused(status === 'active');
+});
 
 export const queryClient = new QueryClient({
   defaultOptions: {
