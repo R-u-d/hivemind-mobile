@@ -40,13 +40,19 @@ function formatTime(iso: string): string {
 const RSVP_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   going: 'checkmark',
   interested: 'star-outline',
-  not_going: 'close-circle-outline',
+  not_going: 'eye-off-outline',
 };
 
 const RSVP_LABEL: Record<string, string> = {
   going: 'Going',
   interested: 'Interested',
-  not_going: 'Not going',
+  not_going: 'Not Interested',
+};
+
+const RSVP_PAST_LABEL: Record<string, string> = {
+  going: 'Went',
+  interested: 'Saved',
+  not_going: 'Passed',
 };
 
 const PICKER_OPTIONS: {
@@ -56,7 +62,7 @@ const PICKER_OPTIONS: {
 }[] = [
   { value: 'going', label: 'Going', icon: 'checkmark-circle-outline' },
   { value: 'interested', label: 'Interested', icon: 'star-outline' },
-  { value: 'not_going', label: 'Not going', icon: 'close-circle-outline' },
+  { value: 'not_going', label: 'Not Interested', icon: 'eye-off-outline' },
 ];
 
 function RsvpPicker({
@@ -192,12 +198,12 @@ function EventCard({ event, onPress }: EventCardProps) {
                   if (!isPast) setPickerOpen(true);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`RSVP: ${RSVP_LABEL[event.rsvp_status]}. Tap to change.`}
+                accessibilityLabel={`RSVP: ${RSVP_LABEL[event.rsvp_status]}. ${isPast ? '' : 'Tap to change.'}`}
                 style={[styles.rsvpBadge, { backgroundColor: colors.primarySoft }]}
               >
                 <Ionicons name={RSVP_ICON[event.rsvp_status]} size={11} color={colors.primary} />
                 <Text style={[styles.rsvpLabel, { color: colors.primary }]}>
-                  {RSVP_LABEL[event.rsvp_status]}
+                  {isPast ? RSVP_PAST_LABEL[event.rsvp_status] : RSVP_LABEL[event.rsvp_status]}
                 </Text>
               </Pressable>
             )}
@@ -232,7 +238,7 @@ function EventCard({ event, onPress }: EventCardProps) {
             <View style={styles.metaFixed}>
               <Ionicons name="people-outline" size={12} color={themeColors.textMuted} />
               <Text style={[styles.metaText, { color: themeColors.textMuted }]} numberOfLines={1}>
-                {event.going_count}
+                {isPast ? `${event.going_count} attended` : event.going_count}
               </Text>
             </View>
           </View>
