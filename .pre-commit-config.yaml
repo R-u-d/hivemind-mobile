@@ -15,6 +15,7 @@ repos:
         language: system
         files: ^api/.*\.py$
         pass_filenames: false
+        stages: [pre-push]
 
       # ── Frontend ─────────────────────────────────────────────────────────
       - id: eslint
@@ -37,3 +38,4 @@ repos:
         language: system
         files: ^app/.*\.(ts|tsx)$
         pass_filenames: false
+        stages: [pre-push]

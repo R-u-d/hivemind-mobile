@@ -206,9 +206,10 @@ CELERY_TIMEZONE = "UTC"
 # Notifications are fire-and-forget — no result backend needed.
 CELERY_TASK_IGNORE_RESULT = True
 CELERY_TASK_STORE_EAGER_RESULT = False
-# Run tasks synchronously under pytest (no broker/worker required).
+# Run tasks synchronously when no broker is needed: tests and local dev (DEBUG=True).
+# In production DEBUG is False so this stays False unless explicitly overridden.
 CELERY_TASK_ALWAYS_EAGER = config(
-    "CELERY_TASK_ALWAYS_EAGER", default="pytest" in sys.modules, cast=bool
+    "CELERY_TASK_ALWAYS_EAGER", default="pytest" in sys.modules or DEBUG, cast=bool
 )
 CELERY_TASK_EAGER_PROPAGATES = True
 
