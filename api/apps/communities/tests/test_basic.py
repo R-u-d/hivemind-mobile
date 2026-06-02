@@ -295,6 +295,44 @@ def test_leave_member(auth_client):
     assert not Membership.objects.filter(community=community, user=user).exists()
 
 
+@pytest.mark.django_db
+def test_leave_withdraws_rsvps_for_community_events(auth_client):
+    from apps.events.factories import EventFactory, RSVPFactory
+    from apps.events.models import RSVP
+
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    event = EventFactory(community=community)
+    RSVPFactory(event=event, user=user, status=RSVP.Status.GOING)
+
+    # RSVP in another community must be untouched.
+    other_event = EventFactory()
+    RSVPFactory(event=other_event, user=user, status=RSVP.Status.GOING)
+
+    response = client.delete(leave_url(community.id))
+    assert response.status_code == 204
+    assert not RSVP.objects.filter(event=event, user=user).exists()
+    assert RSVP.objects.filter(event=other_event, user=user).exists()
+
+
+@pytest.mark.django_db
+def test_leave_keeps_rsvp_for_own_organised_event(auth_client):
+    from apps.events.factories import EventFactory, RSVPFactory
+    from apps.events.models import RSVP
+
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(community=community, user=user, role=Membership.Role.MEMBER)
+    own_event = EventFactory(community=community, organiser=user)
+    RSVPFactory(event=own_event, user=user, status=RSVP.Status.GOING)
+
+    response = client.delete(leave_url(community.id))
+    assert response.status_code == 204
+    # Organiser retains access to their own event, so their RSVP survives.
+    assert RSVP.objects.filter(event=own_event, user=user).exists()
+
+
 # ---- CHANGE ROLE (PATCH member) ----
 
 @pytest.mark.django_db

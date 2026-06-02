@@ -208,6 +208,17 @@ class LeaveView(APIView):
                 {"detail": "Owner cannot leave. Transfer ownership first."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Leaving the community withdraws the user's RSVPs to its events so they
+        # stop occupying capacity slots and the profile counter stays in sync with
+        # the (now member-gated) events list. Events the user organises are kept —
+        # the organiser retains access to their own event even after leaving.
+        from apps.events.models import RSVP
+
+        RSVP.objects.filter(
+            event__community=community, user=request.user
+        ).exclude(event__organiser=request.user).delete()
+
         membership.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
