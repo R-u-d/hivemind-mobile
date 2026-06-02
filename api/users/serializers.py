@@ -30,6 +30,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    event_count = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
         fields = [
@@ -41,8 +43,13 @@ class UserSerializer(serializers.ModelSerializer):
             "avatar_url",
             "has_onboarded",
             "created_at",
+            "event_count",
         ]
-        read_only_fields = ["id", "email", "created_at"]
+        read_only_fields = ["id", "email", "created_at", "event_count"]
+
+    def get_event_count(self, obj):
+        from apps.events.models import RSVP
+        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
 
     def validate_avatar_url(self, value):
         if not value:
@@ -87,7 +94,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return obj.memberships.count()
 
     def get_event_count(self, obj):
-        return 0
+        from apps.events.models import RSVP
+        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
