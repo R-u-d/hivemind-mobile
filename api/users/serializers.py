@@ -49,7 +49,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_event_count(self, obj):
         from apps.events.models import RSVP
-        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
+        from django.utils import timezone
+        return obj.rsvps.filter(
+            status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED],
+            event__start_datetime__gte=timezone.now(),
+        ).count()
 
     def validate_avatar_url(self, value):
         if not value:
@@ -95,7 +99,11 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
     def get_event_count(self, obj):
         from apps.events.models import RSVP
-        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
+        from django.utils import timezone
+        return obj.rsvps.filter(
+            status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED],
+            event__start_datetime__gte=timezone.now(),
+        ).count()
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
