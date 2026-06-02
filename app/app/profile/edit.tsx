@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -23,6 +24,7 @@ import { extractDrfError } from '@/api/client';
 import { useAvatarUpload } from '@/hooks/useAvatarUpload';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useLogout } from '@/hooks/useLogout';
+import { useShakeAnimation } from '@/hooks/useShakeAnimation';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
 import { fonts, radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -103,6 +105,11 @@ export default function EditProfileScreen() {
   };
 
   const bioLength = (watch('bio') ?? '').length;
+  const { style: bioShakeStyle, trigger: triggerBioShake } = useShakeAnimation();
+
+  useEffect(() => {
+    if (bioLength === 200) triggerBioShake();
+  }, [bioLength, triggerBioShake]);
 
   const displayName = user?.display_name || user?.email || '';
   const isPending = updatePending || avatarPending;
@@ -210,22 +217,24 @@ export default function EditProfileScreen() {
                     maxLength={200}
                     accessibilityLabel="Bio"
                   />
-                  <Text
-                    style={[
-                      styles.charCounter,
-                      {
-                        color:
-                          bioLength >= 200
-                            ? colors.danger
-                            : bioLength >= 150
-                              ? colors.warning
-                              : colors.textFaint,
-                        fontFamily: fonts.regular,
-                      },
-                    ]}
-                  >
-                    {bioLength}/200
-                  </Text>
+                  <Animated.View style={bioShakeStyle}>
+                    <Text
+                      style={[
+                        styles.charCounter,
+                        {
+                          color:
+                            bioLength >= 180
+                              ? colors.danger
+                              : bioLength >= 150
+                                ? colors.warning
+                                : colors.textFaint,
+                          fontFamily: fonts.regular,
+                        },
+                      ]}
+                    >
+                      {bioLength}/200
+                    </Text>
+                  </Animated.View>
                 </View>
               )}
             />
