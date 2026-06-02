@@ -13,9 +13,10 @@ type Size = 'sm' | 'md';
 interface TypePillProps {
   type: CommunityType;
   size?: Size;
+  suffix?: string;
 }
 
-export default function TypePill({ type, size = 'sm' }: TypePillProps) {
+export default function TypePill({ type, size = 'sm', suffix }: TypePillProps) {
   const palette = communityTypeColors[type];
   const small = size === 'sm';
   return (
@@ -36,7 +37,7 @@ export default function TypePill({ type, size = 'sm' }: TypePillProps) {
           { color: palette.text, fontSize: small ? 11 : 12, fontFamily: fonts.medium },
         ]}
       >
-        {communityTypeLabels[type]}
+        {communityTypeLabels[type]}{suffix ? ` · ${suffix}` : ''}
       </Text>
     </View>
   );

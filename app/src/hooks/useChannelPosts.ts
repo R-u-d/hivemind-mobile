@@ -78,6 +78,7 @@ export function useCreatePost(channelId: string, currentUser: PostAuthor | null)
     },
 
     onSuccess: (serverPost, _vars, context) => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
       if (!context?.tempId) {
         queryClient.invalidateQueries({ queryKey });
         return;

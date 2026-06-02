@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { client } from '@/api/client';
-import type { User } from '@/types/user';
+import type { PublicUser } from '@/types/user';
 
-async function fetchPublicProfile(id: string): Promise<User> {
-  const { data } = await client.get<User>(`/users/${id}/`);
+async function fetchPublicProfile(id: string): Promise<PublicUser> {
+  const { data } = await client.get<PublicUser>(`/users/${id}/`);
   return data;
 }
 
