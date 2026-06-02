@@ -21,6 +21,7 @@ const user: User = {
   avatar_url: null,
   has_onboarded: false,
   created_at: '2026-01-01T00:00:00Z',
+  event_count: 0,
 };
 
 function makeQueryClient() {

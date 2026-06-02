@@ -8,6 +8,8 @@ import { client } from '@/api/client';
 import DiscoverScreen from '../../app/(tabs)/discover';
 import type { Community } from '@/types/community';
 
+jest.mock('@react-navigation/native', () => ({ useScrollToTop: jest.fn() }));
+
 jest.mock('@/api/client', () => ({
   client: { get: jest.fn(), post: jest.fn(), delete: jest.fn() },
 }));

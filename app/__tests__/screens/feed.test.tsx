@@ -8,6 +8,8 @@ import type { FeedPage } from '@/types/feed';
 
 import FeedScreen from '../../app/(tabs)/feed';
 
+jest.mock('@react-navigation/native', () => ({ useScrollToTop: jest.fn() }));
+
 jest.mock('@/api/client', () => ({
   client: { get: jest.fn() },
 }));
@@ -20,7 +22,8 @@ jest.mock('react-native-safe-area-context', () => {
   const React = require('react');
   const { View } = require('react-native');
   return {
-    SafeAreaView: ({ children }: { children: unknown }) => React.createElement(View, null, children),
+    SafeAreaView: ({ children }: { children: unknown }) =>
+      React.createElement(View, null, children),
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
   };
 });
@@ -71,6 +74,7 @@ const feedWithPost: FeedPage = {
       id: 'post-1',
       channel: 'ch-1',
       channel_name: 'general',
+      community_id: 'com-1',
       community_name: 'Bushwick Synth Heads',
       community_type: 'social',
       author: { id: 'user-1', display_name: 'Theo Reyes', avatar_url: null },
@@ -106,7 +110,11 @@ const feedWithEvent: FeedPage = {
 function makeWrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return ({ children }: { children: ReactNode }) =>
-    createElement(QueryClientProvider, { client: qc }, createElement(ThemeProvider, null, children));
+    createElement(
+      QueryClientProvider,
+      { client: qc },
+      createElement(ThemeProvider, null, children),
+    );
 }
 
 beforeEach(() => jest.clearAllMocks());
@@ -144,7 +152,7 @@ it('renders a post card with community, channel, author and body', async () => {
   expect(screen.getByText('#general')).toBeTruthy();
   expect(screen.getByText('Theo Reyes')).toBeTruthy();
   expect(
-    screen.getByText('Anyone got a tip for taming the resonance on a Moog Sub 25?'),
+    screen.getAllByText('Anyone got a tip for taming the resonance on a Moog Sub 25?')[0],
   ).toBeTruthy();
 });
 

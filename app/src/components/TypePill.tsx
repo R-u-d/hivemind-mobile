@@ -37,7 +37,8 @@ export default function TypePill({ type, size = 'sm', suffix }: TypePillProps) {
           { color: palette.text, fontSize: small ? 11 : 12, fontFamily: fonts.medium },
         ]}
       >
-        {communityTypeLabels[type]}{suffix ? ` · ${suffix}` : ''}
+        {communityTypeLabels[type]}
+        {suffix ? ` · ${suffix}` : ''}
       </Text>
     </View>
   );

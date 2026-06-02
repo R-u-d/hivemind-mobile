@@ -43,7 +43,7 @@ export default function PublicProfileScreen() {
 
   if (isLoading) return <PublicProfileSkeleton />;
 
-  const displayName = user?.display_name || user?.email || 'User';
+  const displayName = user?.display_name || 'User';
 
   return (
     <>
