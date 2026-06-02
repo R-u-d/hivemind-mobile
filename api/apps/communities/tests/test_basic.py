@@ -210,7 +210,7 @@ def test_create_community_creates_default_channels(auth_client):
     community_id = response.data["id"]
     channels = Channel.objects.filter(community_id=community_id)
     names = set(channels.values_list("name", flat=True))
-    assert names == {"general", "announcements", "resources", "help"}
+    assert names == {"general", "announcements", "events", "resources", "help"}
 
 
 # ---- LIST MEMBERS ----
