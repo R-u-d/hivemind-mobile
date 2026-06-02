@@ -9,7 +9,6 @@ import { useScrollToTop } from '@react-navigation/native';
 
 import CommunityCard from '@/components/CommunityCard';
 import CommunityListSkeleton from '@/components/CommunityListSkeleton';
-import DiscoverSearchOverlay from '@/components/DiscoverSearchOverlay';
 import EmptyState from '@/components/EmptyState';
 import FilterChips, { type FilterChipItem } from '@/components/FilterChips';
 import HexLoader from '@/components/HexLoader';
@@ -41,7 +40,6 @@ export default function DiscoverScreen() {
   const listRef = useRef<FlashListRef<Community>>(null);
   useScrollToTop(listRef as never);
   const [active, setActive] = useState<ChipValue>('all');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const typesArg = active === 'all' ? undefined : [active];
   const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
@@ -65,7 +63,11 @@ export default function DiscoverScreen() {
     [queryClient],
   );
 
-  const { mutate: join } = useJoinCommunity(
+  const {
+    mutate: join,
+    isPending: joinPending,
+    variables: joinId,
+  } = useJoinCommunity(
     id =>
       patchPages(id, c => ({
         ...c,
@@ -80,7 +82,11 @@ export default function DiscoverScreen() {
       })),
   );
 
-  const { mutate: leave } = useLeaveCommunity(
+  const {
+    mutate: leave,
+    isPending: leavePending,
+    variables: leaveId,
+  } = useLeaveCommunity(
     id =>
       patchPages(id, c => ({
         ...c,
@@ -94,6 +100,8 @@ export default function DiscoverScreen() {
         member_count: c.member_count + 1,
       })),
   );
+
+  const pendingId = joinPending ? joinId : leavePending ? leaveId : null;
 
   const handleCardPress = useCallback((id: string) => {
     // /community/[id] is not yet a registered route in expo-router's typed-routes table.
@@ -108,9 +116,10 @@ export default function DiscoverScreen() {
         onPress={handleCardPress}
         onJoinPress={join}
         onLeavePress={leave}
+        pendingId={pendingId}
       />
     ),
-    [handleCardPress, join, leave],
+    [handleCardPress, join, leave, pendingId],
   );
 
   return (
@@ -171,18 +180,10 @@ export default function DiscoverScreen() {
         />
       )}
 
-      <DiscoverSearchOverlay
-        visible={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onCardPress={handleCardPress}
-        onJoinPress={join}
-        onLeavePress={leave}
-      />
-
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Search communities"
-        onPress={() => setIsSearchOpen(true)}
+        onPress={() => router.push('/discover/search' as never)}
         style={[styles.fab, { backgroundColor: colors.primary }]}
       >
         <Ionicons name="search" size={22} color="#fff" />
