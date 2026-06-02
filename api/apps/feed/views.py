@@ -2,16 +2,30 @@ import base64
 from datetime import datetime, timezone as dt_timezone
 
 from django.db.models import Count, Q
-from rest_framework import permissions
+from rest_framework import permissions, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.communities.models import Membership, Post
-from apps.communities.serializers import PostSerializer
+from apps.communities.serializers import UserMinimalSerializer
 from apps.events.models import Event, RSVP
 from apps.events.serializers import EventListSerializer
 
 PAGE_SIZE = 20
+
+
+class FeedPostSerializer(serializers.ModelSerializer):
+    author = UserMinimalSerializer(read_only=True)
+    channel = serializers.UUIDField(source="channel_id", read_only=True)
+    channel_name = serializers.CharField(source="channel.name", read_only=True)
+    community_id = serializers.UUIDField(source="channel.community_id", read_only=True)
+    community_name = serializers.CharField(source="channel.community.name", read_only=True)
+    community_type = serializers.CharField(source="channel.community.community_type", read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ["id", "channel", "channel_name", "community_id", "community_name", "community_type", "author", "body", "created_at"]
+        read_only_fields = fields
 
 
 def _encode_cursor(dt: datetime) -> str:
@@ -42,7 +56,7 @@ class FeedView(APIView):
 
         posts_qs = (
             Post.objects.filter(channel__community_id__in=community_ids)
-            .select_related("author", "channel")
+            .select_related("author", "channel", "channel__community")
             .order_by("-created_at")
         )
         events_qs = (
@@ -75,7 +89,7 @@ class FeedView(APIView):
         results = []
         for item_type, _, obj in page:
             if item_type == "post":
-                data = PostSerializer(obj, context={"request": request}).data
+                data = FeedPostSerializer(obj, context={"request": request}).data
             else:
                 data = EventListSerializer(obj, context={"request": request}).data
             results.append({"type": item_type, **data})

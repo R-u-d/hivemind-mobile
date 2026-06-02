@@ -25,6 +25,7 @@ export function useJoinCommunity(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 }
@@ -44,6 +45,7 @@ export function useLeaveCommunity(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 }

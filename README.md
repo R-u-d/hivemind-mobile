@@ -66,6 +66,7 @@ HiveMind/
 - Node.js 20+
 - Python 3.11+
 - PostgreSQL running locally
+- Redis running locally (required for Celery / push notifications — `brew install redis` or use Docker)
 - Expo Go app on your phone (for development)
 - An `.env.local` (frontend) and `.env` (backend) — see `.env.example` in each folder
 
@@ -128,13 +129,18 @@ AWS_S3_REGION_NAME=eu-central-1
 SENTRY_DSN=                      # leave blank for local dev
 ```
 
-Create the database and run migrations:
+Create the database, run migrations, and seed sample data:
 
 ```bash
 createdb hivemind                 # or create via psql / pgAdmin
 python manage.py migrate
+python manage.py seed_all         # fake communities, channels, events & posts for dev
 python manage.py runserver
 ```
+
+> `seed_all` fills the database with development data in one step. Register your own
+> account in the app to log in — the seeded users are for populating content only.
+> Re-running `seed_all` is safe (it refreshes events/posts and tops up the rest).
 
 Health check — open in browser or Postman:
 
@@ -145,7 +151,25 @@ GET http://localhost:8000/api/health/
 
 ---
 
-### 4. Verify both are running
+### 4. Pre-commit hooks
+
+The repo ships with pre-commit hooks that run automatically on every `git commit`:
+
+- **`api/` changes** → ruff (lint) + pytest
+- **`app/` changes** → eslint + typecheck + jest
+
+Activate them once after cloning (requires the backend venv to be set up first):
+
+```bash
+pip install -r api/requirements-dev.txt
+pre-commit install
+```
+
+> **Note:** pytest requires a `DATABASE_URL` in your shell environment. If the hook fails with a database error, make sure your `.env` is sourced or the variable is exported.
+
+---
+
+### 5. Verify both are running
 
 | Service | URL |
 |---|---|
@@ -155,7 +179,7 @@ GET http://localhost:8000/api/health/
 
 ---
 
-## Running tests
+## Running tests locally
 
 ```bash
 # Frontend

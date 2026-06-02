@@ -65,7 +65,7 @@ export default function AppSplash({ onDone }: Props) {
   const haloOpacity = halo.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] });
 
   return (
-    <Animated.View style={[styles.container, { opacity: containerOpacity }]}>
+    <Animated.View style={[styles.container, { opacity: containerOpacity }]} pointerEvents="none">
       {/* Radial-gradient backdrop */}
       <Svg style={StyleSheet.absoluteFill} width={W} height={H}>
         <Defs>

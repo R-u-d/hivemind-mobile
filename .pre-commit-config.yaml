@@ -30,3 +30,10 @@ repos:
         language: system
         files: ^app/.*\.(ts|tsx)$
         pass_filenames: false
+
+      - id: jest
+        name: jest (app)
+        entry: bash -c 'cd app && npm test'
+        language: system
+        files: ^app/.*\.(ts|tsx)$
+        pass_filenames: false

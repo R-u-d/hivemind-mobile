@@ -29,6 +29,7 @@ export const colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+  eventAccent: '#1D9E75',
 
   // Splash screen (always dark — do not flip in darkColors)
   splash: '#130C2E',
@@ -172,6 +173,7 @@ export const darkColors: Colors = {
   danger: '#DC2626',
   warning: '#EF9F27',
   onPrimary: '#FFFFFF',
+  eventAccent: '#1D9E75',
 
   // Splash screen — same as light; splash is always dark
   splash: '#130C2E',

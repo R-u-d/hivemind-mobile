@@ -1,8 +1,9 @@
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScrollToTop } from '@react-navigation/native';
 
 import Avatar from '@/components/Avatar';
 import CommunityIcon from '@/components/CommunityIcon';
@@ -96,6 +97,8 @@ const CommunityRow = memo(function CommunityRow({
 export default function ProfileScreen() {
   const colors = useTheme();
   const { top } = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
 
   const {
     data: user,
@@ -132,6 +135,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={[styles.content, { paddingTop: top + spacing.sm }]}
       showsVerticalScrollIndicator={false}
@@ -177,7 +181,7 @@ export default function ProfileScreen() {
 
       <View style={styles.statsRow}>
         <StatCard label="Communities" value={communities.length} />
-        <StatCard label="Events RSVP'd" value={0} />
+        <StatCard label="Events RSVP'd" value={user.event_count} />
       </View>
 
       <View>

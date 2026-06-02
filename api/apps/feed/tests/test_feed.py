@@ -223,4 +223,81 @@ def test_feed_no_next_when_results_fit_one_page(auth_client):
 
     response = client.get(FEED_URL)
     assert response.status_code == 200
+
+
+# ─── FeedPostSerializer fields ───────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_feed_post_includes_community_and_channel_context(auth_client):
+    client, user = auth_client
+    community = CommunityFactory(name="Test Community", community_type="social")
+    MembershipFactory(user=user, community=community)
+    channel = ChannelFactory(community=community, name="general")
+    PostFactory(channel=channel)
+
+    response = client.get(FEED_URL)
+    assert response.status_code == 200
+    item = next(i for i in response.data["results"] if i["type"] == "post")
+    assert item["community_name"] == "Test Community"
+    assert item["community_type"] == "social"
+    assert item["channel_name"] == "general"
+
+
+@pytest.mark.django_db
+def test_feed_post_channel_field_is_uuid(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(user=user, community=community)
+    channel = ChannelFactory(community=community)
+    PostFactory(channel=channel)
+
+    response = client.get(FEED_URL)
+    item = next(i for i in response.data["results"] if i["type"] == "post")
+    # channel field must be the UUID, not the channel object
+    assert str(item["channel"]) == str(channel.id)
+
+
+@pytest.mark.django_db
+def test_feed_post_author_fields_present(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(user=user, community=community)
+    channel = ChannelFactory(community=community)
+    PostFactory(channel=channel)
+
+    response = client.get(FEED_URL)
+    item = next(i for i in response.data["results"] if i["type"] == "post")
+    assert "author" in item
+    assert "id" in item["author"]
+    assert "display_name" in item["author"]
+    assert "avatar_url" in item["author"]
+
+
+@pytest.mark.django_db
+def test_feed_event_includes_nested_community_object(auth_client):
+    client, user = auth_client
+    community = CommunityFactory(name="Gaming Hub", community_type="gaming")
+    MembershipFactory(user=user, community=community)
+    EventFactory(community=community)
+
+    response = client.get(FEED_URL)
+    item = next(i for i in response.data["results"] if i["type"] == "event")
+    assert "community" in item
+    assert item["community"]["name"] == "Gaming Hub"
+    assert item["community"]["type"] == "gaming"
+    assert "id" in item["community"]
+
+
+@pytest.mark.django_db
+def test_feed_no_n_plus_one_queries(auth_client, django_assert_num_queries):
+    """Community + channel context must be fetched via select_related, not per-post queries."""
+    client, user = auth_client
+    community = CommunityFactory()
+    MembershipFactory(user=user, community=community)
+    channel = ChannelFactory(community=community)
+    PostFactory.create_batch(5, channel=channel)
+
+    with django_assert_num_queries(5):
+        response = client.get(FEED_URL)
+    assert response.status_code == 200
     assert response.data["next"] is None

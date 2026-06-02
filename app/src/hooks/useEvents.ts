@@ -166,6 +166,7 @@ export function useRsvp() {
     onSettled: (_data, _err, { eventId }) => {
       queryClient.invalidateQueries({ queryKey: ['events', eventId] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 }

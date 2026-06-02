@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useScrollToTop } from '@react-navigation/native';
 
 import EmptyState from '@/components/EmptyState';
 import EventCard from '@/components/EventCard';
@@ -58,6 +59,8 @@ function buildQueryArgs(filter: EventFilter) {
 
 export default function EventsScreen() {
   const colors = useTheme();
+  const listRef = useRef<FlashListRef<Event>>(null);
+  useScrollToTop(listRef as never);
 
   const [filter, setFilter] = useState<EventFilter>('all');
 
@@ -122,6 +125,7 @@ export default function EventsScreen() {
         </View>
       ) : (
         <FlashList<Event>
+          ref={listRef}
           data={events}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}

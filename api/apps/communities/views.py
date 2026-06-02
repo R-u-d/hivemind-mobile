@@ -74,6 +74,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
         default_channels = [
             ("general", Channel.ChannelType.GENERAL),
             ("announcements", Channel.ChannelType.ANNOUNCEMENTS),
+            ("events", Channel.ChannelType.EVENTS),
             ("resources", Channel.ChannelType.RESOURCES),
             ("help", Channel.ChannelType.HELP),
         ]
