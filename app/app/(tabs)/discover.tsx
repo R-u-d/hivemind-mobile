@@ -119,12 +119,12 @@ export default function DiscoverScreen() {
         <Text style={[typography.display, { color: colors.text }]}>Discover</Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Search communities"
-          onPress={() => setIsSearchOpen(true)}
+          accessibilityLabel="Create a new community"
+          onPress={() => router.push('/community/create' as never)}
           hitSlop={12}
           style={styles.iconBtn}
         >
-          <Ionicons name="search" size={22} color={colors.ink} />
+          <Ionicons name="add" size={22} color={colors.ink} />
         </Pressable>
       </View>
 
@@ -181,11 +181,11 @@ export default function DiscoverScreen() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Create a new community"
-        onPress={() => router.push('/community/create' as never)}
+        accessibilityLabel="Search communities"
+        onPress={() => setIsSearchOpen(true)}
         style={[styles.fab, { backgroundColor: colors.primary }]}
       >
-        <Ionicons name="add" size={26} color="#fff" />
+        <Ionicons name="search" size={22} color="#fff" />
       </Pressable>
     </SafeAreaView>
   );
