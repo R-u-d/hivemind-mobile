@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useScrollToTop } from '@react-navigation/native';
 
 import CommunityCard from '@/components/CommunityCard';
 import CommunityListSkeleton from '@/components/CommunityListSkeleton';
@@ -37,6 +38,8 @@ const CHIP_ITEMS: ReadonlyArray<FilterChipItem<ChipValue>> = [
 export default function DiscoverScreen() {
   const colors = useTheme();
   const queryClient = useQueryClient();
+  const listRef = useRef<FlashListRef<Community>>(null);
+  useScrollToTop(listRef as never);
   const [active, setActive] = useState<ChipValue>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -146,6 +149,7 @@ export default function DiscoverScreen() {
         />
       ) : (
         <FlashList<Community>
+          ref={listRef}
           data={communities}
           keyExtractor={c => c.id}
           contentContainerStyle={styles.list}

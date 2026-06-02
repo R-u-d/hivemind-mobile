@@ -103,7 +103,7 @@ function EventCover({ event }: { event: Event }) {
 
       {/* Community pill */}
       <View style={styles.coverPill}>
-        <TypePill type={event.community.type} size="sm" />
+        <TypePill type={event.community.type} size="sm" suffix={event.community.name} />
       </View>
     </View>
   );

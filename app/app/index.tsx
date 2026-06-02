@@ -3,18 +3,30 @@ import { Redirect } from 'expo-router';
 import type { Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
+import { client } from '@/api/client';
 import { tokenStorage } from '@/api/tokenStorage';
 
-type Destination = '/(tabs)/feed' | '/(auth)/login';
+type Destination = '/(tabs)/feed' | '/(auth)/login' | '/(onboarding)';
 
 export default function Index() {
   const [destination, setDestination] = useState<Destination | null>(null);
 
   useEffect(() => {
-    tokenStorage
-      .getAccess()
-      .then(token => setDestination(token ? '/(tabs)/feed' : '/(auth)/login'))
-      .catch(() => setDestination('/(auth)/login'));
+    (async () => {
+      try {
+        const token = await tokenStorage.getAccess();
+        if (!token) {
+          setDestination('/(auth)/login');
+          return;
+        }
+        // Server-side has_onboarded is the source of truth — it's per-account,
+        // unlike the device-level hm_onboarded flag which goes stale across accounts.
+        const { data } = await client.get<{ has_onboarded: boolean }>('/users/me/');
+        setDestination(data.has_onboarded ? '/(tabs)/feed' : '/(onboarding)');
+      } catch {
+        setDestination('/(auth)/login');
+      }
+    })();
   }, []);
 
   useEffect(() => {

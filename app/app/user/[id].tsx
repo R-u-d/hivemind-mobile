@@ -115,10 +115,9 @@ export default function PublicProfileScreen() {
             </View>
           </View>
 
-          {/* TODO: show real counts once backend extends /users/:id/ */}
           <View style={styles.statsRow}>
-            <StatCard label="Communities" value="—" />
-            <StatCard label="Events RSVP'd" value="—" />
+            <StatCard label="Communities" value={user.community_count} />
+            <StatCard label="Events RSVP'd" value={user.event_count} />
           </View>
         </ScrollView>
       )}
