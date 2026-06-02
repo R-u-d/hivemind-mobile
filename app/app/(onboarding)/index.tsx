@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-na
 import Svg, { Polygon } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PrimaryButton from '@/components/PrimaryButton';
 import {
@@ -213,7 +213,6 @@ function HoneycombCluster({ selectedTypes, onToggle, scale }: HoneycombClusterPr
 export default function OnboardingScreen() {
   const colors = useTheme();
   const { width } = useWindowDimensions();
-  const { bottom } = useSafeAreaInsets();
   const [selectedTypes, setSelectedTypes] = useState<Set<CommunityType>>(new Set());
 
   const scale = (width - 2 * spacing.xl - spacing.base) / BBOX_W;
@@ -241,7 +240,10 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.surface }]}
+      edges={['top', 'bottom']}
+    >
       <View style={styles.header}>
         <Pressable
           onPress={() => router.replace('/(auth)/login' as Href)}
@@ -271,19 +273,19 @@ export default function OnboardingScreen() {
         <HoneycombCluster selectedTypes={selectedTypes} onToggle={toggle} scale={scale} />
       </View>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(spacing.lg, bottom) }]}>
+      <View style={styles.footer}>
         <PrimaryButton
           label={buttonLabel}
           onPress={handleContinue}
           disabled={selectedTypes.size === 0}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 54 },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
