@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useMemo, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useScrollToTop } from '@react-navigation/native';
 
@@ -61,12 +61,14 @@ export default function FeedScreen() {
     <SafeAreaView style={[styles.screen, { backgroundColor: themeColors.bg }]} edges={['top']}>
       <View style={styles.header}>
         <Text style={[typography.display, { color: themeColors.text }]}>Feed</Text>
-        <Ionicons
-          name="notifications-outline"
-          size={22}
-          color={themeColors.ink}
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel="Notifications"
-        />
+          hitSlop={12}
+          style={styles.iconBtn}
+        >
+          <Ionicons name="notifications-outline" size={22} color={themeColors.ink} />
+        </Pressable>
       </View>
 
       {isLoading ? (
@@ -129,6 +131,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
   },
+  iconBtn: { padding: 4 },
   centerFill: { flex: 1 },
   listContent: { paddingBottom: 100, paddingTop: spacing.xs },
   footer: { alignItems: 'center', paddingVertical: spacing.lg },

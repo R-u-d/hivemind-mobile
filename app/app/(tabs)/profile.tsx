@@ -309,9 +309,10 @@ export default function ProfileScreen() {
         <Text style={[typography.display, { color: colors.text }]}>Profile</Text>
         <Pressable
           onPress={() => router.push('/profile/edit')}
-          style={styles.editBtn}
-          hitSlop={12}
+          accessibilityRole="button"
           accessibilityLabel="Edit profile"
+          hitSlop={12}
+          style={styles.editBtn}
         >
           <Ionicons name="options-outline" size={22} color={colors.ink} />
         </Pressable>
@@ -447,7 +448,12 @@ const sheetStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  content: { padding: spacing.base, paddingBottom: spacing.xxxl, gap: spacing.base },
+  content: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xxxl,
+    gap: spacing.base,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
