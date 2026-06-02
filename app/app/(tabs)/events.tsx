@@ -141,6 +141,14 @@ export default function EventsScreen() {
           }
         />
       )}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Search events"
+        onPress={() => router.push('/events/search' as never)}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+      >
+        <Ionicons name="search" size={22} color="#fff" />
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -159,4 +167,19 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1 },
   list: { padding: spacing.base, paddingBottom: 100 },
   footer: { alignItems: 'center', paddingVertical: spacing.lg },
+  fab: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    right: spacing.base,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 });

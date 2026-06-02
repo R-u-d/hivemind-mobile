@@ -52,7 +52,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
         q = self.request.query_params.get("q", "").strip()
         if q:
-            qs = qs.filter(title__icontains=q) | qs.filter(description__icontains=q)
+            qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
 
         return qs.order_by("start_datetime", "id")
 
