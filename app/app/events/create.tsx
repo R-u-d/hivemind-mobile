@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +16,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -30,6 +32,7 @@ import LocationPickerMap from '@/components/LocationPickerMap';
 import PrimaryButton from '@/components/PrimaryButton';
 import { useCreateEvent, useEventCoverUpload } from '@/hooks/useEvents';
 import { useMyCommunities } from '@/hooks/useMyCommunities';
+import { useShakeAnimation } from '@/hooks/useShakeAnimation';
 import { colors, fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Community } from '@/types/community';
@@ -99,6 +102,7 @@ const schema = z
       .string()
       .optional()
       .refine(v => !v || /^\d+$/.test(v), 'Numbers only'),
+    is_private: z.boolean(),
   })
   .superRefine((data, ctx) => {
     if (data.endAt && data.startAt && data.endAt <= data.startAt) {
@@ -301,6 +305,7 @@ export default function CreateEventScreen() {
       startAt: null,
       endAt: null,
       capacity: '',
+      is_private: false,
     },
   });
 
@@ -309,7 +314,33 @@ export default function CreateEventScreen() {
   const lng = watch('lng');
   const startAt = watch('startAt');
   const endAt = watch('endAt');
+
+  const [communityDefaultCenter, setCommunityDefaultCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  // When a community with a location is selected, silently geocode it as a map hint.
+  useEffect(() => {
+    const community = communities.find((c: Community) => c.id === communityId);
+    if (!community?.location) {
+      setCommunityDefaultCenter(null);
+      return;
+    }
+    let cancelled = false;
+    forwardGeocode(community.location).then(coords => {
+      if (!cancelled) setCommunityDefaultCenter(coords);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [communityId, communities]);
   const descriptionLength = (watch('description') ?? '').length;
+  const { style: descShakeStyle, trigger: triggerDescShake } = useShakeAnimation();
+
+  useEffect(() => {
+    if (descriptionLength === DESCRIPTION_MAX) triggerDescShake();
+  }, [descriptionLength, triggerDescShake]);
 
   // A past start whose date is today is a time problem, so surface it on the
   // Start time field; a past/empty date stays on the Start date field.
@@ -417,6 +448,7 @@ export default function CreateEventScreen() {
         start_datetime: data.startAt.toISOString(),
         end_datetime: data.endAt ? data.endAt.toISOString() : undefined,
         capacity: data.capacity ? Number(data.capacity) : undefined,
+        is_private: data.is_private,
       });
       if (coverUri) {
         try {
@@ -551,22 +583,24 @@ export default function CreateEventScreen() {
                   maxLength={DESCRIPTION_MAX}
                   accessibilityLabel="Description"
                 />
-                <Text
-                  style={[
-                    styles.charCounter,
-                    {
-                      color:
-                        descriptionLength >= DESCRIPTION_DANGER
-                          ? colors.danger
-                          : descriptionLength >= DESCRIPTION_WARN
-                            ? colors.warning
-                            : colors.textFaint,
-                      fontFamily: fonts.regular,
-                    },
-                  ]}
-                >
-                  {descriptionLength}/{DESCRIPTION_MAX}
-                </Text>
+                <Animated.View style={descShakeStyle}>
+                  <Text
+                    style={[
+                      styles.charCounter,
+                      {
+                        color:
+                          descriptionLength >= DESCRIPTION_DANGER
+                            ? colors.danger
+                            : descriptionLength >= DESCRIPTION_WARN
+                              ? colors.warning
+                              : colors.textFaint,
+                        fontFamily: fonts.regular,
+                      },
+                    ]}
+                  >
+                    {descriptionLength}/{DESCRIPTION_MAX}
+                  </Text>
+                </Animated.View>
               </View>
             )}
           />
@@ -579,6 +613,33 @@ export default function CreateEventScreen() {
             error={errors.community?.message}
             active={communityPickerOpen}
             onPress={() => setCommunityPickerOpen(true)}
+          />
+
+          <Controller
+            control={control}
+            name="is_private"
+            render={({ field }) => (
+              <View
+                style={[
+                  styles.switchRow,
+                  { borderColor: colors.border, backgroundColor: colors.surface },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={[typography.body, { color: colors.text }]}>Private event</Text>
+                  <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+                    Only community members can see this event
+                  </Text>
+                </View>
+                <Switch
+                  accessibilityLabel="Private event"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  trackColor={{ true: colors.primary, false: colors.border }}
+                  thumbColor={colors.surface}
+                />
+              </View>
+            )}
           />
 
           {/* Location */}
@@ -615,7 +676,13 @@ export default function CreateEventScreen() {
           />
 
           {/* Map */}
-          <LocationPickerMap lat={lat} lng={lng} onPick={handlePickOnMap} />
+          <LocationPickerMap
+            lat={lat}
+            lng={lng}
+            onPick={handlePickOnMap}
+            defaultCenter={communityDefaultCenter ?? undefined}
+            defaultCenterLabel={selectedCommunity?.location}
+          />
 
           {/* Start date + time */}
           <View style={styles.dateTimeRow}>
@@ -782,6 +849,15 @@ const styles = StyleSheet.create({
   },
   errorText: { fontSize: 12 },
   dateTimeRow: { flexDirection: 'row', gap: spacing.md },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    borderRadius: radius.input,
+    borderWidth: 1,
+    gap: spacing.md,
+  },
   footer: { padding: spacing.base, borderTopWidth: 1 },
 
   // Picker sheet — mirrors the RSVP picker in EventCard

@@ -11,6 +11,7 @@ export interface UseEventsArgs {
   dateFrom?: string;
   dateTo?: string;
   channel?: string;
+  q?: string;
 }
 
 function buildPath(args: UseEventsArgs, cursor: string | null): string {
@@ -20,6 +21,7 @@ function buildPath(args: UseEventsArgs, cursor: string | null): string {
   if (args.dateFrom) params.set('date_from', args.dateFrom);
   if (args.dateTo) params.set('date_to', args.dateTo);
   if (args.channel) params.set('channel', args.channel);
+  if (args.q) params.set('q', args.q);
   if (cursor) params.set('cursor', cursor);
   return `/events/?${params.toString()}`;
 }
@@ -48,6 +50,7 @@ export function useEvents(args: UseEventsArgs = {}, enabled = true) {
         dateFrom: args.dateFrom ?? null,
         dateTo: args.dateTo ?? null,
         channel: args.channel ?? null,
+        q: args.q ?? null,
       },
     ],
     queryFn: ({ pageParam }) => fetchPage(args, pageParam),
@@ -84,6 +87,7 @@ export interface CreateEventPayload {
   start_datetime: string;
   end_datetime?: string | null;
   capacity?: number | null;
+  is_private?: boolean;
 }
 
 export function useCreateEvent() {
