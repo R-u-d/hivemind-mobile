@@ -49,6 +49,8 @@ yarn-error.log*
 Thumbs.db
 .claude/
 CLAUDE.local.md
+NOTES.md
+BUG_BASH.md
 
 # ─── IDE ────────────────────────────────────────────────────────────────────
 .vscode/
