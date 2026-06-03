@@ -270,6 +270,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     gap: spacing.md,
+    marginHorizontal: spacing.base,
     marginVertical: spacing.xs,
     padding: spacing.md,
     borderRadius: radius.lg,
