@@ -1,6 +1,14 @@
 import { FlashList } from '@shopify/flash-list';
 import { useEffect, useRef } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from '@/components/Avatar';
@@ -56,6 +64,8 @@ export default function MembersSheet({
 }: MembersSheetProps) {
   const colors = useTheme();
   const { bottom } = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
+  const sheetHeight = screenHeight * 0.75;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -93,7 +103,11 @@ export default function MembersSheet({
         <Animated.View
           style={[
             styles.sheet,
-            { backgroundColor: colors.surface, paddingBottom: bottom + spacing.base },
+            {
+              height: sheetHeight,
+              backgroundColor: colors.surface,
+              paddingBottom: bottom + spacing.base,
+            },
             { transform: [{ translateY }] },
           ]}
         >
@@ -142,7 +156,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   sheet: {
-    maxHeight: '75%',
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     paddingTop: spacing.sm,
