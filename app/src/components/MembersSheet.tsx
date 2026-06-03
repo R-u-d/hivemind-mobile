@@ -37,8 +37,8 @@ function RoleBadge({ role }: { role: Member['role'] }) {
   const icon = role === 'owner' ? 'shield-checkmark' : 'shield-half';
   return (
     <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>
-      <Ionicons name={icon} size={11} color={colors.primary} />
-      <Text style={[styles.badgeText, { color: colors.primary }]}>{label}</Text>
+      <Ionicons name={icon} size={11} color={colors.primaryOnSoft} />
+      <Text style={[styles.badgeText, { color: colors.primaryOnSoft }]}>{label}</Text>
     </View>
   );
 }

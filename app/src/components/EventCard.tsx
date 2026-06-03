@@ -4,7 +4,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import TypePill from '@/components/TypePill';
 import { useRsvp } from '@/hooks/useEvents';
-import { colors, fonts, radius, spacing } from '@/theme';
+import { fonts, radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Event, RsvpStatus } from '@/types/event';
 
@@ -116,18 +116,21 @@ function RsvpPicker({
                 onPress={() => !isPending && handleSelect(opt.value)}
                 accessibilityRole="button"
                 accessibilityLabel={opt.label}
-                style={[styles.pickerOption, active && { backgroundColor: colors.primarySoft }]}
+                style={[
+                  styles.pickerOption,
+                  active && { backgroundColor: themeColors.primarySoft },
+                ]}
               >
                 <Ionicons
                   name={opt.icon}
                   size={18}
-                  color={active ? colors.primary : themeColors.textMuted}
+                  color={active ? themeColors.primaryOnSoft : themeColors.textMuted}
                 />
                 <Text
                   style={[
                     styles.pickerOptionLabel,
                     {
-                      color: active ? colors.primary : themeColors.text,
+                      color: active ? themeColors.primaryOnSoft : themeColors.text,
                       fontFamily: active ? fonts.medium : fonts.regular,
                     },
                   ]}
@@ -138,7 +141,7 @@ function RsvpPicker({
                   <Ionicons
                     name="checkmark"
                     size={14}
-                    color={colors.primary}
+                    color={themeColors.primaryOnSoft}
                     style={styles.pickerCheck}
                   />
                 )}
@@ -199,10 +202,14 @@ function EventCard({ event, onPress }: EventCardProps) {
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={`RSVP: ${RSVP_LABEL[event.rsvp_status]}. ${isPast ? '' : 'Tap to change.'}`}
-                style={[styles.rsvpBadge, { backgroundColor: colors.primarySoft }]}
+                style={[styles.rsvpBadge, { backgroundColor: themeColors.primarySoft }]}
               >
-                <Ionicons name={RSVP_ICON[event.rsvp_status]} size={11} color={colors.primary} />
-                <Text style={[styles.rsvpLabel, { color: colors.primary }]}>
+                <Ionicons
+                  name={RSVP_ICON[event.rsvp_status]}
+                  size={11}
+                  color={themeColors.primaryOnSoft}
+                />
+                <Text style={[styles.rsvpLabel, { color: themeColors.primaryOnSoft }]}>
                   {isPast ? RSVP_PAST_LABEL[event.rsvp_status] : RSVP_LABEL[event.rsvp_status]}
                 </Text>
               </Pressable>
