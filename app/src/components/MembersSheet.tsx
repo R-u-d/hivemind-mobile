@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import Avatar from '@/components/Avatar';
 import HexLoader from '@/components/HexLoader';
 import { fonts, radius, spacing, typography } from '@/theme';
@@ -32,8 +34,10 @@ function RoleBadge({ role }: { role: Member['role'] }) {
   const colors = useTheme();
   if (role === 'member') return null;
   const label = role === 'owner' ? 'Owner' : 'Mod';
+  const icon = role === 'owner' ? 'shield-checkmark' : 'shield-half';
   return (
     <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>
+      <Ionicons name={icon} size={11} color={colors.primary} />
       <Text style={[styles.badgeText, { color: colors.primary }]}>{label}</Text>
     </View>
   );
@@ -175,14 +179,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   badge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: radius.full,
   },
   badgeText: {
     fontSize: 11,
     fontFamily: fonts.medium,
-    letterSpacing: 0.3,
   },
   listWrap: { flex: 1 },
   loaderWrap: { paddingVertical: spacing.lg, alignItems: 'center' },
