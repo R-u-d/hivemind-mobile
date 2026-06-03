@@ -270,7 +270,7 @@ export default function ChannelScreen() {
       <KeyboardAvoidingView
         style={[styles.flex, { backgroundColor: colors.bg }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? top + 54 : 0}
       >
         {isLoading ? (
           <ChannelSkeleton />
@@ -332,7 +332,7 @@ export default function ChannelScreen() {
               {
                 backgroundColor: colors.surface,
                 borderTopColor: colors.borderSoft,
-                paddingBottom: bottom + spacing.sm,
+                paddingBottom: Platform.OS === 'ios' ? bottom + spacing.sm : spacing.sm,
               },
             ]}
           >
