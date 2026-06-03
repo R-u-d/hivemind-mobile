@@ -106,22 +106,24 @@ export default function MembersSheet({
             <HexLoader size={28} color={colors.primary} />
           </View>
         ) : (
-          <FlashList<Member>
-            data={members}
-            keyExtractor={m => m.id}
-            renderItem={({ item }) => <MemberRow item={item} />}
-            onEndReached={() => {
-              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-            }}
-            onEndReachedThreshold={0.4}
-            ListFooterComponent={
-              isFetchingNextPage ? (
-                <View style={styles.loaderWrap}>
-                  <HexLoader size={22} color={colors.primary} />
-                </View>
-              ) : null
-            }
-          />
+          <View style={styles.listWrap}>
+            <FlashList<Member>
+              data={members}
+              keyExtractor={m => m.id}
+              renderItem={({ item }) => <MemberRow item={item} />}
+              onEndReached={() => {
+                if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+              }}
+              onEndReachedThreshold={0.4}
+              ListFooterComponent={
+                isFetchingNextPage ? (
+                  <View style={styles.loaderWrap}>
+                    <HexLoader size={22} color={colors.primary} />
+                  </View>
+                ) : null
+              }
+            />
+          </View>
         )}
       </Animated.View>
     </Modal>
@@ -167,5 +169,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     letterSpacing: 0.3,
   },
+  listWrap: { flex: 1 },
   loaderWrap: { paddingVertical: spacing.lg, alignItems: 'center' },
 });
