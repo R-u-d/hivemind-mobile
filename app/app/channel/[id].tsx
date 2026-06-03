@@ -76,7 +76,7 @@ export default function ChannelScreen() {
   const INPUT_LINE_H = 20;
   const INPUT_PAD_V = 11;
   const INPUT_MIN_H = INPUT_LINE_H + INPUT_PAD_V * 2;
-  const INPUT_MAX_H = INPUT_LINE_H * 4 + INPUT_PAD_V * 2;
+  const INPUT_MAX_H = INPUT_LINE_H * 5 + INPUT_PAD_V * 2;
   const [inputHeight, setInputHeight] = useState(INPUT_MIN_H);
 
   // ── Data ──────────────────────────────────────────────────────────────────
