@@ -1,5 +1,13 @@
-import { memo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { memo, useCallback, useRef, useState } from 'react';
+import {
+  Animated as RNAnimated,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { router, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
@@ -269,6 +277,17 @@ export default function ProfileScreen() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const [rsvpSheetOpen, setRsvpSheetOpen] = useState(false);
+  const commSectionY = useRef(0);
+  const labelHighlight = useRef(new RNAnimated.Value(0)).current;
+
+  const scrollToCommunities = useCallback(() => {
+    scrollRef.current?.scrollTo({ y: commSectionY.current, animated: true });
+    labelHighlight.setValue(0);
+    RNAnimated.sequence([
+      RNAnimated.timing(labelHighlight, { toValue: 1, duration: 250, useNativeDriver: false }),
+      RNAnimated.timing(labelHighlight, { toValue: 0, duration: 600, useNativeDriver: false }),
+    ]).start();
+  }, [labelHighlight]);
 
   const {
     data: user,
@@ -352,9 +371,14 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          <View style={styles.statItem}>
+          <Pressable
+            onPress={scrollToCommunities}
+            accessibilityRole="button"
+            accessibilityLabel="Scroll to my communities"
+            style={styles.statItem}
+          >
             <StatCard label="Communities" value={communities.length} />
-          </View>
+          </Pressable>
           <Pressable
             onPress={() => setRsvpSheetOpen(true)}
             accessibilityRole="button"
@@ -365,12 +389,25 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        <View>
-          <Text
-            style={[styles.sectionLabel, { color: colors.textMuted, fontFamily: fonts.medium }]}
+        <View
+          onLayout={e => {
+            commSectionY.current = e.nativeEvent.layout.y;
+          }}
+        >
+          <RNAnimated.Text
+            style={[
+              styles.sectionLabel,
+              {
+                fontFamily: fonts.medium,
+                color: labelHighlight.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [colors.textMuted, colors.text],
+                }),
+              },
+            ]}
           >
             My communities
-          </Text>
+          </RNAnimated.Text>
 
           {commLoading ? (
             <>
