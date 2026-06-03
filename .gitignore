@@ -59,3 +59,6 @@ CLAUDE.local.md
 design/
 docs/superpowers/
 .superpowers/
+
+# ─── Local dev notes (not shared) ────────────────────────────────────────────
+BUG_BASH.md
