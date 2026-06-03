@@ -1,15 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
-import Svg, {
-  Defs,
-  LinearGradient,
-  Mask,
-  Pattern,
-  Polygon,
-  RadialGradient,
-  Rect,
-  Stop,
-} from 'react-native-svg';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { colors, fonts } from '@/theme';
 import HexLoader from '@/components/HexLoader';
@@ -22,22 +14,18 @@ interface Props {
 const VISIBLE_MS = 1800;
 const FADE_MS = 320;
 
-// Honeycomb tile in a 600×900 reference space, tiled via an SVG <Pattern>.
-const HEX_W = 31.17;
-
 export default function AppSplash({ onDone }: Props) {
-  const { width: W, height: H } = Dimensions.get('window');
-
   const containerOpacity = useRef(new Animated.Value(1)).current;
   const logoScale = useRef(new Animated.Value(0.88)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
   const halo = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(logoScale, { toValue: 1, tension: 60, friction: 8, useNativeDriver: true }),
-      Animated.timing(logoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-    ]).start();
+    Animated.spring(logoScale, {
+      toValue: 1,
+      tension: 60,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
 
     const haloLoop = Animated.loop(
       Animated.sequence([
@@ -59,84 +47,24 @@ export default function AppSplash({ onDone }: Props) {
       clearTimeout(timer);
       haloLoop.stop();
     };
-  }, [containerOpacity, halo, logoOpacity, logoScale, onDone]);
+  }, [containerOpacity, halo, logoScale, onDone]);
 
   const haloScale = halo.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
   const haloOpacity = halo.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] });
 
   return (
     <Animated.View style={[styles.container, { opacity: containerOpacity }]} pointerEvents="none">
-      {/* Radial-gradient backdrop */}
-      <Svg style={StyleSheet.absoluteFill} width={W} height={H}>
-        <Defs>
-          <RadialGradient
-            id="hm-bg"
-            cx={W * 0.5}
-            cy={H * 0.36}
-            rx={W * 1.2}
-            ry={H * 0.8}
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop offset="0" stopColor={colors.splashGradient} />
-            <Stop offset="0.5" stopColor={colors.splashGradientMid} />
-            <Stop offset="1" stopColor={colors.splashBg} />
-          </RadialGradient>
-        </Defs>
-        <Rect x={0} y={0} width={W} height={H} fill="url(#hm-bg)" />
-      </Svg>
+      {/* Single backdrop layer — gradient + 3D honeycomb baked into one WebP.
+          One native-backed layer avoids the iOS Fabric two-layer compositing bug. */}
+      <Image
+        source={require('../../assets/images/splash-bg.webp')}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        accessible={false}
+      />
 
-      {/* Honeycomb lying flat and receding, fading out toward the top */}
-      <View style={styles.hexWrapper} pointerEvents="none">
-        <Svg width="100%" height="100%" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice">
-          <Defs>
-            <Pattern
-              id="hm-hex"
-              x={0}
-              y={0}
-              width={HEX_W}
-              height={54}
-              patternUnits="userSpaceOnUse"
-            >
-              <Polygon
-                points="15.585,0 31.17,9 31.17,27 15.585,36 0,27 0,9"
-                fill="none"
-                stroke={colors.splashDot}
-                strokeWidth={0.5}
-              />
-              <Polygon
-                points="0,27 15.585,36 15.585,54 0,63 -15.585,54 -15.585,36"
-                fill="none"
-                stroke={colors.splashDot}
-                strokeWidth={0.5}
-              />
-              <Polygon
-                points="31.17,27 46.755,36 46.755,54 31.17,63 15.585,54 15.585,36"
-                fill="none"
-                stroke={colors.splashDot}
-                strokeWidth={0.5}
-              />
-            </Pattern>
-            <LinearGradient id="hm-vignette" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#fff" stopOpacity={0} />
-              <Stop offset="0.12" stopColor="#fff" stopOpacity={0.05} />
-              <Stop offset="0.22" stopColor="#fff" stopOpacity={0.18} />
-              <Stop offset="0.32" stopColor="#fff" stopOpacity={0.45} />
-              <Stop offset="0.45" stopColor="#fff" stopOpacity={0.85} />
-              <Stop offset="0.6" stopColor="#fff" stopOpacity={1} />
-              <Stop offset="1" stopColor="#fff" stopOpacity={1} />
-            </LinearGradient>
-            <Mask id="hm-vmask">
-              <Rect x={0} y={0} width={600} height={900} fill="url(#hm-vignette)" />
-            </Mask>
-          </Defs>
-          <Rect width={600} height={900} fill="url(#hm-hex)" mask="url(#hm-vmask)" />
-        </Svg>
-      </View>
-
-      {/* Logo + wordmark */}
-      <Animated.View
-        style={[styles.center, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
-      >
+      {/* Logo + wordmark — JS layer, always visible above the single native backdrop */}
+      <Animated.View style={[styles.center, { transform: [{ scale: logoScale }] }]}>
         <View style={styles.logoWrap}>
           <Animated.View
             style={[styles.halo, { opacity: haloOpacity, transform: [{ scale: haloScale }] }]}
@@ -174,16 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 999,
-    overflow: 'hidden',
-  },
-  hexWrapper: {
-    position: 'absolute',
-    top: '-80%',
-    left: '-40%',
-    right: '-40%',
-    bottom: '-40%',
-    opacity: 0.11,
-    transform: [{ perspective: 1100 }, { rotateX: '58deg' }],
   },
   center: { alignItems: 'center', gap: 18, marginTop: -40 },
   logoWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
