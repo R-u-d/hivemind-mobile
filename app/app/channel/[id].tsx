@@ -73,6 +73,11 @@ export default function ChannelScreen() {
 
   const [text, setText] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const INPUT_LINE_H = 20;
+  const INPUT_PAD_V = 11;
+  const INPUT_MIN_H = INPUT_LINE_H + INPUT_PAD_V * 2;
+  const INPUT_MAX_H = INPUT_LINE_H * 4 + INPUT_PAD_V * 2;
+  const [inputHeight, setInputHeight] = useState(INPUT_MIN_H);
 
   // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -153,6 +158,7 @@ export default function ChannelScreen() {
     const trimmed = text.trim();
     if (!trimmed || createPending) return;
     setText('');
+    setInputHeight(INPUT_MIN_H);
     pendingScrollRef.current = true;
     createPost({ body: trimmed }, { onError: () => setText(trimmed) });
     inputRef.current?.focus();
@@ -345,12 +351,18 @@ export default function ChannelScreen() {
               returnKeyType="send"
               onSubmitEditing={handleSubmit}
               blurOnSubmit={false}
-              multiline={false}
+              multiline
+              scrollEnabled={inputHeight >= INPUT_MAX_H}
+              onContentSizeChange={e => {
+                const h = e.nativeEvent.contentSize.height;
+                setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
+              }}
               editable={!createPending}
               accessibilityLabel="Message input"
               style={[
                 styles.input,
                 {
+                  height: inputHeight,
                   backgroundColor: colors.surfaceSunk,
                   color: colors.text,
                   fontFamily: fonts.regular,
@@ -409,7 +421,7 @@ const styles = StyleSheet.create({
 
   composeBar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: spacing.md,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
@@ -417,10 +429,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 42,
     paddingHorizontal: spacing.base,
-    borderRadius: radius.full,
+    paddingVertical: 11,
+    borderRadius: radius.xl,
     fontSize: 14,
+    lineHeight: 20,
   },
   sendBtn: {
     width: 42,
