@@ -11,6 +11,7 @@ import type { Event, RsvpStatus } from '@/types/event';
 interface EventCardProps {
   event: Event;
   onPress: (id: string) => void;
+  hidePill?: boolean;
 }
 
 const MONTH_ABBR = [
@@ -154,7 +155,7 @@ function RsvpPicker({
   );
 }
 
-function EventCard({ event, onPress }: EventCardProps) {
+function EventCard({ event, onPress, hidePill = false }: EventCardProps) {
   const themeColors = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
   const date = new Date(event.start_datetime);
@@ -193,7 +194,7 @@ function EventCard({ event, onPress }: EventCardProps) {
         {/* Content */}
         <View style={styles.content}>
           <View style={styles.pills}>
-            <TypePill type={event.community.type} size="sm" />
+            {!hidePill && <TypePill type={event.community.type} size="sm" />}
             {event.rsvp_status && (
               <Pressable
                 onPress={e => {

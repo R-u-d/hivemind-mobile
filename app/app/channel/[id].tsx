@@ -287,6 +287,7 @@ export default function ChannelScreen() {
                     <EventCard
                       event={item.data}
                       onPress={id => router.push(`/event/${id}` as never)}
+                      hidePill
                     />
                   ) : (
                     <PostCard
