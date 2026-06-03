@@ -352,17 +352,21 @@ export default function ChannelScreen() {
               onSubmitEditing={handleSubmit}
               blurOnSubmit={false}
               multiline
-              scrollEnabled={inputHeight >= INPUT_MAX_H}
-              onContentSizeChange={e => {
-                const h = e.nativeEvent.contentSize.height;
-                setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
-              }}
+              scrollEnabled={Platform.OS === 'android' ? inputHeight >= INPUT_MAX_H : undefined}
+              onContentSizeChange={
+                Platform.OS === 'android'
+                  ? e => {
+                      const h = e.nativeEvent.contentSize.height;
+                      setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
+                    }
+                  : undefined
+              }
               editable={!createPending}
               accessibilityLabel="Message input"
               style={[
                 styles.input,
+                Platform.OS === 'android' ? { height: inputHeight } : { maxHeight: INPUT_MAX_H },
                 {
-                  height: inputHeight,
                   backgroundColor: colors.surfaceSunk,
                   color: colors.text,
                   fontFamily: fonts.regular,
