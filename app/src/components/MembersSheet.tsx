@@ -84,62 +84,64 @@ export default function MembersSheet({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <Pressable
-        style={styles.backdrop}
-        onPress={onClose}
-        accessibilityLabel="Close members sheet"
-      />
-      <Animated.View
-        style={[
-          styles.sheet,
-          { backgroundColor: colors.surface, paddingBottom: bottom + spacing.base },
-          { transform: [{ translateY }] },
-        ]}
-      >
-        <View style={[styles.handle, { backgroundColor: colors.border }]} />
-        <Text style={[typography.title, { color: colors.text, marginBottom: spacing.md }]}>
-          Members{total > 0 ? ` · ${total.toLocaleString()}` : ''}
-        </Text>
+      <View style={styles.container}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={onClose}
+          accessibilityLabel="Close members sheet"
+        />
+        <Animated.View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surface, paddingBottom: bottom + spacing.base },
+            { transform: [{ translateY }] },
+          ]}
+        >
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
+          <Text style={[typography.title, { color: colors.text, marginBottom: spacing.md }]}>
+            Members{total > 0 ? ` · ${total.toLocaleString()}` : ''}
+          </Text>
 
-        {isLoading ? (
-          <View style={styles.loaderWrap}>
-            <HexLoader size={28} color={colors.primary} />
-          </View>
-        ) : (
-          <View style={styles.listWrap}>
-            <FlashList<Member>
-              data={members}
-              keyExtractor={m => m.id}
-              renderItem={({ item }) => <MemberRow item={item} />}
-              onEndReached={() => {
-                if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-              }}
-              onEndReachedThreshold={0.4}
-              ListFooterComponent={
-                isFetchingNextPage ? (
-                  <View style={styles.loaderWrap}>
-                    <HexLoader size={22} color={colors.primary} />
-                  </View>
-                ) : null
-              }
-            />
-          </View>
-        )}
-      </Animated.View>
+          {isLoading ? (
+            <View style={styles.loaderWrap}>
+              <HexLoader size={28} color={colors.primary} />
+            </View>
+          ) : (
+            <View style={styles.listWrap}>
+              <FlashList<Member>
+                data={members}
+                keyExtractor={m => m.id}
+                renderItem={({ item }) => <MemberRow item={item} />}
+                onEndReached={() => {
+                  if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                }}
+                onEndReachedThreshold={0.4}
+                ListFooterComponent={
+                  isFetchingNextPage ? (
+                    <View style={styles.loaderWrap}>
+                      <HexLoader size={22} color={colors.primary} />
+                    </View>
+                  ) : null
+                }
+              />
+            </View>
+          )}
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
   sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     maxHeight: '75%',
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
