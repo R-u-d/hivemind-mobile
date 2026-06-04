@@ -3,6 +3,7 @@ import {
   Animated as RNAnimated,
   Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +18,7 @@ import { useScrollToTop } from '@react-navigation/native';
 import Avatar from '@/components/Avatar';
 import CommunityIcon from '@/components/CommunityIcon';
 import EmptyState from '@/components/EmptyState';
+import TabErrorState from '@/components/TabErrorState';
 import EventCard from '@/components/EventCard';
 import FilterChips from '@/components/FilterChips';
 import LoadingTail from '@/components/LoadingTail';
@@ -293,6 +295,7 @@ export default function ProfileScreen() {
     data: user,
     isLoading: userLoading,
     isError: userError,
+    isRefetching: userRefetching,
     refetch: refetchUser,
   } = useCurrentUser();
 
@@ -303,19 +306,7 @@ export default function ProfileScreen() {
   if (userError || !user) {
     return (
       <SafeAreaView style={[styles.center, { backgroundColor: colors.bg }]} edges={['top']}>
-        <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.errorTitle, { color: colors.text, fontFamily: fonts.medium }]}>
-          Failed to load profile
-        </Text>
-        <Pressable
-          onPress={() => refetchUser()}
-          style={[styles.retryBtn, { borderColor: colors.border }]}
-          accessibilityLabel="Retry loading profile"
-        >
-          <Text style={[styles.retryText, { color: colors.primary, fontFamily: fonts.medium }]}>
-            Try again
-          </Text>
-        </Pressable>
+        <TabErrorState title="Couldn't load profile" onRetry={refetchUser} />
       </SafeAreaView>
     );
   }
@@ -342,6 +333,7 @@ export default function ProfileScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={userRefetching} onRefresh={refetchUser} />}
       >
         <View style={styles.head}>
           <Avatar uri={user.avatar_url} name={displayName} size={68} />

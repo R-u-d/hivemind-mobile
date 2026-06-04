@@ -12,6 +12,7 @@ import CommunityListSkeleton from '@/components/CommunityListSkeleton';
 import EmptyState from '@/components/EmptyState';
 import FilterChips, { type FilterChipItem } from '@/components/FilterChips';
 import HexLoader from '@/components/HexLoader';
+import TabErrorState from '@/components/TabErrorState';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
 import { communityTypeLabels, spacing, typography, type CommunityType } from '@/theme';
@@ -42,8 +43,16 @@ export default function DiscoverScreen() {
   const [active, setActive] = useState<ChipValue>('all');
 
   const typesArg = active === 'all' ? undefined : [active];
-  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
-    useCommunities({ types: typesArg });
+  const {
+    data,
+    isLoading,
+    isError,
+    isRefetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useCommunities({ types: typesArg });
 
   const communities = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -142,11 +151,7 @@ export default function DiscoverScreen() {
       {isLoading ? (
         <CommunityListSkeleton />
       ) : isError ? (
-        <EmptyState
-          icon="cloud-offline-outline"
-          title="Couldn't load communities"
-          message="Pull down to try again."
-        />
+        <TabErrorState title="Couldn't load communities" onRetry={refetch} />
       ) : communities.length === 0 ? (
         <EmptyState
           icon={active === 'all' ? 'people-outline' : 'filter-outline'}
@@ -169,7 +174,7 @@ export default function DiscoverScreen() {
           }}
           onEndReachedThreshold={0.5}
           onRefresh={refetch}
-          refreshing={false}
+          refreshing={isRefetching}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>

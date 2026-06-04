@@ -12,6 +12,7 @@ import FeedPostCard from '@/components/FeedPostCard';
 import FeedSkeleton from '@/components/FeedSkeleton';
 import GhostButton from '@/components/GhostButton';
 import HexLoader from '@/components/HexLoader';
+import TabErrorState from '@/components/TabErrorState';
 import { useFeed } from '@/hooks/useFeed';
 import { colors, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -30,8 +31,16 @@ export default function FeedScreen() {
   const listRef = useRef<FlashListRef<FeedItem>>(null);
   useScrollToTop(listRef as never);
 
-  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
-    useFeed();
+  const {
+    data,
+    isLoading,
+    isError,
+    isRefetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useFeed();
 
   const items = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -75,12 +84,7 @@ export default function FeedScreen() {
         <FeedSkeleton />
       ) : isError ? (
         <View style={styles.centerFill}>
-          <EmptyState
-            icon="alert-circle-outline"
-            title="Couldn't load feed"
-            message="Check your connection and try again."
-            action={<GhostButton label="Retry" onPress={refetch} />}
-          />
+          <TabErrorState title="Couldn't load feed" onRetry={refetch} />
         </View>
       ) : items.length === 0 ? (
         <View style={styles.centerFill}>
@@ -106,7 +110,7 @@ export default function FeedScreen() {
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.4}
           onRefresh={refetch}
-          refreshing={false}
+          refreshing={isRefetching}
           contentContainerStyle={styles.listContent}
           ListFooterComponent={
             isFetchingNextPage ? (
