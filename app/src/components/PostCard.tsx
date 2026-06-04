@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { useActionSheet } from '@expo/react-native-action-sheet';
-import { ActionSheetIOS, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { ActionSheetIOS, Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Avatar from '@/components/Avatar';
 import { fonts, radius, spacing, typography } from '@/theme';
@@ -28,25 +29,61 @@ function PostCard({
   const isOwn = post.author.id === currentUserId;
 
   function handleLongPress() {
-    if (!isOwn) return;
-    const sheetOptions = {
-      options: ['Cancel', 'Delete Message'] as string[],
-      destructiveButtonIndex: 1,
-      cancelButtonIndex: 0,
-    };
-    const callback = (buttonIndex: number | undefined) => {
-      if (buttonIndex === 1) onDelete(post.id);
-    };
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(sheetOptions, callback);
+    const comingSoon = () => Alert.alert('Coming soon', 'This feature is not available yet.');
+
+    if (isOwn) {
+      const options = [
+        'Cancel',
+        '😀  React',
+        '↩️  Reply',
+        '📋  Copy Text',
+        '➡️  Forward',
+        '📌  Pin Message',
+        '✏️  Edit Message',
+        '🗑  Delete Message',
+      ];
+      const destructiveButtonIndex = options.length - 1;
+      const cancelButtonIndex = 0;
+      const callback = (i: number | undefined) => {
+        if (i === 1) comingSoon();
+        else if (i === 2) comingSoon();
+        else if (i === 3) Clipboard.setStringAsync(post.body);
+        else if (i === 4) comingSoon();
+        else if (i === 5) comingSoon();
+        else if (i === 6) comingSoon();
+        else if (i === 7) onDelete(post.id);
+      };
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          { options, destructiveButtonIndex, cancelButtonIndex },
+          callback,
+        );
+      } else {
+        showActionSheetWithOptions(
+          { options, destructiveButtonIndex, cancelButtonIndex },
+          callback,
+        );
+      }
     } else {
-      showActionSheetWithOptions(sheetOptions, callback);
+      const options = ['Cancel', '😀  React', '↩️  Reply', '📋  Copy Text', '➡️  Forward'];
+      const cancelButtonIndex = 0;
+      const callback = (i: number | undefined) => {
+        if (i === 1) comingSoon();
+        else if (i === 2) comingSoon();
+        else if (i === 3) Clipboard.setStringAsync(post.body);
+        else if (i === 4) comingSoon();
+      };
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions({ options, cancelButtonIndex }, callback);
+      } else {
+        showActionSheetWithOptions({ options, cancelButtonIndex }, callback);
+      }
     }
   }
 
   return (
     <Pressable
-      onLongPress={isOwn ? handleLongPress : undefined}
+      onLongPress={handleLongPress}
       accessibilityRole="button"
       accessibilityLabel={`Post by ${post.author.display_name}`}
       style={[

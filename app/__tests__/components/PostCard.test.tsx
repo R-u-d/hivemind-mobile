@@ -13,6 +13,10 @@ jest.mock('@expo/react-native-action-sheet', () => ({
   useActionSheet: () => ({ showActionSheetWithOptions: jest.fn() }),
 }));
 
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(),
+}));
+
 const ACCENT = '#DB2777';
 
 const post: Post = {
@@ -60,7 +64,7 @@ describe('PostCard', () => {
     expect(screen.queryByText('PINNED')).toBeNull();
   });
 
-  it('shows action sheet on long-press when post belongs to current user', () => {
+  it('shows full action sheet on long-press for own post', () => {
     const sheetSpy = jest
       .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
       .mockImplementation(jest.fn());
@@ -68,8 +72,17 @@ describe('PostCard', () => {
     fireEvent(screen.getByLabelText('Post by Alice'), 'longPress');
     expect(sheetSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: ['Cancel', 'Delete Message'],
-        destructiveButtonIndex: 1,
+        options: expect.arrayContaining([
+          'Cancel',
+          expect.stringContaining('React'),
+          expect.stringContaining('Reply'),
+          expect.stringContaining('Copy Text'),
+          expect.stringContaining('Forward'),
+          expect.stringContaining('Pin Message'),
+          expect.stringContaining('Edit Message'),
+          expect.stringContaining('Delete Message'),
+        ]),
+        destructiveButtonIndex: 7,
         cancelButtonIndex: 0,
       }),
       expect.any(Function),
@@ -77,13 +90,26 @@ describe('PostCard', () => {
     sheetSpy.mockRestore();
   });
 
-  it("does not show action sheet on long-press for another user's post", () => {
+  it("shows reduced action sheet on long-press for another user's post", () => {
     const sheetSpy = jest
       .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
       .mockImplementation(jest.fn());
     renderCard({ currentUserId: 'user-bob' });
     fireEvent(screen.getByLabelText('Post by Alice'), 'longPress');
-    expect(sheetSpy).not.toHaveBeenCalled();
+    expect(sheetSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.arrayContaining([
+          'Cancel',
+          expect.stringContaining('React'),
+          expect.stringContaining('Reply'),
+          expect.stringContaining('Copy Text'),
+          expect.stringContaining('Forward'),
+        ]),
+        cancelButtonIndex: 0,
+      }),
+      expect.any(Function),
+    );
+    expect(sheetSpy.mock.calls[0][0].options).toHaveLength(5);
     sheetSpy.mockRestore();
   });
 });
