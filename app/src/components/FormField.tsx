@@ -38,8 +38,8 @@ const PRIMARY_RGB = '109, 40, 217'; // colors.primary #6D28D9
 // textarea-style field (event description, bio, community description) matches.
 export const MULTILINE_MIN_HEIGHT = 56;
 
-// Approximate line height for the 15px body font used inside FormField.
-const FORM_LINE_H = 22;
+// Explicit line height applied to multiline inputs — must match inputMultiline style below.
+const FORM_LINE_H = 20;
 // Vertical padding on the row container (rowMultiline.paddingVertical = 12).
 const ROW_PAD_V = 12;
 
@@ -233,6 +233,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     outlineStyle: 'none' as never,
   },
-  inputMultiline: { textAlignVertical: 'top', paddingVertical: 0 },
+  inputMultiline: { textAlignVertical: 'top', paddingVertical: 0, lineHeight: FORM_LINE_H },
   error: { fontSize: 12 },
 });
