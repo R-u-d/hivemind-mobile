@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -19,6 +20,12 @@ interface FormFieldProps extends TextInputProps {
   rightAccessory?: React.ReactNode;
   /** Floor height for multiline fields. Defaults to ~3 lines. */
   minHeight?: number;
+  /**
+   * When set, a multiline field grows freely up to this many lines then
+   * becomes internally scrollable. Without this prop the field grows without
+   * bound (existing behaviour).
+   */
+  maxLines?: number;
 }
 
 // Focus state renders a two-layer purple aura around the input. The outer
@@ -31,6 +38,11 @@ const PRIMARY_RGB = '109, 40, 217'; // colors.primary #6D28D9
 // textarea-style field (event description, bio, community description) matches.
 export const MULTILINE_MIN_HEIGHT = 56;
 
+// Approximate line height for the 15px body font used inside FormField.
+const FORM_LINE_H = 22;
+// Vertical padding on the row container (rowMultiline.paddingVertical = 12).
+const ROW_PAD_V = 12;
+
 export default function FormField({
   label,
   error,
@@ -41,12 +53,20 @@ export default function FormField({
   value,
   style,
   minHeight,
+  maxLines,
   ...props
 }: FormFieldProps) {
   const colors = useTheme();
   const [focused, setFocused] = useState(false);
   const glow = useRef(new Animated.Value(0)).current;
   const breath = useRef(new Animated.Value(0)).current;
+
+  const maxInputH = maxLines ? maxLines * FORM_LINE_H : undefined;
+  const maxRowH = maxInputH ? maxInputH + ROW_PAD_V * 2 : undefined;
+
+  // Android: track content height explicitly so the field can grow and then scroll.
+  const minInputH = minHeight ?? MULTILINE_MIN_HEIGHT;
+  const [androidH, setAndroidH] = useState(minInputH);
 
   useEffect(() => {
     Animated.timing(glow, {
@@ -82,6 +102,27 @@ export default function FormField({
   const breathOpacity = breath.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] });
   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
 
+  // Height / scroll logic for capped multiline fields.
+  const isAndroid = Platform.OS === 'android';
+  const cappedMultiline = props.multiline && maxLines != null;
+  const androidAtCap = cappedMultiline && isAndroid && androidH >= (maxInputH ?? Infinity);
+
+  const inputHeightStyle = cappedMultiline
+    ? isAndroid
+      ? { height: androidH }
+      : { maxHeight: maxInputH }
+    : props.multiline
+      ? { minHeight: minInputH }
+      : undefined;
+
+  const scrollEnabled = cappedMultiline
+    ? isAndroid
+      ? androidAtCap
+      : undefined // iOS handles it natively via maxHeight
+    : props.multiline
+      ? false
+      : undefined;
+
   return (
     <View style={styles.wrapper}>
       <Text
@@ -112,6 +153,7 @@ export default function FormField({
             styles.row,
             { borderColor, backgroundColor: colors.surface },
             props.multiline ? styles.rowMultiline : styles.rowSingleLine,
+            cappedMultiline && maxRowH ? { maxHeight: maxRowH } : undefined,
           ]}
         >
           <TextInput
@@ -119,7 +161,7 @@ export default function FormField({
               styles.input,
               { color: colors.text, fontFamily: fonts.regular },
               props.multiline && styles.inputMultiline,
-              props.multiline ? { minHeight: minHeight ?? MULTILINE_MIN_HEIGHT } : undefined,
+              inputHeightStyle,
               style,
             ]}
             underlineColorAndroid="transparent"
@@ -133,7 +175,15 @@ export default function FormField({
               onBlur?.(e);
             }}
             value={value ?? ''}
-            scrollEnabled={props.multiline ? false : undefined}
+            scrollEnabled={scrollEnabled}
+            onContentSizeChange={
+              cappedMultiline && isAndroid
+                ? e => {
+                    const h = e.nativeEvent.contentSize.height;
+                    setAndroidH(Math.min(Math.max(h, minInputH), maxInputH ?? h));
+                  }
+                : props.onContentSizeChange
+            }
             {...props}
           />
           {rightAccessory}

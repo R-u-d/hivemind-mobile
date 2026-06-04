@@ -580,6 +580,7 @@ export default function CreateEventScreen() {
                   error={errors.description?.message}
                   placeholder="Tell people what to expect"
                   multiline
+                  maxLines={13}
                   maxLength={DESCRIPTION_MAX}
                   accessibilityLabel="Description"
                 />
