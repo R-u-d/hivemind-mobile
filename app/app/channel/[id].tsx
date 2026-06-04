@@ -150,7 +150,7 @@ export default function ChannelScreen() {
   const accentColor = community ? communityTypeColors[community.type].primary : colors.primary;
 
   const isAnnouncementsChannel = channel?.channel_type === 'announcements';
-  const showComposeBar = !!community?.is_member && !isAnnouncementsChannel;
+  const showComposeBar = !!community?.is_member;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -342,53 +342,74 @@ export default function ChannelScreen() {
               },
             ]}
           >
-            <TextInput
-              ref={inputRef}
-              value={text}
-              onChangeText={setText}
-              placeholder={`Message #${channel?.name ?? 'channel'}…`}
-              placeholderTextColor={colors.textFaint}
-              returnKeyType="send"
-              onSubmitEditing={handleSubmit}
-              blurOnSubmit={false}
-              multiline
-              scrollEnabled={Platform.OS === 'android' ? inputHeight >= INPUT_MAX_H : undefined}
-              onContentSizeChange={
-                Platform.OS === 'android'
-                  ? e => {
-                      const h = e.nativeEvent.contentSize.height;
-                      setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
-                    }
-                  : undefined
-              }
-              editable={!createPending}
-              accessibilityLabel="Message input"
-              style={[
-                styles.input,
-                Platform.OS === 'android' ? { height: inputHeight } : { maxHeight: INPUT_MAX_H },
-                {
-                  backgroundColor: colors.surfaceSunk,
-                  color: colors.text,
-                  fontFamily: fonts.regular,
-                  opacity: createPending ? 0.5 : 1,
-                },
-              ]}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Send message"
-              onPress={handleSubmit}
-              disabled={createPending || !text.trim()}
-              style={[
-                styles.sendBtn,
-                {
-                  backgroundColor: colors.primary,
-                  opacity: createPending || !text.trim() ? 0.5 : 1,
-                },
-              ]}
-            >
-              <Ionicons name="send" size={18} color={colors.onPrimary} />
-            </Pressable>
+            {isAnnouncementsChannel ? (
+              <View
+                style={[styles.readOnlyBar, { backgroundColor: colors.surfaceSunk }]}
+                accessibilityLabel="Read-only channel"
+              >
+                <Ionicons name="megaphone-outline" size={16} color={colors.textMuted} />
+                <Text
+                  style={[
+                    styles.readOnlyText,
+                    { color: colors.textMuted, fontFamily: fonts.regular },
+                  ]}
+                >
+                  Only moderators can post here
+                </Text>
+              </View>
+            ) : (
+              <>
+                <TextInput
+                  ref={inputRef}
+                  value={text}
+                  onChangeText={setText}
+                  placeholder={`Message #${channel?.name ?? 'channel'}…`}
+                  placeholderTextColor={colors.textFaint}
+                  returnKeyType="send"
+                  onSubmitEditing={handleSubmit}
+                  blurOnSubmit={false}
+                  multiline
+                  scrollEnabled={Platform.OS === 'android' ? inputHeight >= INPUT_MAX_H : undefined}
+                  onContentSizeChange={
+                    Platform.OS === 'android'
+                      ? e => {
+                          const h = e.nativeEvent.contentSize.height;
+                          setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
+                        }
+                      : undefined
+                  }
+                  editable={!createPending}
+                  accessibilityLabel="Message input"
+                  style={[
+                    styles.input,
+                    Platform.OS === 'android'
+                      ? { height: inputHeight }
+                      : { maxHeight: INPUT_MAX_H },
+                    {
+                      backgroundColor: colors.surfaceSunk,
+                      color: colors.text,
+                      fontFamily: fonts.regular,
+                      opacity: createPending ? 0.5 : 1,
+                    },
+                  ]}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Send message"
+                  onPress={handleSubmit}
+                  disabled={createPending || !text.trim()}
+                  style={[
+                    styles.sendBtn,
+                    {
+                      backgroundColor: colors.primary,
+                      opacity: createPending || !text.trim() ? 0.5 : 1,
+                    },
+                  ]}
+                >
+                  <Ionicons name="send" size={18} color={colors.onPrimary} />
+                </Pressable>
+              </>
+            )}
           </View>
         )}
       </KeyboardAvoidingView>
@@ -454,4 +475,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
   },
+  readOnlyBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    height: 42,
+    paddingHorizontal: spacing.base,
+    borderRadius: radius.xl,
+  },
+  readOnlyText: { fontSize: 14 },
 });
