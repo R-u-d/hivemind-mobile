@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { client } from '@/api/client';
 import type { ChannelPage } from '@/types/community';
@@ -16,5 +16,16 @@ export function useCommunityChannels(communityId: string, enabled = true) {
     queryFn: ({ signal }) => fetchChannels(communityId, signal),
     enabled: enabled && !!communityId,
     retry: false,
+  });
+}
+
+export function useDeleteChannel(communityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (channelId: string) =>
+      client.delete(`/communities/${communityId}/channels/${channelId}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['communities', communityId, 'channels'] });
+    },
   });
 }

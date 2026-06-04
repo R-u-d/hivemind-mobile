@@ -3,8 +3,18 @@ import { Image } from 'expo-image';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActionSheetIOS,
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useActionSheet } from '@expo/react-native-action-sheet';
 
 import EmptyState from '@/components/EmptyState';
 import HexCover from '@/components/HexCover';
@@ -12,9 +22,10 @@ import LoadingTail from '@/components/LoadingTail';
 import MembersSheet from '@/components/MembersSheet';
 import SkeletonBox from '@/components/SkeletonBox';
 import TypePill from '@/components/TypePill';
-import { useCommunityChannels } from '@/hooks/useCommunityChannels';
+import { useCommunityChannels, useDeleteChannel } from '@/hooks/useCommunityChannels';
 import { useCommunityDetail } from '@/hooks/useCommunityDetail';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
 import { fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -36,14 +47,53 @@ interface InfiniteCommunityListData {
 
 // ── Channel row ───────────────────────────────────────────────────────────────
 
-function ChannelRow({ channel, onPress }: { channel: Channel; onPress: (id: string) => void }) {
+function ChannelRow({
+  channel,
+  onPress,
+  canManage,
+  onDelete,
+}: {
+  channel: Channel;
+  onPress: (id: string) => void;
+  canManage: boolean;
+  onDelete: (id: string) => void;
+}) {
   const colors = useTheme();
+  const { showActionSheetWithOptions } = useActionSheet();
   const iconName = CHANNEL_ICONS[channel.channel_type] ?? 'chatbubble-outline';
+
+  function handleLongPress() {
+    if (!canManage) return;
+    const comingSoon = () => Alert.alert('Coming soon', 'This feature is not available yet.');
+    const options = ['Cancel', '✏️  Rename', '🏷  Change Type', '🗑  Delete Channel'];
+    const destructiveButtonIndex = 3;
+    const cancelButtonIndex = 0;
+    const callback = (i: number | undefined) => {
+      if (i === 1) comingSoon();
+      else if (i === 2) comingSoon();
+      else if (i === 3) {
+        Alert.alert('Delete channel', `Delete #${channel.name}? This cannot be undone.`, [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: () => onDelete(channel.id) },
+        ]);
+      }
+    };
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options, destructiveButtonIndex, cancelButtonIndex },
+        callback,
+      );
+    } else {
+      showActionSheetWithOptions({ options, destructiveButtonIndex, cancelButtonIndex }, callback);
+    }
+  }
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${channel.name} channel`}
       onPress={() => onPress(channel.id)}
+      onLongPress={canManage ? handleLongPress : undefined}
       style={[styles.channelRow, { borderBottomColor: colors.borderSoft }]}
     >
       <View style={[styles.channelIconWrap, { backgroundColor: colors.surfaceSunk }]}>
@@ -117,12 +167,16 @@ export default function CommunityDetailScreen() {
     refetch: refetchDetail,
   } = useCommunityDetail(id);
 
+  const { data: currentUser } = useCurrentUser();
+
   const {
     data: channelsData,
     isLoading: channelsLoading,
     isError: channelsError,
     refetch: refetchChannels,
-  } = useCommunityChannels(id);
+  } = useCommunityChannels(id, !!community?.is_member);
+
+  const { mutate: deleteChannel } = useDeleteChannel(id);
 
   const {
     data: membersData,
@@ -135,6 +189,14 @@ export default function CommunityDetailScreen() {
   const channels = useMemo(() => channelsData?.results ?? [], [channelsData]);
   const members = useMemo(() => membersData?.pages.flatMap(p => p.results) ?? [], [membersData]);
   const memberTotal = community?.member_count ?? 0;
+
+  // Show channel context menu for owners and moderators.
+  const canManageChannels = useMemo(() => {
+    if (!community || !currentUser) return false;
+    if (community.owner_id === currentUser.id) return true;
+    const membership = members.find(m => m.user_id === currentUser.id);
+    return membership?.role === 'moderator' || membership?.role === 'owner';
+  }, [community, currentUser, members]);
 
   const patchDetail = useCallback(
     (patch: (c: CommunityDetail) => CommunityDetail) => {
@@ -378,7 +440,11 @@ export default function CommunityDetailScreen() {
                 Channels
               </Text>
 
-              {channelsLoading ? (
+              {!community.is_member ? (
+                <Text style={[typography.caption, { color: colors.textMuted }]}>
+                  Join this community to see its channels.
+                </Text>
+              ) : channelsLoading ? (
                 <ChannelsSkeleton />
               ) : channelsError ? (
                 <Pressable
@@ -396,7 +462,13 @@ export default function CommunityDetailScreen() {
                 </Text>
               ) : (
                 channels.map(channel => (
-                  <ChannelRow key={channel.id} channel={channel} onPress={handleChannelPress} />
+                  <ChannelRow
+                    key={channel.id}
+                    channel={channel}
+                    onPress={handleChannelPress}
+                    canManage={canManageChannels}
+                    onDelete={deleteChannel}
+                  />
                 ))
               )}
             </View>
