@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useCallback, useMemo, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useScrollToTop } from '@react-navigation/native';
 
@@ -12,7 +12,9 @@ import FeedPostCard from '@/components/FeedPostCard';
 import FeedSkeleton from '@/components/FeedSkeleton';
 import GhostButton from '@/components/GhostButton';
 import HexLoader from '@/components/HexLoader';
+import NotificationsSheet from '@/components/NotificationsSheet';
 import { useFeed } from '@/hooks/useFeed';
+import { useNotifications } from '@/hooks/useNotifications';
 import { colors, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { FeedItem } from '@/types/feed';
@@ -28,6 +30,8 @@ function keyExtractor(item: FeedItem): string {
 export default function FeedScreen() {
   const themeColors = useTheme();
   const listRef = useRef<FlashListRef<FeedItem>>(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const { hasUnread } = useNotifications();
   useScrollToTop(listRef as never);
 
   const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
@@ -61,13 +65,18 @@ export default function FeedScreen() {
     <SafeAreaView style={[styles.screen, { backgroundColor: themeColors.bg }]} edges={['top']}>
       <View style={styles.header}>
         <Text style={[typography.display, { color: themeColors.text }]}>Feed</Text>
-        <Ionicons
-          name="notifications-outline"
-          size={22}
-          color={themeColors.ink}
+        <Pressable
+          onPress={() => setSheetVisible(true)}
           accessibilityLabel="Notifications"
-        />
+          accessibilityRole="button"
+          hitSlop={12}
+          style={styles.bellWrap}
+        >
+          <Ionicons name="notifications-outline" size={22} color={themeColors.ink} />
+          {hasUnread && <View style={[styles.badge, { backgroundColor: themeColors.primary }]} />}
+        </Pressable>
       </View>
+      <NotificationsSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
 
       {isLoading ? (
         <FeedSkeleton />
@@ -130,6 +139,15 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   centerFill: { flex: 1 },
+  bellWrap: { padding: 4 },
+  badge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
   listContent: { paddingBottom: 100, paddingTop: spacing.xs },
   footer: { alignItems: 'center', paddingVertical: spacing.lg },
 });
