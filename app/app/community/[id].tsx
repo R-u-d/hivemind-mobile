@@ -2,15 +2,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
+  Animated,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,14 +25,24 @@ import LoadingTail from '@/components/LoadingTail';
 import MembersSheet from '@/components/MembersSheet';
 import SkeletonBox from '@/components/SkeletonBox';
 import TypePill from '@/components/TypePill';
-import { useCommunityChannels, useDeleteChannel } from '@/hooks/useCommunityChannels';
+import {
+  useCommunityChannels,
+  useCreateChannel,
+  useDeleteChannel,
+} from '@/hooks/useCommunityChannels';
 import { useCommunityDetail } from '@/hooks/useCommunityDetail';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
 import { fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
-import type { Channel, Community, CommunityDetail, CommunityPage } from '@/types/community';
+import type {
+  Channel,
+  ChannelType,
+  Community,
+  CommunityDetail,
+  CommunityPage,
+} from '@/types/community';
 
 const COVER_HEIGHT = 168;
 const CHANNEL_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
@@ -150,6 +163,173 @@ function ChannelsSkeleton() {
   );
 }
 
+// ── Create channel sheet ──────────────────────────────────────────────────────
+
+const CHANNEL_TYPES: {
+  value: ChannelType;
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+}[] = [
+  { value: 'general', label: 'General', icon: 'chatbubble-outline' },
+  { value: 'announcements', label: 'Announcements', icon: 'megaphone-outline' },
+  { value: 'events', label: 'Events', icon: 'calendar-outline' },
+  { value: 'media', label: 'Media', icon: 'image-outline' },
+  { value: 'help', label: 'Help', icon: 'help-circle-outline' },
+];
+
+function CreateChannelSheet({
+  visible,
+  onClose,
+  onCreate,
+  isPending,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onCreate: (name: string, type: ChannelType) => void;
+  isPending: boolean;
+}) {
+  const colors = useTheme();
+  const { bottom } = useSafeAreaInsets();
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const [name, setName] = useState('');
+  const [channelType, setChannelType] = useState<ChannelType>('general');
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(slideAnim, {
+        toValue: 1,
+        tension: 65,
+        friction: 11,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      slideAnim.setValue(0);
+      setName('');
+      setChannelType('general');
+    }
+  }, [visible, slideAnim]);
+
+  const translateY = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] });
+  const canCreate = name.trim().length > 0 && !isPending;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <View style={styles.sheetContainer}>
+        <Pressable style={styles.sheetBackdrop} onPress={onClose} accessibilityLabel="Close" />
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.surface,
+              paddingBottom: bottom + spacing.base,
+              transform: [{ translateY }],
+            },
+          ]}
+        >
+          <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+          <Text style={[typography.title, { color: colors.text, marginBottom: spacing.lg }]}>
+            New Channel
+          </Text>
+
+          <Text style={[styles.sheetLabel, { color: colors.textMuted, fontFamily: fonts.medium }]}>
+            Name
+          </Text>
+          <View
+            style={[
+              styles.sheetInput,
+              { borderColor: colors.border, backgroundColor: colors.surfaceSunk },
+            ]}
+          >
+            <Text style={[styles.sheetHash, { color: colors.textMuted }]}>#</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="channel-name"
+              placeholderTextColor={colors.textFaint}
+              autoCapitalize="none"
+              maxLength={40}
+              accessibilityLabel="Channel name"
+              style={[styles.sheetTextInput, { color: colors.text, fontFamily: fonts.regular }]}
+            />
+          </View>
+
+          <Text
+            style={[
+              styles.sheetLabel,
+              { color: colors.textMuted, fontFamily: fonts.medium, marginTop: spacing.md },
+            ]}
+          >
+            Type
+          </Text>
+          <View style={styles.typeGrid}>
+            {CHANNEL_TYPES.map(t => {
+              const active = channelType === t.value;
+              return (
+                <Pressable
+                  key={t.value}
+                  onPress={() => setChannelType(t.value)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.label}
+                  style={[
+                    styles.typeOption,
+                    {
+                      borderColor: active ? colors.primary : colors.border,
+                      backgroundColor: active ? colors.primarySoft : colors.surfaceSunk,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={t.icon}
+                    size={16}
+                    color={active ? colors.primaryOnSoft : colors.textMuted}
+                  />
+                  <Text
+                    style={[
+                      styles.typeLabel,
+                      {
+                        color: active ? colors.primaryOnSoft : colors.textMuted,
+                        fontFamily: active ? fonts.medium : fonts.regular,
+                      },
+                    ]}
+                  >
+                    {t.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Pressable
+            onPress={() => canCreate && onCreate(name.trim(), channelType)}
+            accessibilityRole="button"
+            accessibilityLabel="Create channel"
+            disabled={!canCreate}
+            style={[
+              styles.sheetCreateBtn,
+              { backgroundColor: colors.primary, opacity: canCreate ? 1 : 0.4 },
+            ]}
+          >
+            <Text
+              style={[
+                styles.sheetCreateText,
+                { color: colors.onPrimary, fontFamily: fonts.medium },
+              ]}
+            >
+              {isPending ? 'Creating…' : 'Create Channel'}
+            </Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function CommunityDetailScreen() {
@@ -159,6 +339,7 @@ export default function CommunityDetailScreen() {
   const rawId = useLocalSearchParams<{ id: string }>().id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const [membersOpen, setMembersOpen] = useState(false);
+  const [createChannelOpen, setCreateChannelOpen] = useState(false);
 
   const {
     data: community,
@@ -177,6 +358,7 @@ export default function CommunityDetailScreen() {
   } = useCommunityChannels(id, !!community?.is_member);
 
   const { mutate: deleteChannel } = useDeleteChannel(id);
+  const { mutate: createChannel, isPending: createChannelPending } = useCreateChannel(id);
 
   const {
     data: membersData,
@@ -258,6 +440,13 @@ export default function CommunityDetailScreen() {
       router.push(`/channel/${channelId}?communityId=${id}` as never);
     },
     [id],
+  );
+
+  const handleCreateChannel = useCallback(
+    (name: string, type: ChannelType) => {
+      createChannel({ name, channel_type: type }, { onSuccess: () => setCreateChannelOpen(false) });
+    },
+    [createChannel],
   );
 
   if (detailError) {
@@ -434,16 +623,22 @@ export default function CommunityDetailScreen() {
 
             {/* Channels section */}
             <View style={styles.channelsSection}>
-              <Text
-                style={[typography.overline, { color: colors.textMuted, marginBottom: spacing.sm }]}
-              >
-                Channels
-              </Text>
+              <View style={styles.channelsHeader}>
+                <Text style={[typography.overline, { color: colors.textMuted }]}>Channels</Text>
+                {canManageChannels && (
+                  <Pressable
+                    onPress={() => setCreateChannelOpen(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Create channel"
+                    hitSlop={10}
+                  >
+                    <Ionicons name="add" size={20} color={colors.primary} />
+                  </Pressable>
+                )}
+              </View>
 
               {!community.is_member ? (
-                <Text style={[typography.caption, { color: colors.textMuted }]}>
-                  Join this community to see its channels.
-                </Text>
+                <ChannelsSkeleton />
               ) : channelsLoading ? (
                 <ChannelsSkeleton />
               ) : channelsError ? (
@@ -485,6 +680,13 @@ export default function CommunityDetailScreen() {
         isFetchingNextPage={membersFetchingNext}
         hasNextPage={membersHasNext ?? false}
         fetchNextPage={membersFetchNext}
+      />
+
+      <CreateChannelSheet
+        visible={createChannelOpen}
+        onClose={() => setCreateChannelOpen(false)}
+        onCreate={handleCreateChannel}
+        isPending={createChannelPending}
       />
     </>
   );
@@ -545,6 +747,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     gap: spacing.xs,
   },
+  channelsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
   channelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -561,4 +769,58 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   channelName: { fontSize: 15, fontWeight: '500', letterSpacing: -0.1 },
+  // Create channel sheet
+  sheetContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheetBackdrop: { ...StyleSheet.absoluteFillObject },
+  sheet: {
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.base,
+    gap: 0,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: radius.full,
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
+  sheetLabel: { fontSize: 13, letterSpacing: 0.1, marginBottom: spacing.xs },
+  sheetInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,
+    borderRadius: radius.input,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    gap: spacing.xs,
+  },
+  sheetHash: { fontSize: 16, fontWeight: '500' },
+  sheetTextInput: { flex: 1, fontSize: 15, letterSpacing: -0.1 },
+  typeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  typeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  typeLabel: { fontSize: 13 },
+  sheetCreateBtn: {
+    height: 48,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  sheetCreateText: { fontSize: 15 },
 });
