@@ -11,6 +11,7 @@ import type { Event, RsvpStatus } from '@/types/event';
 interface EventCardProps {
   event: Event;
   onPress: (id: string) => void;
+  isNew?: boolean;
 }
 
 const MONTH_ABBR = [
@@ -145,7 +146,7 @@ function RsvpPicker({
   );
 }
 
-function EventCard({ event, onPress }: EventCardProps) {
+function EventCard({ event, onPress, isNew }: EventCardProps) {
   const themeColors = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
   const date = new Date(event.start_datetime);
@@ -175,6 +176,7 @@ function EventCard({ event, onPress }: EventCardProps) {
           },
         ]}
       >
+        {isNew && <View style={styles.newDot} />}
         {/* Date column */}
         <View style={styles.dateCol}>
           <Text style={[styles.month, { color: themeColors.primary }]}>{month}</Text>
@@ -314,6 +316,16 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 12, fontFamily: fonts.regular },
   metaLocation: { flexShrink: 1 },
 
+  newDot: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
+    zIndex: 1,
+  },
   // RSVP picker
   pickerBackdrop: {
     flex: 1,

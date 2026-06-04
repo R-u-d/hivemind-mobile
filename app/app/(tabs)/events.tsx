@@ -13,6 +13,7 @@ import FilterChips, { type FilterChipItem } from '@/components/FilterChips';
 import GhostButton from '@/components/GhostButton';
 import HexLoader from '@/components/HexLoader';
 import { useEvents } from '@/hooks/useEvents';
+import { useNotifications } from '@/hooks/useNotifications';
 import { spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Event } from '@/types/event';
@@ -63,6 +64,22 @@ export default function EventsScreen() {
   useScrollToTop(listRef as never);
 
   const [filter, setFilter] = useState<EventFilter>('all');
+  const { notifications } = useNotifications();
+
+  // Set of event ids that have an unread new_event notification.
+  const newEventIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const n of notifications) {
+      if (
+        n.notification_type === 'new_event' &&
+        !n.is_read &&
+        typeof n.data.event_id === 'string'
+      ) {
+        ids.add(n.data.event_id);
+      }
+    }
+    return ids;
+  }, [notifications]);
 
   const queryArgs = buildQueryArgs(filter);
   const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
@@ -129,7 +146,9 @@ export default function EventsScreen() {
           data={events}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <EventCard event={item} onPress={handleEventPress} />}
+          renderItem={({ item }) => (
+            <EventCard event={item} onPress={handleEventPress} isNew={newEventIds.has(item.id)} />
+          )}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.3}
           ListFooterComponent={

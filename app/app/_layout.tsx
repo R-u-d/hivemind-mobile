@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Sentry from '@sentry/react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { queryClient } from '@/api/queryClient';
 import AppSplash from '@/components/AppSplash';
@@ -34,20 +35,23 @@ export default Sentry.wrap(function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ActionSheetProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-          {!splashDone && <AppSplash onDone={handleSplashDone} />}
-        </ThemeProvider>
-        <QueryDevtools />
-      </QueryClientProvider>
-    </ActionSheetProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ActionSheetProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+            {!splashDone && <AppSplash onDone={handleSplashDone} />}
+          </ThemeProvider>
+          <QueryDevtools />
+        </QueryClientProvider>
+      </ActionSheetProvider>
+    </GestureHandlerRootView>
   );
 });
