@@ -21,6 +21,7 @@ class Command(BaseCommand):
                 ("backfill_default_channels", {}),
                 ("seed_events", {"clear": True}),
                 ("seed_posts", {"clear": True}),
+                ("seed_notifications", {"clear": True}),
             ]
             for name, kwargs in steps:
                 self.stdout.write(self.style.MIGRATE_HEADING(f"\n>>> {name}"))

@@ -59,3 +59,11 @@ class NotificationViewSet(
     def read_all(self, request):
         updated = self.get_queryset().filter(is_read=False).update(is_read=True)
         return Response({"updated": updated})
+
+    @action(detail=True, methods=["post"])
+    def unread(self, request, pk=None):
+        notification = self.get_object()
+        if notification.is_read:
+            notification.is_read = False
+            notification.save(update_fields=["is_read"])
+        return Response(NotificationSerializer(notification).data)
