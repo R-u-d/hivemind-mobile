@@ -163,6 +163,50 @@ function ChannelsSkeleton() {
   );
 }
 
+// Ghost rows shown to non-members — structure mirrors real channel rows but
+// content is replaced with thin muted lines so it reads as "locked preview".
+function LockedChannelsPreview() {
+  const colors = useTheme();
+  const rows: Array<{ nameW: `${number}%`; hasDesc: boolean; descW: `${number}%` }> = [
+    { nameW: '52%', hasDesc: false, descW: '0%' },
+    { nameW: '38%', hasDesc: true, descW: '62%' },
+    { nameW: '60%', hasDesc: false, descW: '0%' },
+    { nameW: '44%', hasDesc: true, descW: '45%' },
+  ];
+  return (
+    <View style={{ opacity: 0.38 }}>
+      {rows.map((r, i) => (
+        <View key={i} style={[styles.channelRow, { borderBottomColor: colors.borderSoft }]}>
+          <View style={[styles.channelIconWrap, { backgroundColor: colors.borderSoft }]} />
+          <View style={{ flex: 1, gap: 5 }}>
+            <View
+              style={{ width: r.nameW, height: 9, borderRadius: 5, backgroundColor: colors.border }}
+            />
+            {r.hasDesc && (
+              <View
+                style={{
+                  width: r.descW,
+                  height: 7,
+                  borderRadius: 4,
+                  backgroundColor: colors.borderSoft,
+                }}
+              />
+            )}
+          </View>
+        </View>
+      ))}
+      <Text
+        style={[
+          typography.caption,
+          { color: colors.textFaint, marginTop: spacing.sm, textAlign: 'center' },
+        ]}
+      >
+        Join to see channels
+      </Text>
+    </View>
+  );
+}
+
 // ── Create channel sheet ──────────────────────────────────────────────────────
 
 const CHANNEL_TYPES: {
@@ -638,7 +682,7 @@ export default function CommunityDetailScreen() {
               </View>
 
               {!community.is_member ? (
-                <ChannelsSkeleton />
+                <LockedChannelsPreview />
               ) : channelsLoading ? (
                 <ChannelsSkeleton />
               ) : channelsError ? (
