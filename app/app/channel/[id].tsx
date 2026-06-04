@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +36,37 @@ type FeedItem =
   | { type: 'post'; data: Post; ts: number }
   | { type: 'event'; data: Event; ts: number };
 
+const CHANNEL_EMPTY: Record<
+  string,
+  { icon: React.ComponentProps<typeof Ionicons>['name']; title: string; message: string }
+> = {
+  general: {
+    icon: 'chatbubble-outline',
+    title: 'No posts yet',
+    message: 'Be the first to start a conversation.',
+  },
+  announcements: {
+    icon: 'megaphone-outline',
+    title: 'No announcements yet',
+    message: 'Moderators will post important updates here.',
+  },
+  events: {
+    icon: 'calendar-outline',
+    title: 'No events yet',
+    message: 'Events created in this community will appear here.',
+  },
+  media: {
+    icon: 'image-outline',
+    title: 'No media yet',
+    message: 'Share photos, videos or links with the community.',
+  },
+  help: {
+    icon: 'help-circle-outline',
+    title: 'No questions yet',
+    message: 'Ask the community anything — someone will help.',
+  },
+};
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ChannelSkeleton() {
@@ -53,6 +85,7 @@ function ChannelSkeleton() {
 export default function ChannelScreen() {
   const colors = useTheme();
   const { top, bottom } = useSafeAreaInsets();
+  const { height: screenH } = useWindowDimensions();
   const rawParams = useLocalSearchParams<{ id: string; communityId: string }>();
   const channelId = Array.isArray(rawParams.id) ? rawParams.id[0] : rawParams.id;
   const communityId = Array.isArray(rawParams.communityId)
@@ -307,10 +340,11 @@ export default function ChannelScreen() {
                 </View>
               )}
               ListEmptyComponent={
-                <View style={styles.emptyWrap}>
+                <View style={[styles.emptyWrap, { minHeight: screenH * 0.55 }]}>
                   <EmptyState
-                    icon={isEventsChannel ? 'calendar-outline' : 'chatbubble-outline'}
-                    title={isEventsChannel ? 'Nothing here yet' : 'No posts yet'}
+                    icon={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].icon}
+                    title={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].title}
+                    message={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].message}
                   />
                 </View>
               }
@@ -441,7 +475,12 @@ const styles = StyleSheet.create({
 
   invertedContainer: { flex: 1, transform: [{ scaleY: -1 }] },
   invertedItem: { transform: [{ scaleY: -1 }] },
-  emptyWrap: { transform: [{ scaleY: -1 }] },
+  emptyWrap: {
+    transform: [{ scaleY: -1 }],
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footerLoader: { alignItems: 'center', paddingVertical: spacing.md },
 
   composeBar: {
