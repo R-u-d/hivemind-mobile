@@ -5,7 +5,7 @@ import { ActionSheetIOS, Alert, Platform, Pressable, StyleSheet, Text, View } fr
 
 import Avatar from '@/components/Avatar';
 import { fonts, radius, spacing, typography } from '@/theme';
-import { useTheme } from '@/theme/ThemeContext';
+import { useIsDark, useTheme } from '@/theme/ThemeContext';
 import type { Post } from '@/types/community';
 import { relativeTime } from '@/utils/relativeTime';
 
@@ -25,8 +25,21 @@ function PostCard({
   onDelete,
 }: PostCardProps) {
   const colors = useTheme();
+  const isDark = useIsDark();
   const { showActionSheetWithOptions } = useActionSheet();
   const isOwn = post.author.id === currentUserId;
+
+  const iosStyle = { userInterfaceStyle: isDark ? ('dark' as const) : ('light' as const) };
+  const androidDark = isDark
+    ? {
+        containerStyle: { backgroundColor: colors.surface },
+        tintColor: colors.text,
+        destructiveColor: colors.danger,
+        textStyle: { color: colors.text },
+        titleTextStyle: { color: colors.textMuted },
+        separatorStyle: { backgroundColor: colors.border },
+      }
+    : {};
 
   function handleLongPress() {
     const comingSoon = () => Alert.alert('Coming soon', 'This feature is not available yet.');
@@ -55,12 +68,12 @@ function PostCard({
       };
       if (Platform.OS === 'ios') {
         ActionSheetIOS.showActionSheetWithOptions(
-          { options, destructiveButtonIndex, cancelButtonIndex },
+          { options, destructiveButtonIndex, cancelButtonIndex, ...iosStyle },
           callback,
         );
       } else {
         showActionSheetWithOptions(
-          { options, destructiveButtonIndex, cancelButtonIndex },
+          { options, destructiveButtonIndex, cancelButtonIndex, ...androidDark },
           callback,
         );
       }
@@ -74,9 +87,12 @@ function PostCard({
         else if (i === 4) comingSoon();
       };
       if (Platform.OS === 'ios') {
-        ActionSheetIOS.showActionSheetWithOptions({ options, cancelButtonIndex }, callback);
+        ActionSheetIOS.showActionSheetWithOptions(
+          { options, cancelButtonIndex, ...iosStyle },
+          callback,
+        );
       } else {
-        showActionSheetWithOptions({ options, cancelButtonIndex }, callback);
+        showActionSheetWithOptions({ options, cancelButtonIndex, ...androidDark }, callback);
       }
     }
   }

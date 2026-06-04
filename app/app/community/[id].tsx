@@ -35,7 +35,7 @@ import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
 import { fonts, radius, spacing, typography } from '@/theme';
-import { useTheme } from '@/theme/ThemeContext';
+import { useIsDark, useTheme } from '@/theme/ThemeContext';
 import type {
   Channel,
   ChannelType,
@@ -72,8 +72,21 @@ function ChannelRow({
   onDelete: (id: string) => void;
 }) {
   const colors = useTheme();
+  const isDark = useIsDark();
   const { showActionSheetWithOptions } = useActionSheet();
   const iconName = CHANNEL_ICONS[channel.channel_type] ?? 'chatbubble-outline';
+
+  const iosStyle = { userInterfaceStyle: isDark ? ('dark' as const) : ('light' as const) };
+  const androidDark = isDark
+    ? {
+        containerStyle: { backgroundColor: colors.surface },
+        tintColor: colors.text,
+        destructiveColor: colors.danger,
+        textStyle: { color: colors.text },
+        titleTextStyle: { color: colors.textMuted },
+        separatorStyle: { backgroundColor: colors.border },
+      }
+    : {};
 
   function handleLongPress() {
     if (!canManage) return;
@@ -93,11 +106,14 @@ function ChannelRow({
     };
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options, destructiveButtonIndex, cancelButtonIndex },
+        { options, destructiveButtonIndex, cancelButtonIndex, ...iosStyle },
         callback,
       );
     } else {
-      showActionSheetWithOptions({ options, destructiveButtonIndex, cancelButtonIndex }, callback);
+      showActionSheetWithOptions(
+        { options, destructiveButtonIndex, cancelButtonIndex, ...androidDark },
+        callback,
+      );
     }
   }
 
