@@ -22,7 +22,12 @@
         "backgroundColor": "#130C2E"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "config": {
+        "googleMaps": {
+          "apiKey": "SET_VIA_ENV"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
