@@ -83,6 +83,8 @@ jest.mock('@/hooks/useCommunityChannels', () => ({
     isError: false,
     refetch: jest.fn(),
   }),
+  useCreateChannel: () => ({ mutate: jest.fn(), isPending: false }),
+  useDeleteChannel: () => ({ mutate: jest.fn() }),
 }));
 
 jest.mock('@/hooks/useCommunityMembers', () => ({
@@ -93,6 +95,10 @@ jest.mock('@/hooks/useCommunityMembers', () => ({
     hasNextPage: false,
     fetchNextPage: jest.fn(),
   }),
+}));
+
+jest.mock('@/hooks/useCurrentUser', () => ({
+  useCurrentUser: () => ({ data: { id: 'user-1' } }),
 }));
 
 jest.mock('@/hooks/useJoinCommunity', () => ({
