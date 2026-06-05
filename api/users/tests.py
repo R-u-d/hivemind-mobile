@@ -241,6 +241,28 @@ def test_public_profile_returns_community_and_event_counts(api_client, user):
 
 
 @pytest.mark.django_db
+def test_event_count_excludes_non_member_rsvps(api_client, user):
+    """event_count only counts RSVPs the user can still see — member of the
+    event's community or organiser. Orphan RSVPs (e.g. from before events were
+    member-gated) must not inflate the counter."""
+    from apps.events.factories import EventFactory, RSVPFactory
+    from apps.events.models import RSVP
+
+    joined = CommunityFactory()
+    MembershipFactory(community=joined, user=user)
+    member_event = EventFactory(community=joined)
+    RSVPFactory(event=member_event, user=user, status=RSVP.Status.GOING)
+
+    # RSVP to an event in a community the user never joined → not counted.
+    orphan_event = EventFactory()
+    RSVPFactory(event=orphan_event, user=user, status=RSVP.Status.GOING)
+
+    response = api_client.get(public_profile_url(user.id))
+    assert response.status_code == 200
+    assert response.data["event_count"] == 1
+
+
+@pytest.mark.django_db
 def test_public_profile_returns_location(api_client, user):
     user.location = "Berlin, Germany"
     user.save()

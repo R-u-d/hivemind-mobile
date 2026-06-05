@@ -1,10 +1,12 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useActionSheet } from '@expo/react-native-action-sheet';
-import { ActionSheetIOS, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { ActionSheetIOS, Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Avatar from '@/components/Avatar';
+import MiniProfileSheet from '@/components/MiniProfileSheet';
 import { fonts, radius, spacing, typography } from '@/theme';
-import { useTheme } from '@/theme/ThemeContext';
+import { useIsDark, useTheme } from '@/theme/ThemeContext';
 import type { Post } from '@/types/community';
 import { relativeTime } from '@/utils/relativeTime';
 
@@ -24,69 +26,145 @@ function PostCard({
   onDelete,
 }: PostCardProps) {
   const colors = useTheme();
+  const isDark = useIsDark();
   const { showActionSheetWithOptions } = useActionSheet();
   const isOwn = post.author.id === currentUserId;
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const iosStyle = { userInterfaceStyle: isDark ? ('dark' as const) : ('light' as const) };
+  const androidDark = isDark
+    ? {
+        containerStyle: { backgroundColor: colors.surface },
+        tintColor: colors.text,
+        destructiveColor: colors.danger,
+        textStyle: { color: colors.text },
+        titleTextStyle: { color: colors.textMuted },
+        separatorStyle: { backgroundColor: colors.border },
+      }
+    : {};
 
   function handleLongPress() {
-    if (!isOwn) return;
-    const sheetOptions = {
-      options: ['Cancel', 'Delete Message'] as string[],
-      destructiveButtonIndex: 1,
-      cancelButtonIndex: 0,
-    };
-    const callback = (buttonIndex: number | undefined) => {
-      if (buttonIndex === 1) onDelete(post.id);
-    };
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(sheetOptions, callback);
+    const comingSoon = () => Alert.alert('Coming soon', 'This feature is not available yet.');
+
+    if (isOwn) {
+      const options = [
+        'Cancel',
+        '😀  React',
+        '↩️  Reply',
+        '📋  Copy Text',
+        '➡️  Forward',
+        '📌  Pin Message',
+        '✏️  Edit Message',
+        '🗑  Delete Message',
+      ];
+      const destructiveButtonIndex = options.length - 1;
+      const cancelButtonIndex = 0;
+      const callback = (i: number | undefined) => {
+        if (i === 1) comingSoon();
+        else if (i === 2) comingSoon();
+        else if (i === 3) Clipboard.setStringAsync(post.body);
+        else if (i === 4) comingSoon();
+        else if (i === 5) comingSoon();
+        else if (i === 6) comingSoon();
+        else if (i === 7) onDelete(post.id);
+      };
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          { options, destructiveButtonIndex, cancelButtonIndex, ...iosStyle },
+          callback,
+        );
+      } else {
+        showActionSheetWithOptions(
+          { options, destructiveButtonIndex, cancelButtonIndex, ...androidDark },
+          callback,
+        );
+      }
     } else {
-      showActionSheetWithOptions(sheetOptions, callback);
+      const options = ['Cancel', '😀  React', '↩️  Reply', '📋  Copy Text', '➡️  Forward'];
+      const cancelButtonIndex = 0;
+      const callback = (i: number | undefined) => {
+        if (i === 1) comingSoon();
+        else if (i === 2) comingSoon();
+        else if (i === 3) Clipboard.setStringAsync(post.body);
+        else if (i === 4) comingSoon();
+      };
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          { options, cancelButtonIndex, ...iosStyle },
+          callback,
+        );
+      } else {
+        showActionSheetWithOptions({ options, cancelButtonIndex, ...androidDark }, callback);
+      }
     }
   }
 
   return (
-    <Pressable
-      onLongPress={isOwn ? handleLongPress : undefined}
-      accessibilityRole="button"
-      accessibilityLabel={`Post by ${post.author.display_name}`}
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderTopWidth: StyleSheet.hairlineWidth,
-          borderRightWidth: StyleSheet.hairlineWidth,
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderLeftWidth: isAnnouncementsChannel ? 3 : StyleSheet.hairlineWidth,
-          borderTopColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
-          borderRightColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
-          borderBottomColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
-          borderLeftColor: isAnnouncementsChannel ? accentColor : colors.border,
-        },
-      ]}
-    >
-      <Avatar name={post.author.display_name} uri={post.author.avatar_url} size={32} />
-      <View style={styles.content}>
-        <View style={styles.meta}>
-          <Text style={[styles.author, { color: colors.text, fontFamily: fonts.medium }]}>
-            {post.author.display_name}
-          </Text>
-          <Text style={[styles.time, { color: colors.textFaint }]}>
-            {relativeTime(post.created_at)}
-          </Text>
-          {isAnnouncementsChannel && (
-            <Text
-              style={[
-                typography.overline,
-                { color: accentColor, marginLeft: 'auto' as unknown as number },
-              ]}
+    <>
+      <Pressable
+        onLongPress={handleLongPress}
+        accessibilityRole="button"
+        accessibilityLabel={`Post by ${post.author.display_name}`}
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.surface,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderRightWidth: StyleSheet.hairlineWidth,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderLeftWidth: isAnnouncementsChannel ? 3 : StyleSheet.hairlineWidth,
+            borderTopColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
+            borderRightColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
+            borderBottomColor: isAnnouncementsChannel ? accentColor + '55' : colors.border,
+            borderLeftColor: isAnnouncementsChannel ? accentColor : colors.border,
+          },
+        ]}
+      >
+        <Pressable
+          onPress={() => setProfileOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${post.author.display_name}'s profile`}
+          hitSlop={4}
+        >
+          <Avatar name={post.author.display_name} uri={post.author.avatar_url} size={32} />
+        </Pressable>
+        <View style={styles.content}>
+          <View style={styles.meta}>
+            <Pressable
+              onPress={() => setProfileOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`View ${post.author.display_name}'s profile`}
             >
-              PINNED
+              <Text style={[styles.author, { color: colors.text, fontFamily: fonts.medium }]}>
+                {post.author.display_name}
+              </Text>
+            </Pressable>
+            <Text style={[styles.time, { color: colors.textFaint }]}>
+              {relativeTime(post.created_at)}
             </Text>
-          )}
+            {isAnnouncementsChannel && (
+              <Text
+                style={[
+                  typography.overline,
+                  { color: accentColor, marginLeft: 'auto' as unknown as number },
+                ]}
+              >
+                PINNED
+              </Text>
+            )}
+          </View>
+          <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
         </View>
-        <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
-      </View>
-    </Pressable>
+      </Pressable>
+
+      <MiniProfileSheet
+        visible={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        userId={post.author.id}
+        displayName={post.author.display_name}
+        avatarUrl={post.author.avatar_url}
+      />
+    </>
   );
 }
 

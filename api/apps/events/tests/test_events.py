@@ -14,6 +14,11 @@ def event_url(pk):
     return f"/api/events/{pk}/"
 
 
+def join(user, community, role=Membership.Role.MEMBER):
+    """Make `user` a member of `community` so they can see its events."""
+    return MembershipFactory(community=community, user=user, role=role)
+
+
 def make_event_payload(community, **kwargs):
     start = timezone.now() + timezone.timedelta(days=1)
     end = start + timezone.timedelta(hours=2)
@@ -31,17 +36,52 @@ def make_event_payload(community, **kwargs):
 # ─── List ────────────────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_list_events_public(api_client):
+def test_list_unauthenticated(api_client):
     EventFactory.create_batch(3)
     response = api_client.get(EVENTS_URL)
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_list_shows_member_community_events(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
+    EventFactory.create_batch(3, community=community)
+    response = client.get(EVENTS_URL)
     assert response.status_code == 200
     assert len(response.data["results"]) == 3
 
 
 @pytest.mark.django_db
-def test_list_returns_coordinates(api_client):
-    EventFactory(lat=40.71, lng=-73.99)
-    response = api_client.get(EVENTS_URL)
+def test_list_excludes_non_member_community_events(auth_client):
+    client, user = auth_client
+    joined = CommunityFactory()
+    join(user, joined)
+    EventFactory.create_batch(2, community=joined)
+    EventFactory()  # event in a community the user has not joined
+    response = client.get(EVENTS_URL)
+    assert response.status_code == 200
+    assert len(response.data["results"]) == 2
+
+
+@pytest.mark.django_db
+def test_list_includes_own_organised_event_when_not_member(auth_client):
+    client, user = auth_client
+    # User organises an event but is not (or no longer) a member of its community.
+    EventFactory(organiser=user)
+    response = client.get(EVENTS_URL)
+    assert response.status_code == 200
+    assert len(response.data["results"]) == 1
+
+
+@pytest.mark.django_db
+def test_list_returns_coordinates(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
+    EventFactory(community=community, lat=40.71, lng=-73.99)
+    response = client.get(EVENTS_URL)
     assert response.status_code == 200
     result = response.data["results"][0]
     assert result["lat"] == 40.71
@@ -49,64 +89,82 @@ def test_list_returns_coordinates(api_client):
 
 
 @pytest.mark.django_db
-def test_list_filter_by_community(api_client):
+def test_list_filter_by_community(auth_client):
+    client, user = auth_client
     community = CommunityFactory()
+    join(user, community)
     EventFactory.create_batch(2, community=community)
     EventFactory()
-    response = api_client.get(EVENTS_URL, {"community": str(community.id)})
+    response = client.get(EVENTS_URL, {"community": str(community.id)})
     assert response.status_code == 200
     assert len(response.data["results"]) == 2
 
 
 @pytest.mark.django_db
-def test_list_filter_by_date_from(api_client):
+def test_list_filter_by_date_from(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
     now = timezone.now()
     EventFactory(
+        community=community,
         start_datetime=now + timezone.timedelta(days=1),
         end_datetime=now + timezone.timedelta(days=1, hours=2),
     )
     EventFactory(
+        community=community,
         start_datetime=now + timezone.timedelta(days=5),
         end_datetime=now + timezone.timedelta(days=5, hours=2),
     )
     cutoff = (now + timezone.timedelta(days=3)).isoformat()
-    response = api_client.get(EVENTS_URL, {"date_from": cutoff})
+    response = client.get(EVENTS_URL, {"date_from": cutoff})
     assert response.status_code == 200
     assert len(response.data["results"]) == 1
 
 
 @pytest.mark.django_db
-def test_list_filter_by_date_to(api_client):
+def test_list_filter_by_date_to(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
     now = timezone.now()
     EventFactory(
+        community=community,
         start_datetime=now + timezone.timedelta(days=1),
         end_datetime=now + timezone.timedelta(days=1, hours=2),
     )
     EventFactory(
+        community=community,
         start_datetime=now + timezone.timedelta(days=5),
         end_datetime=now + timezone.timedelta(days=5, hours=2),
     )
     cutoff = (now + timezone.timedelta(days=3)).isoformat()
-    response = api_client.get(EVENTS_URL, {"date_to": cutoff})
+    response = client.get(EVENTS_URL, {"date_to": cutoff})
     assert response.status_code == 200
     assert len(response.data["results"]) == 1
 
 
 @pytest.mark.django_db
-def test_list_filter_by_search_title(api_client):
-    EventFactory(title="Django Meetup")
-    EventFactory(title="React Workshop")
-    response = api_client.get(EVENTS_URL, {"q": "django"})
+def test_list_filter_by_search_title(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
+    EventFactory(community=community, title="Django Meetup")
+    EventFactory(community=community, title="React Workshop")
+    response = client.get(EVENTS_URL, {"q": "django"})
     assert response.status_code == 200
     assert len(response.data["results"]) == 1
     assert response.data["results"][0]["title"] == "Django Meetup"
 
 
 @pytest.mark.django_db
-def test_list_filter_by_search_description(api_client):
-    EventFactory(title="Event A", description="Learn about Python")
-    EventFactory(title="Event B", description="Learn about JavaScript")
-    response = api_client.get(EVENTS_URL, {"q": "python"})
+def test_list_filter_by_search_description(auth_client):
+    client, user = auth_client
+    community = CommunityFactory()
+    join(user, community)
+    EventFactory(community=community, title="Event A", description="Learn about Python")
+    EventFactory(community=community, title="Event B", description="Learn about JavaScript")
+    response = client.get(EVENTS_URL, {"q": "python"})
     assert response.status_code == 200
     assert len(response.data["results"]) == 1
 
@@ -114,13 +172,40 @@ def test_list_filter_by_search_description(api_client):
 # ─── Retrieve ────────────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_retrieve_event_public(api_client):
+def test_retrieve_event_unauthenticated(api_client):
     event = EventFactory()
     response = api_client.get(event_url(event.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_retrieve_event_non_member_forbidden(auth_client):
+    client, _ = auth_client
+    event = EventFactory()
+    response = client.get(event_url(event.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_retrieve_event_member(auth_client):
+    client, user = auth_client
+    event = EventFactory()
+    join(user, event.community)
+    response = client.get(event_url(event.id))
     assert response.status_code == 200
     assert response.data["id"] == str(event.id)
     assert "organiser" in response.data
     assert "display_name" in response.data["organiser"]
+
+
+@pytest.mark.django_db
+def test_retrieve_event_organiser_not_member(auth_client):
+    client, user = auth_client
+    # Organiser retains access even without a membership row.
+    event = EventFactory(organiser=user)
+    response = client.get(event_url(event.id))
+    assert response.status_code == 200
+    assert response.data["id"] == str(event.id)
 
 
 # ─── Create ──────────────────────────────────────────────────────────────────
@@ -205,13 +290,15 @@ def test_create_event_no_events_channel_leaves_null(auth_client):
 
 
 @pytest.mark.django_db
-def test_list_filter_by_channel(api_client):
+def test_list_filter_by_channel(auth_client):
     from apps.communities.factories import ChannelFactory
 
+    client, user = auth_client
     channel = ChannelFactory()
+    join(user, channel.community)
     EventFactory.create_batch(2, community=channel.community, channel=channel)
     EventFactory(community=channel.community)
-    response = api_client.get(EVENTS_URL, {"channel": str(channel.id)})
+    response = client.get(EVENTS_URL, {"channel": str(channel.id)})
     assert response.status_code == 200
     assert len(response.data["results"]) == 2
 

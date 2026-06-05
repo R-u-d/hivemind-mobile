@@ -33,7 +33,10 @@ describe('useCommunities', () => {
     mockedClient.get.mockResolvedValueOnce({ data: samplePage() } as never);
     const { result } = renderHook(() => useCommunities(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockedClient.get).toHaveBeenCalledWith('/communities/?');
+    expect(mockedClient.get).toHaveBeenCalledWith(
+      '/communities/?',
+      expect.objectContaining({ signal: expect.anything() }),
+    );
   });
 
   it('includes type params when types provided', async () => {
@@ -42,7 +45,10 @@ describe('useCommunities', () => {
       wrapper: makeWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockedClient.get).toHaveBeenCalledWith('/communities/?type=gaming&type=study');
+    expect(mockedClient.get).toHaveBeenCalledWith(
+      '/communities/?type=gaming&type=study',
+      expect.objectContaining({ signal: expect.anything() }),
+    );
   });
 
   it('includes search param when provided', async () => {
@@ -51,7 +57,10 @@ describe('useCommunities', () => {
       wrapper: makeWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockedClient.get).toHaveBeenCalledWith('/communities/?search=linocut');
+    expect(mockedClient.get).toHaveBeenCalledWith(
+      '/communities/?search=linocut',
+      expect.objectContaining({ signal: expect.anything() }),
+    );
   });
 
   it('fetches next page using the cursor from previous page', async () => {
@@ -66,6 +75,9 @@ describe('useCommunities', () => {
 
     await result.current.fetchNextPage();
     await waitFor(() => expect(mockedClient.get).toHaveBeenCalledTimes(2));
-    expect(mockedClient.get).toHaveBeenLastCalledWith('/communities/?cursor=ABC');
+    expect(mockedClient.get).toHaveBeenLastCalledWith(
+      '/communities/?cursor=ABC',
+      expect.objectContaining({ signal: expect.anything() }),
+    );
   });
 });

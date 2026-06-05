@@ -11,6 +11,7 @@ import type { Event, RsvpStatus } from '@/types/event';
 interface EventCardProps {
   event: Event;
   onPress: (id: string) => void;
+  hidePill?: boolean;
   isNew?: boolean;
 }
 
@@ -41,13 +42,19 @@ function formatTime(iso: string): string {
 const RSVP_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   going: 'checkmark',
   interested: 'star-outline',
-  not_going: 'close-circle-outline',
+  not_going: 'eye-off-outline',
 };
 
 const RSVP_LABEL: Record<string, string> = {
   going: 'Going',
   interested: 'Interested',
-  not_going: 'Not going',
+  not_going: 'Not Interested',
+};
+
+const RSVP_PAST_LABEL: Record<string, string> = {
+  going: 'Went',
+  interested: 'Saved',
+  not_going: 'Passed',
 };
 
 const PICKER_OPTIONS: {
@@ -57,7 +64,7 @@ const PICKER_OPTIONS: {
 }[] = [
   { value: 'going', label: 'Going', icon: 'checkmark-circle-outline' },
   { value: 'interested', label: 'Interested', icon: 'star-outline' },
-  { value: 'not_going', label: 'Not going', icon: 'close-circle-outline' },
+  { value: 'not_going', label: 'Not Interested', icon: 'eye-off-outline' },
 ];
 
 function RsvpPicker({
@@ -111,18 +118,21 @@ function RsvpPicker({
                 onPress={() => !isPending && handleSelect(opt.value)}
                 accessibilityRole="button"
                 accessibilityLabel={opt.label}
-                style={[styles.pickerOption, active && { backgroundColor: colors.primarySoft }]}
+                style={[
+                  styles.pickerOption,
+                  active && { backgroundColor: themeColors.primarySoft },
+                ]}
               >
                 <Ionicons
                   name={opt.icon}
                   size={18}
-                  color={active ? colors.primary : themeColors.textMuted}
+                  color={active ? themeColors.primaryOnSoft : themeColors.textMuted}
                 />
                 <Text
                   style={[
                     styles.pickerOptionLabel,
                     {
-                      color: active ? colors.primary : themeColors.text,
+                      color: active ? themeColors.primaryOnSoft : themeColors.text,
                       fontFamily: active ? fonts.medium : fonts.regular,
                     },
                   ]}
@@ -133,7 +143,7 @@ function RsvpPicker({
                   <Ionicons
                     name="checkmark"
                     size={14}
-                    color={colors.primary}
+                    color={themeColors.primaryOnSoft}
                     style={styles.pickerCheck}
                   />
                 )}
@@ -146,7 +156,7 @@ function RsvpPicker({
   );
 }
 
-function EventCard({ event, onPress, isNew }: EventCardProps) {
+function EventCard({ event, onPress, hidePill = false, isNew }: EventCardProps) {
   const themeColors = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
   const date = new Date(event.start_datetime);
@@ -186,7 +196,7 @@ function EventCard({ event, onPress, isNew }: EventCardProps) {
         {/* Content */}
         <View style={styles.content}>
           <View style={styles.pills}>
-            <TypePill type={event.community.type} size="sm" />
+            {!hidePill && <TypePill type={event.community.type} size="sm" />}
             {event.rsvp_status && (
               <Pressable
                 onPress={e => {
@@ -194,12 +204,16 @@ function EventCard({ event, onPress, isNew }: EventCardProps) {
                   if (!isPast) setPickerOpen(true);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`RSVP: ${RSVP_LABEL[event.rsvp_status]}. Tap to change.`}
-                style={[styles.rsvpBadge, { backgroundColor: colors.primarySoft }]}
+                accessibilityLabel={`RSVP: ${RSVP_LABEL[event.rsvp_status]}. ${isPast ? '' : 'Tap to change.'}`}
+                style={[styles.rsvpBadge, { backgroundColor: themeColors.primarySoft }]}
               >
-                <Ionicons name={RSVP_ICON[event.rsvp_status]} size={11} color={colors.primary} />
-                <Text style={[styles.rsvpLabel, { color: colors.primary }]}>
-                  {RSVP_LABEL[event.rsvp_status]}
+                <Ionicons
+                  name={RSVP_ICON[event.rsvp_status]}
+                  size={11}
+                  color={themeColors.primaryOnSoft}
+                />
+                <Text style={[styles.rsvpLabel, { color: themeColors.primaryOnSoft }]}>
+                  {isPast ? RSVP_PAST_LABEL[event.rsvp_status] : RSVP_LABEL[event.rsvp_status]}
                 </Text>
               </Pressable>
             )}
@@ -234,7 +248,7 @@ function EventCard({ event, onPress, isNew }: EventCardProps) {
             <View style={styles.metaFixed}>
               <Ionicons name="people-outline" size={12} color={themeColors.textMuted} />
               <Text style={[styles.metaText, { color: themeColors.textMuted }]} numberOfLines={1}>
-                {event.going_count}
+                {isPast ? `${event.going_count} attended` : event.going_count}
               </Text>
             </View>
           </View>
@@ -259,6 +273,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     gap: spacing.md,
+    marginHorizontal: spacing.base,
     marginVertical: spacing.xs,
     padding: spacing.md,
     borderRadius: radius.lg,

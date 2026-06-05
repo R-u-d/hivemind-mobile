@@ -86,9 +86,9 @@ export default function HiveLogo({
             strokeWidth={1.8}
             strokeLinejoin="round"
           />
-          <Circle cx={16} cy={3.6} r={0.85} fill={color} opacity={0.85} />
-          <Circle cx={26.2} cy={21.6} r={0.85} fill={color} opacity={0.5} />
-          <Circle cx={5.8} cy={21.6} r={0.85} fill={color} opacity={0.5} />
+          {animated && <Circle cx={16} cy={3.6} r={0.85} fill={color} opacity={0.85} />}
+          {animated && <Circle cx={26.2} cy={21.6} r={0.85} fill={color} opacity={0.5} />}
+          {animated && <Circle cx={5.8} cy={21.6} r={0.85} fill={color} opacity={0.5} />}
         </Svg>
       </Animated.View>
 

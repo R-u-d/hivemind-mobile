@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +36,37 @@ type FeedItem =
   | { type: 'post'; data: Post; ts: number }
   | { type: 'event'; data: Event; ts: number };
 
+const CHANNEL_EMPTY: Record<
+  string,
+  { icon: React.ComponentProps<typeof Ionicons>['name']; title: string; message: string }
+> = {
+  general: {
+    icon: 'chatbubble-outline',
+    title: 'No posts yet',
+    message: 'Be the first to start a conversation.',
+  },
+  announcements: {
+    icon: 'megaphone-outline',
+    title: 'No announcements yet',
+    message: 'Moderators will post important updates here.',
+  },
+  events: {
+    icon: 'calendar-outline',
+    title: 'No events yet',
+    message: 'Events created in this community will appear here.',
+  },
+  media: {
+    icon: 'image-outline',
+    title: 'No media yet',
+    message: 'Share photos, videos or links with the community.',
+  },
+  help: {
+    icon: 'help-circle-outline',
+    title: 'No questions yet',
+    message: 'Ask the community anything — someone will help.',
+  },
+};
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ChannelSkeleton() {
@@ -53,6 +85,7 @@ function ChannelSkeleton() {
 export default function ChannelScreen() {
   const colors = useTheme();
   const { top, bottom } = useSafeAreaInsets();
+  const { height: screenH } = useWindowDimensions();
   const rawParams = useLocalSearchParams<{ id: string; communityId: string }>();
   const channelId = Array.isArray(rawParams.id) ? rawParams.id[0] : rawParams.id;
   const communityId = Array.isArray(rawParams.communityId)
@@ -73,6 +106,11 @@ export default function ChannelScreen() {
 
   const [text, setText] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const INPUT_LINE_H = 20;
+  const INPUT_PAD_V = 11;
+  const INPUT_MIN_H = INPUT_LINE_H + INPUT_PAD_V * 2;
+  const INPUT_MAX_H = INPUT_LINE_H * 5 + INPUT_PAD_V * 2;
+  const [inputHeight, setInputHeight] = useState(INPUT_MIN_H);
 
   // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -145,7 +183,7 @@ export default function ChannelScreen() {
   const accentColor = community ? communityTypeColors[community.type].primary : colors.primary;
 
   const isAnnouncementsChannel = channel?.channel_type === 'announcements';
-  const showComposeBar = !!community?.is_member && !isAnnouncementsChannel;
+  const showComposeBar = !!community?.is_member;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -153,6 +191,7 @@ export default function ChannelScreen() {
     const trimmed = text.trim();
     if (!trimmed || createPending) return;
     setText('');
+    setInputHeight(INPUT_MIN_H);
     pendingScrollRef.current = true;
     createPost({ body: trimmed }, { onError: () => setText(trimmed) });
     inputRef.current?.focus();
@@ -270,7 +309,7 @@ export default function ChannelScreen() {
       <KeyboardAvoidingView
         style={[styles.flex, { backgroundColor: colors.bg }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? top + 54 : 0}
       >
         {isLoading ? (
           <ChannelSkeleton />
@@ -287,6 +326,7 @@ export default function ChannelScreen() {
                     <EventCard
                       event={item.data}
                       onPress={id => router.push(`/event/${id}` as never)}
+                      hidePill
                     />
                   ) : (
                     <PostCard
@@ -300,10 +340,11 @@ export default function ChannelScreen() {
                 </View>
               )}
               ListEmptyComponent={
-                <View style={styles.emptyWrap}>
+                <View style={[styles.emptyWrap, { minHeight: screenH * 0.55 }]}>
                   <EmptyState
-                    icon={isEventsChannel ? 'calendar-outline' : 'chatbubble-outline'}
-                    title={isEventsChannel ? 'Nothing here yet' : 'No posts yet'}
+                    icon={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].icon}
+                    title={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].title}
+                    message={CHANNEL_EMPTY[channel?.channel_type ?? 'general'].message}
                   />
                 </View>
               }
@@ -331,47 +372,78 @@ export default function ChannelScreen() {
               {
                 backgroundColor: colors.surface,
                 borderTopColor: colors.borderSoft,
-                paddingBottom: bottom + spacing.sm,
+                paddingBottom: Platform.OS === 'ios' ? bottom + spacing.sm : spacing.sm,
               },
             ]}
           >
-            <TextInput
-              ref={inputRef}
-              value={text}
-              onChangeText={setText}
-              placeholder={`Message #${channel?.name ?? 'channel'}…`}
-              placeholderTextColor={colors.textFaint}
-              returnKeyType="send"
-              onSubmitEditing={handleSubmit}
-              blurOnSubmit={false}
-              multiline={false}
-              editable={!createPending}
-              accessibilityLabel="Message input"
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.surfaceSunk,
-                  color: colors.text,
-                  fontFamily: fonts.regular,
-                  opacity: createPending ? 0.5 : 1,
-                },
-              ]}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Send message"
-              onPress={handleSubmit}
-              disabled={createPending || !text.trim()}
-              style={[
-                styles.sendBtn,
-                {
-                  backgroundColor: colors.primary,
-                  opacity: createPending || !text.trim() ? 0.5 : 1,
-                },
-              ]}
-            >
-              <Ionicons name="send" size={18} color={colors.onPrimary} />
-            </Pressable>
+            {isAnnouncementsChannel ? (
+              <View
+                style={[styles.readOnlyBar, { backgroundColor: colors.surfaceSunk }]}
+                accessibilityLabel="Read-only channel"
+              >
+                <Ionicons name="megaphone-outline" size={16} color={colors.textMuted} />
+                <Text
+                  style={[
+                    styles.readOnlyText,
+                    { color: colors.textMuted, fontFamily: fonts.regular },
+                  ]}
+                >
+                  Only moderators can post here
+                </Text>
+              </View>
+            ) : (
+              <>
+                <TextInput
+                  ref={inputRef}
+                  value={text}
+                  onChangeText={setText}
+                  placeholder={`Message #${channel?.name ?? 'channel'}…`}
+                  placeholderTextColor={colors.textFaint}
+                  returnKeyType="send"
+                  onSubmitEditing={handleSubmit}
+                  blurOnSubmit={false}
+                  multiline
+                  scrollEnabled={Platform.OS === 'android' ? inputHeight >= INPUT_MAX_H : undefined}
+                  onContentSizeChange={
+                    Platform.OS === 'android'
+                      ? e => {
+                          const h = e.nativeEvent.contentSize.height;
+                          setInputHeight(Math.min(Math.max(h, INPUT_MIN_H), INPUT_MAX_H));
+                        }
+                      : undefined
+                  }
+                  editable={!createPending}
+                  accessibilityLabel="Message input"
+                  style={[
+                    styles.input,
+                    Platform.OS === 'android'
+                      ? { height: inputHeight }
+                      : { maxHeight: INPUT_MAX_H },
+                    {
+                      backgroundColor: colors.surfaceSunk,
+                      color: colors.text,
+                      fontFamily: fonts.regular,
+                      opacity: createPending ? 0.5 : 1,
+                    },
+                  ]}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Send message"
+                  onPress={handleSubmit}
+                  disabled={createPending || !text.trim()}
+                  style={[
+                    styles.sendBtn,
+                    {
+                      backgroundColor: colors.primary,
+                      opacity: createPending || !text.trim() ? 0.5 : 1,
+                    },
+                  ]}
+                >
+                  <Ionicons name="send" size={18} color={colors.onPrimary} />
+                </Pressable>
+              </>
+            )}
           </View>
         )}
       </KeyboardAvoidingView>
@@ -403,12 +475,17 @@ const styles = StyleSheet.create({
 
   invertedContainer: { flex: 1, transform: [{ scaleY: -1 }] },
   invertedItem: { transform: [{ scaleY: -1 }] },
-  emptyWrap: { transform: [{ scaleY: -1 }] },
+  emptyWrap: {
+    transform: [{ scaleY: -1 }],
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footerLoader: { alignItems: 'center', paddingVertical: spacing.md },
 
   composeBar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: spacing.md,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
@@ -416,10 +493,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 42,
     paddingHorizontal: spacing.base,
-    borderRadius: radius.full,
+    paddingVertical: 11,
+    borderRadius: radius.xl,
     fontSize: 14,
+    lineHeight: 20,
   },
   sendBtn: {
     width: 42,
@@ -436,4 +514,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
   },
+  readOnlyBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    height: 42,
+    paddingHorizontal: spacing.base,
+    borderRadius: radius.xl,
+  },
+  readOnlyText: { fontSize: 14 },
 });

@@ -1,7 +1,17 @@
 import { FlashList } from '@shopify/flash-list';
 import { useEffect, useRef } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Ionicons } from '@expo/vector-icons';
 
 import Avatar from '@/components/Avatar';
 import HexLoader from '@/components/HexLoader';
@@ -24,9 +34,11 @@ function RoleBadge({ role }: { role: Member['role'] }) {
   const colors = useTheme();
   if (role === 'member') return null;
   const label = role === 'owner' ? 'Owner' : 'Mod';
+  const icon = role === 'owner' ? 'shield-checkmark' : 'shield-half';
   return (
     <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>
-      <Text style={[styles.badgeText, { color: colors.primary }]}>{label}</Text>
+      <Ionicons name={icon} size={11} color={colors.primaryOnSoft} />
+      <Text style={[styles.badgeText, { color: colors.primaryOnSoft }]}>{label}</Text>
     </View>
   );
 }
@@ -56,6 +68,8 @@ export default function MembersSheet({
 }: MembersSheetProps) {
   const colors = useTheme();
   const { bottom } = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
+  const sheetHeight = screenHeight * 0.75;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -84,61 +98,68 @@ export default function MembersSheet({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <Pressable
-        style={styles.backdrop}
-        onPress={onClose}
-        accessibilityLabel="Close members sheet"
-      />
-      <Animated.View
-        style={[
-          styles.sheet,
-          { backgroundColor: colors.surface, paddingBottom: bottom + spacing.base },
-          { transform: [{ translateY }] },
-        ]}
-      >
-        <View style={[styles.handle, { backgroundColor: colors.border }]} />
-        <Text style={[typography.title, { color: colors.text, marginBottom: spacing.md }]}>
-          Members{total > 0 ? ` · ${total.toLocaleString()}` : ''}
-        </Text>
+      <View style={styles.container}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={onClose}
+          accessibilityLabel="Close members sheet"
+        />
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              height: sheetHeight,
+              backgroundColor: colors.surface,
+              paddingBottom: bottom + spacing.base,
+            },
+            { transform: [{ translateY }] },
+          ]}
+        >
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
+          <Text style={[typography.title, { color: colors.text, marginBottom: spacing.md }]}>
+            Members{total > 0 ? ` · ${total.toLocaleString()}` : ''}
+          </Text>
 
-        {isLoading ? (
-          <View style={styles.loaderWrap}>
-            <HexLoader size={28} color={colors.primary} />
-          </View>
-        ) : (
-          <FlashList<Member>
-            data={members}
-            keyExtractor={m => m.id}
-            renderItem={({ item }) => <MemberRow item={item} />}
-            onEndReached={() => {
-              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-            }}
-            onEndReachedThreshold={0.4}
-            ListFooterComponent={
-              isFetchingNextPage ? (
-                <View style={styles.loaderWrap}>
-                  <HexLoader size={22} color={colors.primary} />
-                </View>
-              ) : null
-            }
-          />
-        )}
-      </Animated.View>
+          {isLoading ? (
+            <View style={styles.loaderWrap}>
+              <HexLoader size={28} color={colors.primary} />
+            </View>
+          ) : (
+            <View style={styles.listWrap}>
+              <FlashList<Member>
+                data={members}
+                keyExtractor={m => m.id}
+                renderItem={({ item }) => <MemberRow item={item} />}
+                onEndReached={() => {
+                  if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                }}
+                onEndReachedThreshold={0.4}
+                ListFooterComponent={
+                  isFetchingNextPage ? (
+                    <View style={styles.loaderWrap}>
+                      <HexLoader size={22} color={colors.primary} />
+                    </View>
+                  ) : null
+                }
+              />
+            </View>
+          )}
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
   sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: '75%',
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     paddingTop: spacing.sm,
@@ -158,14 +179,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   badge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: radius.full,
   },
   badgeText: {
     fontSize: 11,
     fontFamily: fonts.medium,
-    letterSpacing: 0.3,
   },
+  listWrap: { flex: 1 },
   loaderWrap: { paddingVertical: spacing.lg, alignItems: 'center' },
 });

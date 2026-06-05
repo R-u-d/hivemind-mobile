@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList, type ListRenderItem } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -90,7 +90,6 @@ const ListSeparator = () => <View style={styles.separator} />;
 
 export default function OnboardingStep2() {
   const colors = useTheme();
-  const { bottom } = useSafeAreaInsets();
   const { types: typesParam } = useLocalSearchParams<{ types: string }>();
   const types = (() => {
     try {
@@ -199,7 +198,10 @@ export default function OnboardingStep2() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.surface }]}
+      edges={['top', 'bottom']}
+    >
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -227,7 +229,7 @@ export default function OnboardingStep2() {
 
       <View style={styles.listWrap}>{renderList()}</View>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(spacing.lg, bottom) }]}>
+      <View style={styles.footer}>
         <Pressable
           onPress={handleSkip}
           accessibilityLabel="Skip for now"
@@ -244,12 +246,12 @@ export default function OnboardingStep2() {
           disabled={joinedIds.size === 0}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 54 },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

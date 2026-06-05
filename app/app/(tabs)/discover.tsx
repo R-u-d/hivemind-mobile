@@ -9,10 +9,10 @@ import { useScrollToTop } from '@react-navigation/native';
 
 import CommunityCard from '@/components/CommunityCard';
 import CommunityListSkeleton from '@/components/CommunityListSkeleton';
-import DiscoverSearchOverlay from '@/components/DiscoverSearchOverlay';
 import EmptyState from '@/components/EmptyState';
 import FilterChips, { type FilterChipItem } from '@/components/FilterChips';
 import HexLoader from '@/components/HexLoader';
+import TabErrorState from '@/components/TabErrorState';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useJoinCommunity, useLeaveCommunity } from '@/hooks/useJoinCommunity';
 import { communityTypeLabels, spacing, typography, type CommunityType } from '@/theme';
@@ -41,11 +41,18 @@ export default function DiscoverScreen() {
   const listRef = useRef<FlashListRef<Community>>(null);
   useScrollToTop(listRef as never);
   const [active, setActive] = useState<ChipValue>('all');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const typesArg = active === 'all' ? undefined : [active];
-  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
-    useCommunities({ types: typesArg });
+  const {
+    data,
+    isLoading,
+    isError,
+    isRefetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useCommunities({ types: typesArg });
 
   const communities = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -65,7 +72,11 @@ export default function DiscoverScreen() {
     [queryClient],
   );
 
-  const { mutate: join } = useJoinCommunity(
+  const {
+    mutate: join,
+    isPending: joinPending,
+    variables: joinId,
+  } = useJoinCommunity(
     id =>
       patchPages(id, c => ({
         ...c,
@@ -80,7 +91,11 @@ export default function DiscoverScreen() {
       })),
   );
 
-  const { mutate: leave } = useLeaveCommunity(
+  const {
+    mutate: leave,
+    isPending: leavePending,
+    variables: leaveId,
+  } = useLeaveCommunity(
     id =>
       patchPages(id, c => ({
         ...c,
@@ -94,6 +109,8 @@ export default function DiscoverScreen() {
         member_count: c.member_count + 1,
       })),
   );
+
+  const pendingId = joinPending ? joinId : leavePending ? leaveId : null;
 
   const handleCardPress = useCallback((id: string) => {
     // /community/[id] is not yet a registered route in expo-router's typed-routes table.
@@ -108,9 +125,10 @@ export default function DiscoverScreen() {
         onPress={handleCardPress}
         onJoinPress={join}
         onLeavePress={leave}
+        pendingId={pendingId}
       />
     ),
-    [handleCardPress, join, leave],
+    [handleCardPress, join, leave, pendingId],
   );
 
   return (
@@ -119,12 +137,12 @@ export default function DiscoverScreen() {
         <Text style={[typography.display, { color: colors.text }]}>Discover</Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Search communities"
-          onPress={() => setIsSearchOpen(true)}
+          accessibilityLabel="Create a new community"
+          onPress={() => router.push('/community/create' as never)}
           hitSlop={12}
           style={styles.iconBtn}
         >
-          <Ionicons name="search" size={22} color={colors.ink} />
+          <Ionicons name="add" size={22} color={colors.ink} />
         </Pressable>
       </View>
 
@@ -133,11 +151,7 @@ export default function DiscoverScreen() {
       {isLoading ? (
         <CommunityListSkeleton />
       ) : isError ? (
-        <EmptyState
-          icon="cloud-offline-outline"
-          title="Couldn't load communities"
-          message="Pull down to try again."
-        />
+        <TabErrorState title="Couldn't load communities" onRetry={refetch} />
       ) : communities.length === 0 ? (
         <EmptyState
           icon={active === 'all' ? 'people-outline' : 'filter-outline'}
@@ -160,7 +174,7 @@ export default function DiscoverScreen() {
           }}
           onEndReachedThreshold={0.5}
           onRefresh={refetch}
-          refreshing={false}
+          refreshing={isRefetching}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>
@@ -171,21 +185,13 @@ export default function DiscoverScreen() {
         />
       )}
 
-      <DiscoverSearchOverlay
-        visible={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onCardPress={handleCardPress}
-        onJoinPress={join}
-        onLeavePress={leave}
-      />
-
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Create a new community"
-        onPress={() => router.push('/community/create' as never)}
+        accessibilityLabel="Search communities"
+        onPress={() => router.push('/discover/search' as never)}
         style={[styles.fab, { backgroundColor: colors.primary }]}
       >
-        <Ionicons name="add" size={26} color="#fff" />
+        <Ionicons name="search" size={22} color="#fff" />
       </Pressable>
     </SafeAreaView>
   );

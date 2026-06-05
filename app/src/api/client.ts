@@ -68,10 +68,14 @@ client.interceptors.response.use(
       const newAccess = await refreshing;
       original.headers.Authorization = `Bearer ${newAccess}`;
       return client(original);
-    } catch {
-      Sentry.captureMessage('Token refresh failed', 'error');
-      await tokenStorage.clear();
-      router.replace('/(auth)/login' as Href);
+    } catch (refreshErr) {
+      // Network failure ≠ auth failure — only clear session if the server explicitly rejected the token
+      const serverRejected = axios.isAxiosError(refreshErr) && !!refreshErr.response;
+      if (serverRejected) {
+        Sentry.captureMessage('Token refresh failed', 'error');
+        await tokenStorage.clear();
+        router.replace('/(auth)/login' as Href);
+      }
       return Promise.reject(error);
     }
   },

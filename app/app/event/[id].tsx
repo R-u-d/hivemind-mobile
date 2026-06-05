@@ -126,29 +126,31 @@ const RSVP_OPTIONS: {
   { value: 'interested', label: 'Interested', iconActive: 'star', iconInactive: 'star-outline' },
   {
     value: 'not_going',
-    label: 'Not going',
-    iconActive: 'close-circle',
-    iconInactive: 'close-circle-outline',
+    label: 'Not Interested',
+    iconActive: 'eye-off',
+    iconInactive: 'eye-off-outline',
   },
 ];
 
 function RsvpPastBanner({ current }: { current: RsvpStatus | null }) {
   const colors = useTheme();
 
-  if (current === 'not_going') return null;
-
   const icon: React.ComponentProps<typeof Ionicons>['name'] =
     current === 'going'
       ? 'checkmark-circle'
       : current === 'interested'
         ? 'star'
-        : 'calendar-outline';
+        : current === 'not_going'
+          ? 'eye-off-outline'
+          : 'calendar-outline';
   const label =
     current === 'going'
       ? 'You went'
       : current === 'interested'
-        ? 'You were interested'
-        : 'This event has ended';
+        ? 'You saved this event'
+        : current === 'not_going'
+          ? 'You passed on this'
+          : 'Event ended';
   const usePrimary = current === 'going' || current === 'interested';
 
   return (
@@ -259,11 +261,13 @@ function AttendeesRow({
   preview,
   total,
   interested,
+  isPast,
   onPress,
 }: {
   preview: Attendee[];
   total: number;
   interested: number;
+  isPast: boolean;
   onPress: () => void;
 }) {
   const colors = useTheme();
@@ -273,7 +277,7 @@ function AttendeesRow({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${total} going — tap to see attendees`}
+      accessibilityLabel={`${total} ${isPast ? 'attended' : 'going'} — tap to see attendees`}
       style={styles.attendeesRow}
     >
       <View style={styles.avatarStack}>
@@ -309,8 +313,10 @@ function AttendeesRow({
         )}
       </View>
       <Text style={[styles.attendeesCount, { color: colors.textMuted, fontFamily: fonts.regular }]}>
-        <Text style={{ color: colors.text, fontFamily: fonts.medium }}>{total} going</Text>
-        {interested > 0 && ` · ${interested} interested`}
+        <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+          {total} {isPast ? 'attended' : 'going'}
+        </Text>
+        {interested > 0 && ` · ${interested} ${isPast ? 'saved' : 'interested'}`}
       </Text>
       <Ionicons name="chevron-forward" size={14} color={colors.textFaint} style={styles.chevron} />
     </Pressable>
@@ -541,6 +547,7 @@ export default function EventDetailScreen() {
               preview={attendeePreview}
               total={event.going_count}
               interested={event.interested_count}
+              isPast={isPast}
               onPress={() => setAttendeesOpen(true)}
             />
           </View>

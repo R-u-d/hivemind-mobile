@@ -1,0 +1,61 @@
+module.exports = {
+  expo: {
+    name: 'HiveMind',
+    slug: 'hivemind',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: './assets/images/icon.png',
+    scheme: 'app',
+    userInterfaceStyle: 'automatic',
+    newArchEnabled: true,
+    splash: {
+      image: './assets/images/splash-icon.png',
+      resizeMode: 'cover',
+      backgroundColor: '#130C2E',
+    },
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: 'com.hivemind.app',
+    },
+    android: {
+      package: 'com.hivemind.app',
+      adaptiveIcon: {
+        foregroundImage: './assets/images/adaptive-icon.png',
+        backgroundColor: '#130C2E',
+      },
+      edgeToEdgeEnabled: true,
+      predictiveBackGestureEnabled: false,
+      config: {
+        googleMaps: {
+          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY,
+        },
+      },
+    },
+    web: {
+      bundler: 'metro',
+      output: 'static',
+    },
+    plugins: [
+      'expo-router',
+      [
+        '@sentry/react-native/expo',
+        {
+          url: 'https://sentry.io/',
+          project: 'react-native',
+          organization: 'hivemind-ak',
+        },
+      ],
+      'expo-secure-store',
+      '@react-native-community/datetimepicker',
+      [
+        'expo-location',
+        {
+          locationWhenInUsePermission: 'HiveMind uses your location to place events on the map.',
+        },
+      ],
+    ],
+    experiments: {
+      typedRoutes: true,
+    },
+  },
+};

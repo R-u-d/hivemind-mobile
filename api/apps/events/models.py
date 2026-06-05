@@ -31,6 +31,7 @@ class Event(models.Model):
     end_datetime = models.DateTimeField(null=True, blank=True)
     cover_image_url = models.URLField(blank=True, max_length=500)
     capacity = models.PositiveIntegerField(null=True, blank=True)
+    is_private = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

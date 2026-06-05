@@ -13,11 +13,19 @@ interface CommunityCardProps {
   onPress: (id: string) => void;
   onJoinPress: (id: string) => void;
   onLeavePress: (id: string) => void;
+  pendingId?: string | null;
 }
 
-function CommunityCardImpl({ community, onPress, onJoinPress, onLeavePress }: CommunityCardProps) {
+function CommunityCardImpl({
+  community,
+  onPress,
+  onJoinPress,
+  onLeavePress,
+  pendingId,
+}: CommunityCardProps) {
   const colors = useTheme();
   const { id, name, type, member_count, is_member } = community;
+  const isMutating = pendingId === id;
 
   return (
     <Pressable
@@ -44,10 +52,12 @@ function CommunityCardImpl({ community, onPress, onJoinPress, onLeavePress }: Co
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={is_member ? `Leave ${name}` : `Join ${name}`}
-        accessibilityState={{ selected: is_member }}
+        accessibilityState={{ selected: is_member, disabled: isMutating }}
+        disabled={isMutating}
         onPress={() => (is_member ? onLeavePress(id) : onJoinPress(id))}
         style={[
           styles.button,
+          isMutating && { opacity: 0.5 },
           is_member
             ? { backgroundColor: colors.primary, borderColor: colors.primary }
             : { backgroundColor: colors.surface, borderColor: colors.primary },

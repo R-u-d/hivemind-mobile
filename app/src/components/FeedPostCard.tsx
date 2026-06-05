@@ -89,7 +89,7 @@ function FeedPostCard({ item, onPress }: FeedPostCardProps) {
 
               {TRUNCATE_STYLE === 'gradient' && isTruncated && (
                 <LinearGradient
-                  colors={['transparent', colors.surface]}
+                  colors={[`${colors.surface}00`, colors.surface]}
                   style={styles.bodyFade}
                   pointerEvents="none"
                 />

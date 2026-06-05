@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from apps.communities.models import Community
+from apps.communities.models import Community, Membership
 from apps.events.models import Event, RSVP
 
 User = get_user_model()
@@ -161,6 +161,14 @@ class Command(BaseCommand):
                 created_count += 1
 
                 for i, user in enumerate(rsvp_users):
+                    # RSVPs are now member-gated, so a seeded RSVP is only valid
+                    # if the user belongs to the event's community. Join them
+                    # first to keep the demo data consistent (no orphan RSVPs).
+                    Membership.objects.get_or_create(
+                        community=community,
+                        user=user,
+                        defaults={"role": Membership.Role.MEMBER},
+                    )
                     rsvp_status = [
                         RSVP.Status.GOING,
                         RSVP.Status.GOING,
