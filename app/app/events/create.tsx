@@ -28,6 +28,7 @@ import { eventDraftStorage } from '@/api/eventDraftStorage';
 import DateTimePickerField from '@/components/DateTimePickerField';
 import FieldFocusAura from '@/components/FieldFocusAura';
 import FormField from '@/components/FormField';
+import HexLoader from '@/components/HexLoader';
 import LocationPickerMap from '@/components/LocationPickerMap';
 import PrimaryButton from '@/components/PrimaryButton';
 import { useCreateEvent, useEventCoverUpload } from '@/hooks/useEvents';
@@ -164,7 +165,7 @@ function OptionPickerModal({
           </Text>
           {loading ? (
             <View style={styles.pickerEmpty}>
-              <ActivityIndicator color={themeColors.primary} />
+              <HexLoader color={themeColors.primary} />
             </View>
           ) : options.length === 0 ? (
             <View style={styles.pickerEmpty}>

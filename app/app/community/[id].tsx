@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 
 import EmptyState from '@/components/EmptyState';
+import GhostButton from '@/components/GhostButton';
 import HexCover from '@/components/HexCover';
 import LoadingTail from '@/components/LoadingTail';
 import MembersSheet from '@/components/MembersSheet';
@@ -702,15 +703,10 @@ export default function CommunityDetailScreen() {
               ) : channelsLoading ? (
                 <ChannelsSkeleton />
               ) : channelsError ? (
-                <Pressable
-                  onPress={() => refetchChannels()}
-                  accessibilityRole="button"
-                  accessibilityLabel="Retry loading channels"
-                >
-                  <Text style={[typography.caption, { color: colors.danger }]}>
-                    Couldn't load channels — tap to retry
-                  </Text>
-                </Pressable>
+                <GhostButton
+                  label="Couldn't load channels — tap to retry"
+                  onPress={refetchChannels}
+                />
               ) : channels.length === 0 ? (
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
                   No channels yet.
