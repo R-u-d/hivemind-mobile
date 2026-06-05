@@ -88,6 +88,10 @@ const CommunityCard = memo(function CommunityCard({
 
 const ListSeparator = () => <View style={styles.separator} />;
 
+function communityKeyExtractor(item: Community): string {
+  return item.id;
+}
+
 export default function OnboardingStep2() {
   const colors = useTheme();
   const { types: typesParam } = useLocalSearchParams<{ types: string }>();
@@ -146,6 +150,18 @@ export default function OnboardingStep2() {
 
   const buttonLabel = joinedIds.size > 0 ? `Continue · ${joinedIds.size} joined` : 'Continue';
 
+  const renderItem: ListRenderItem<Community> = useCallback(
+    ({ item }) => (
+      <CommunityCard
+        community={item}
+        joined={joinedIds.has(item.id)}
+        onJoin={joinMutate}
+        onLeave={leaveMutate}
+      />
+    ),
+    [joinedIds, joinMutate, leaveMutate],
+  );
+
   const renderList = () => {
     if (isLoading) {
       return (
@@ -178,18 +194,10 @@ export default function OnboardingStep2() {
         />
       );
     }
-    const renderItem: ListRenderItem<Community> = ({ item }) => (
-      <CommunityCard
-        community={item}
-        joined={joinedIds.has(item.id)}
-        onJoin={joinMutate}
-        onLeave={leaveMutate}
-      />
-    );
     return (
       <FlashList
         data={communities}
-        keyExtractor={item => item.id}
+        keyExtractor={communityKeyExtractor}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={ListSeparator}
         renderItem={renderItem}
