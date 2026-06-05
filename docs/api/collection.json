@@ -494,7 +494,6 @@
             }
           },
           "response": [
-          "response": [
             {
               "name": "200 OK \u2014 with is_member",
               "originalRequest": {
@@ -1806,6 +1805,27 @@
               ]
             },
             "description": "Mark a single notification as read."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification Unread",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}/unread/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notification_id}}",
+                "unread",
+                ""
+              ]
+            },
+            "description": "Mark a single notification as unread."
           },
           "response": []
         },
