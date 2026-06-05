@@ -12,11 +12,16 @@ function extractCursor(nextUrl: string | null): string | null {
   }
 }
 
-async function fetchMembers(communityId: string, cursor: string | null): Promise<MemberPage> {
+async function fetchMembers(
+  communityId: string,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<MemberPage> {
   const params = new URLSearchParams();
   if (cursor) params.set('cursor', cursor);
   const { data } = await client.get<MemberPage>(
     `/communities/${communityId}/members/?${params.toString()}`,
+    { signal },
   );
   return data;
 }
@@ -24,7 +29,7 @@ async function fetchMembers(communityId: string, cursor: string | null): Promise
 export function useCommunityMembers(communityId: string) {
   return useInfiniteQuery({
     queryKey: ['communities', communityId, 'members'],
-    queryFn: ({ pageParam }) => fetchMembers(communityId, pageParam),
+    queryFn: ({ pageParam, signal }) => fetchMembers(communityId, pageParam, signal),
     initialPageParam: null as string | null,
     getNextPageParam: last => extractCursor(last.next),
     retry: false,

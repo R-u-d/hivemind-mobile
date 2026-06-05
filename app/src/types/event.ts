@@ -28,6 +28,7 @@ export interface Event {
   cover_image_url: string | null;
   organiser: EventOrganiser;
   capacity: number | null;
+  is_private: boolean;
   going_count: number;
   interested_count: number;
   rsvp_status: RsvpStatus | null;

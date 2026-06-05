@@ -158,7 +158,10 @@ describe('DiscoverScreen', () => {
     });
 
     await waitFor(() => expect(mockedClient.get).toHaveBeenCalledTimes(2));
-    expect(mockedClient.get).toHaveBeenLastCalledWith('/communities/?type=gaming');
+    expect(mockedClient.get).toHaveBeenLastCalledWith(
+      '/communities/?type=gaming',
+      expect.any(Object),
+    );
   });
 
   it('optimistically flips Join to Joined and rolls back on error', async () => {

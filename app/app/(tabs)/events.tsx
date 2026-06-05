@@ -10,8 +10,8 @@ import EmptyState from '@/components/EmptyState';
 import EventCard from '@/components/EventCard';
 import EventListSkeleton from '@/components/EventListSkeleton';
 import FilterChips, { type FilterChipItem } from '@/components/FilterChips';
-import GhostButton from '@/components/GhostButton';
 import HexLoader from '@/components/HexLoader';
+import TabErrorState from '@/components/TabErrorState';
 import { useEvents } from '@/hooks/useEvents';
 import { spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
@@ -65,8 +65,16 @@ export default function EventsScreen() {
   const [filter, setFilter] = useState<EventFilter>('all');
 
   const queryArgs = buildQueryArgs(filter);
-  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
-    useEvents(queryArgs);
+  const {
+    data,
+    isLoading,
+    isError,
+    isRefetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useEvents(queryArgs);
 
   const events = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -98,12 +106,7 @@ export default function EventsScreen() {
         <EventListSkeleton />
       ) : isError ? (
         <View style={styles.centerFill}>
-          <EmptyState
-            icon="alert-circle-outline"
-            title="Couldn't load events"
-            message="Check your connection and try again."
-            action={<GhostButton label="Retry" onPress={refetch} />}
-          />
+          <TabErrorState title="Couldn't load events" onRetry={refetch} />
         </View>
       ) : events.length === 0 ? (
         <View style={styles.centerFill}>
@@ -132,6 +135,8 @@ export default function EventsScreen() {
           renderItem={({ item }) => <EventCard event={item} onPress={handleEventPress} />}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.3}
+          onRefresh={refetch}
+          refreshing={isRefetching}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>
@@ -141,6 +146,14 @@ export default function EventsScreen() {
           }
         />
       )}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Search events"
+        onPress={() => router.push('/events/search' as never)}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+      >
+        <Ionicons name="search" size={22} color="#fff" />
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -159,4 +172,19 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1 },
   list: { padding: spacing.base, paddingBottom: 100 },
   footer: { alignItems: 'center', paddingVertical: spacing.lg },
+  fab: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    right: spacing.base,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 });

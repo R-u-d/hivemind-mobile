@@ -17,8 +17,12 @@ function buildPath(args: UseCommunitiesArgs, cursor: string | null): string {
   return `/communities/?${params.toString()}`;
 }
 
-async function fetchPage(args: UseCommunitiesArgs, cursor: string | null): Promise<CommunityPage> {
-  const { data } = await client.get<CommunityPage>(buildPath(args, cursor));
+async function fetchPage(
+  args: UseCommunitiesArgs,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<CommunityPage> {
+  const { data } = await client.get<CommunityPage>(buildPath(args, cursor), { signal });
   return data;
 }
 
@@ -34,7 +38,7 @@ function extractCursor(nextUrl: string | null): string | null {
 export function useCommunities(args: UseCommunitiesArgs = {}) {
   return useInfiniteQuery({
     queryKey: ['communities', { types: args.types ?? [], search: args.search ?? '' }],
-    queryFn: ({ pageParam }) => fetchPage(args, pageParam),
+    queryFn: ({ pageParam, signal }) => fetchPage(args, pageParam, signal),
     initialPageParam: null as string | null,
     getNextPageParam: last => extractCursor(last.next),
     retry: false,

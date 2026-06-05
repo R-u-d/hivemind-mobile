@@ -40,7 +40,10 @@ it('GETs /users/me/communities/ and returns the list', async () => {
 
   await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-  expect(mockClient.get).toHaveBeenCalledWith('/users/me/communities/');
+  expect(mockClient.get).toHaveBeenCalledWith(
+    '/users/me/communities/',
+    expect.objectContaining({ signal: expect.anything() }),
+  );
   expect(result.current.data).toEqual(communities);
 });
 

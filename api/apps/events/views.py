@@ -10,7 +10,7 @@ from core.pagination import CreatedAtCursorPagination, StartsAtCursorPagination
 from core.s3 import S3Error, generate_event_cover_presigned_url
 
 from .models import Event, RSVP
-from .permissions import IsEventOrganiserOrModerator
+from .permissions import IsEventCommunityMember, IsEventOrganiserOrModerator
 from .serializers import AttendeeSerializer, CoverUploadSerializer, EventListSerializer, EventSerializer, RSVPSerializer
 
 
@@ -52,14 +52,28 @@ class EventViewSet(viewsets.ModelViewSet):
 
         q = self.request.query_params.get("q", "").strip()
         if q:
-            qs = qs.filter(title__icontains=q) | qs.filter(description__icontains=q)
+            qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
+
+        # The list endpoint only surfaces events from communities the user has
+        # joined (plus any they organise). Detail/RSVP access is enforced
+        # object-level via IsEventCommunityMember so a non-member gets 403, not
+        # a silent 404, hence this filter is scoped to the list action only.
+        if self.action == "list":
+            member_community_ids = Membership.objects.filter(
+                user=self.request.user
+            ).values_list("community_id", flat=True)
+            qs = qs.filter(
+                Q(community_id__in=member_community_ids) | Q(organiser=self.request.user)
+            )
 
         return qs.order_by("start_datetime", "id")
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve", "attendees"):
-            return [permissions.AllowAny()]
-        if self.action in ("create", "rsvp"):
+        if self.action == "list":
+            return [permissions.IsAuthenticated()]
+        if self.action in ("retrieve", "attendees", "rsvp"):
+            return [permissions.IsAuthenticated(), IsEventCommunityMember()]
+        if self.action == "create":
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), IsEventOrganiserOrModerator()]
 

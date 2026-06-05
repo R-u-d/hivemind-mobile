@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from '@tanstack/react-query';
 
 import { client } from '@/api/client';
 import type { AttendeePage, Event, EventPage, RsvpStatus } from '@/types/event';
@@ -11,6 +17,7 @@ export interface UseEventsArgs {
   dateFrom?: string;
   dateTo?: string;
   channel?: string;
+  q?: string;
 }
 
 function buildPath(args: UseEventsArgs, cursor: string | null): string {
@@ -20,6 +27,7 @@ function buildPath(args: UseEventsArgs, cursor: string | null): string {
   if (args.dateFrom) params.set('date_from', args.dateFrom);
   if (args.dateTo) params.set('date_to', args.dateTo);
   if (args.channel) params.set('channel', args.channel);
+  if (args.q) params.set('q', args.q);
   if (cursor) params.set('cursor', cursor);
   return `/events/?${params.toString()}`;
 }
@@ -48,6 +56,7 @@ export function useEvents(args: UseEventsArgs = {}, enabled = true) {
         dateFrom: args.dateFrom ?? null,
         dateTo: args.dateTo ?? null,
         channel: args.channel ?? null,
+        q: args.q ?? null,
       },
     ],
     queryFn: ({ pageParam }) => fetchPage(args, pageParam),
@@ -84,6 +93,7 @@ export interface CreateEventPayload {
   start_datetime: string;
   end_datetime?: string | null;
   capacity?: number | null;
+  is_private?: boolean;
 }
 
 export function useCreateEvent() {
@@ -150,23 +160,48 @@ export function useRsvp() {
 
     onMutate: async ({ eventId, status }) => {
       await queryClient.cancelQueries({ queryKey: ['events', eventId] });
-      const previous = queryClient.getQueryData<Event>(['events', eventId]);
+
+      const previousEvent = queryClient.getQueryData<Event>(['events', eventId]);
+
+      const listPredicate = (q: { queryKey: readonly unknown[] }) =>
+        q.queryKey[0] === 'events' && typeof q.queryKey[1] === 'object' && q.queryKey[1] !== null;
+
+      const previousLists = queryClient.getQueriesData<InfiniteData<EventPage>>({
+        predicate: listPredicate,
+      });
+
       queryClient.setQueryData<Event>(['events', eventId], old =>
         old ? { ...old, rsvp_status: status } : old,
       );
-      return { previous };
+
+      queryClient.setQueriesData<InfiniteData<EventPage>>({ predicate: listPredicate }, old => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            results: page.results.map(e => (e.id === eventId ? { ...e, rsvp_status: status } : e)),
+          })),
+        };
+      });
+
+      return { previousEvent, previousLists };
     },
 
     onError: (_err, { eventId }, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['events', eventId], context.previous);
+      if (context?.previousEvent) {
+        queryClient.setQueryData(['events', eventId], context.previousEvent);
       }
+      context?.previousLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
     },
 
     onSettled: (_data, _err, { eventId }) => {
       queryClient.invalidateQueries({ queryKey: ['events', eventId] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
     },
   });
 }

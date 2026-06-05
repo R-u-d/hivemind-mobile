@@ -24,6 +24,7 @@ class CommunityMinimalSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "type",
+            "location",
             "member_count",
             "cover_image_url",
             "is_private",

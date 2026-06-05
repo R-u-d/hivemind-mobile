@@ -3,9 +3,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  Animated,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +25,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import { extractDrfError } from '@/api/client';
 import { useCreateCommunity } from '@/hooks/useCreateCommunity';
 import { useCoverUpload } from '@/hooks/useCoverUpload';
+import { useShakeAnimation } from '@/hooks/useShakeAnimation';
 import {
   communityTypeColors,
   communityTypeLabels,
@@ -37,56 +39,74 @@ import { useTheme } from '@/theme/ThemeContext';
 
 const TYPES: CommunityType[] = ['study', 'gaming', 'sports', 'creative', 'social'];
 
+const DESCRIPTION_MAX = 500;
+const DESCRIPTION_WARN = 400;
+const DESCRIPTION_DANGER = 480;
+
 const schema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Max 100 characters'),
-  community_type: z.enum(['study', 'gaming', 'sports', 'creative', 'social']),
+  community_type: z
+    .enum(['study', 'gaming', 'sports', 'creative', 'social'])
+    .nullable()
+    .refine(v => v !== null, 'Please select a type'),
   is_private: z.boolean(),
   location: z.string().max(100, 'Max 100 characters').optional(),
-  description: z.string().max(500, 'Max 500 characters').optional(),
+  description: z.string().max(DESCRIPTION_MAX, `Max ${DESCRIPTION_MAX} characters`).optional(),
 });
 
-type FormData = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormData = z.output<typeof schema>;
 
 function TypePickerChips({
   value,
   onChange,
+  error,
 }: {
-  value: CommunityType;
-  onChange: (t: CommunityType) => void;
+  value: CommunityType | null;
+  onChange: (t: CommunityType | null) => void;
+  error?: string;
 }) {
   const colors = useTheme();
   return (
-    <View style={styles.chipRow}>
-      {TYPES.map(type => {
-        const tc = communityTypeColors[type];
-        const selected = value === type;
-        return (
-          <Pressable
-            key={type}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={communityTypeLabels[type]}
-            onPress={() => onChange(type)}
-            style={[
-              styles.typeChip,
-              {
-                borderColor: selected ? tc.primary : colors.border,
-                backgroundColor: selected ? tc.background : colors.surface,
-              },
-            ]}
-          >
-            <View style={[styles.typeDot, { backgroundColor: tc.primary }]} />
-            <Text
+    <View style={styles.fieldGroup}>
+      <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>Type</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipRow}
+      >
+        {TYPES.map(type => {
+          const tc = communityTypeColors[type];
+          const selected = value === type;
+          return (
+            <Pressable
+              key={type}
+              accessibilityRole="radio"
+              accessibilityState={{ selected }}
+              accessibilityLabel={communityTypeLabels[type]}
+              onPress={() => onChange(selected ? null : type)}
               style={[
-                typography.caption,
-                { color: selected ? tc.text : colors.textMuted, fontFamily: fonts.medium },
+                styles.typeChip,
+                {
+                  borderColor: selected ? tc.primary : colors.border,
+                  backgroundColor: selected ? tc.background : colors.surface,
+                },
               ]}
             >
-              {communityTypeLabels[type]}
-            </Text>
-          </Pressable>
-        );
-      })}
+              <View style={[styles.typeDot, { backgroundColor: tc.primary }]} />
+              <Text
+                style={[
+                  typography.caption,
+                  { color: selected ? tc.text : colors.textMuted, fontFamily: fonts.medium },
+                ]}
+              >
+                {communityTypeLabels[type]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+      {error ? <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text> : null}
     </View>
   );
 }
@@ -105,17 +125,25 @@ export default function CreateCommunityScreen() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormInput, unknown, FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
-      community_type: 'social',
+      community_type: null,
       is_private: false,
       location: '',
       description: '',
     },
   });
+
+  const descriptionLength = (watch('description') ?? '').length;
+  const { style: descShakeStyle, trigger: triggerDescShake } = useShakeAnimation();
+
+  useEffect(() => {
+    if (descriptionLength === DESCRIPTION_MAX) triggerDescShake();
+  }, [descriptionLength, triggerDescShake]);
 
   const pickCover = async () => {
     if (isPending) return;
@@ -133,7 +161,7 @@ export default function CreateCommunityScreen() {
     try {
       const community = await createCommunity({
         name: data.name,
-        community_type: data.community_type,
+        community_type: data.community_type!,
         is_private: data.is_private,
         location: data.location || undefined,
         description: data.description || undefined,
@@ -156,24 +184,32 @@ export default function CreateCommunityScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen
+        options={{
+          title: 'New community',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.bg },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontFamily: fonts.medium, fontSize: 17 },
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
+              hitSlop={8}
+              style={styles.headerBtn}
+            >
+              <Text style={[typography.body, { color: colors.text }]} numberOfLines={1}>
+                Cancel
+              </Text>
+            </Pressable>
+          ),
+        }}
+      />
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: colors.bg }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.header, { borderBottomColor: colors.borderSoft }]}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Cancel"
-            onPress={() => router.back()}
-            style={styles.headerSide}
-          >
-            <Text style={[typography.body, { color: colors.textMuted }]}>Cancel</Text>
-          </Pressable>
-          <Text style={[typography.title, { color: colors.text }]}>New community</Text>
-          <View style={styles.headerSide} />
-        </View>
-
         <ScrollView
           contentContainerStyle={[styles.body, { paddingBottom: bottom + spacing.xl }]}
           keyboardShouldPersistTaps="handled"
@@ -228,16 +264,17 @@ export default function CreateCommunityScreen() {
             )}
           />
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>Type</Text>
-            <Controller
-              control={control}
-              name="community_type"
-              render={({ field }) => (
-                <TypePickerChips value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </View>
+          <Controller
+            control={control}
+            name="community_type"
+            render={({ field }) => (
+              <TypePickerChips
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.community_type?.message}
+              />
+            )}
+          />
 
           <View
             style={[
@@ -289,16 +326,36 @@ export default function CreateCommunityScreen() {
             control={control}
             name="description"
             render={({ field }) => (
-              <FormField
-                label="Description"
-                value={field.value ?? ''}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.description?.message}
-                placeholder="What's this community about?"
-                multiline
-                maxLength={500}
-              />
+              <View>
+                <FormField
+                  label="Description"
+                  value={field.value ?? ''}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.description?.message}
+                  placeholder="What's this community about?"
+                  multiline
+                  maxLength={DESCRIPTION_MAX}
+                />
+                <Animated.View style={descShakeStyle}>
+                  <Text
+                    style={[
+                      styles.charCounter,
+                      {
+                        color:
+                          descriptionLength >= DESCRIPTION_DANGER
+                            ? colors.danger
+                            : descriptionLength >= DESCRIPTION_WARN
+                              ? colors.warning
+                              : colors.textFaint,
+                        fontFamily: fonts.regular,
+                      },
+                    ]}
+                  >
+                    {descriptionLength}/{DESCRIPTION_MAX}
+                  </Text>
+                </Animated.View>
+              </View>
             )}
           />
 
@@ -327,15 +384,7 @@ export default function CreateCommunityScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-  },
-  headerSide: { minWidth: 60 },
+  headerBtn: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
   body: {
     padding: spacing.base,
     gap: spacing.lg,
@@ -358,9 +407,8 @@ const styles = StyleSheet.create({
   fieldGroup: { gap: spacing.sm },
   fieldLabel: { fontSize: 13, letterSpacing: 0.1, fontFamily: fonts.medium },
   chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.sm,
+    alignItems: 'center',
   },
   typeChip: {
     flexDirection: 'row',
@@ -376,6 +424,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
+  errorText: { fontSize: 12 },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -385,6 +434,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: spacing.md,
   },
+  charCounter: { fontSize: 11, textAlign: 'right', marginTop: 4, paddingHorizontal: 2 },
   footer: {
     padding: spacing.base,
     borderTopWidth: 1,

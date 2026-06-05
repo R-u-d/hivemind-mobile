@@ -1,8 +1,16 @@
 import pytest
 from django.utils import timezone
 
+from apps.communities.factories import MembershipFactory
+from apps.communities.models import Membership
+
 from ..factories import EventFactory, RSVPFactory
 from ..models import RSVP
+
+
+def join(user, community, role=Membership.Role.MEMBER):
+    """Make `user` a member of `community` so they can RSVP / view the event."""
+    return MembershipFactory(community=community, user=user, role=role)
 
 
 def rsvp_url(event_id):
@@ -27,9 +35,18 @@ def test_rsvp_unauthenticated(api_client):
 
 
 @pytest.mark.django_db
+def test_rsvp_non_member_forbidden(auth_client):
+    client, _ = auth_client
+    event = EventFactory()
+    response = client.post(rsvp_url(event.id), {"status": "going"}, format="json")
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
 def test_rsvp_going_creates_rsvp(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {"status": "going"}, format="json")
     assert response.status_code == 201
     assert response.data["status"] == "going"
@@ -40,6 +57,7 @@ def test_rsvp_going_creates_rsvp(auth_client):
 def test_rsvp_interested(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 201
     assert response.data["status"] == "interested"
@@ -49,6 +67,7 @@ def test_rsvp_interested(auth_client):
 def test_rsvp_not_going(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {"status": "not_going"}, format="json")
     assert response.status_code == 201
     assert response.data["status"] == "not_going"
@@ -58,6 +77,7 @@ def test_rsvp_not_going(auth_client):
 def test_rsvp_defaults_to_going_when_no_status(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {}, format="json")
     assert response.status_code == 201
     assert response.data["status"] == "going"
@@ -65,8 +85,9 @@ def test_rsvp_defaults_to_going_when_no_status(auth_client):
 
 @pytest.mark.django_db
 def test_rsvp_invalid_status_rejected(auth_client):
-    client, _ = auth_client
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {"status": "invalid"}, format="json")
     assert response.status_code == 400
 
@@ -75,6 +96,7 @@ def test_rsvp_invalid_status_rejected(auth_client):
 def test_rsvp_update_status_returns_200(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, user=user, status=RSVP.Status.GOING)
     response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 200
@@ -86,12 +108,13 @@ def test_rsvp_update_status_returns_200(auth_client):
 
 @pytest.mark.django_db
 def test_rsvp_past_event_rejected(auth_client):
-    client, _ = auth_client
+    client, user = auth_client
     now = timezone.now()
     event = EventFactory(
         start_datetime=now - timezone.timedelta(days=2),
         end_datetime=now - timezone.timedelta(days=1),
     )
+    join(user, event.community)
     response = client.post(rsvp_url(event.id), {"status": "going"}, format="json")
     assert response.status_code == 400
     assert "past" in response.data["detail"].lower()
@@ -103,6 +126,7 @@ def test_rsvp_past_event_rejected(auth_client):
 def test_rsvp_at_capacity_rejected(auth_client):
     client, user = auth_client
     event = EventFactory(capacity=1)
+    join(user, event.community)
     other_user = RSVPFactory(event=event, status=RSVP.Status.GOING).user
     assert other_user != user
     response = client.post(rsvp_url(event.id), {"status": "going"}, format="json")
@@ -114,6 +138,7 @@ def test_rsvp_at_capacity_rejected(auth_client):
 def test_rsvp_interested_allowed_when_at_capacity(auth_client):
     client, user = auth_client
     event = EventFactory(capacity=1)
+    join(user, event.community)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     response = client.post(rsvp_url(event.id), {"status": "interested"}, format="json")
     assert response.status_code == 201
@@ -123,6 +148,7 @@ def test_rsvp_interested_allowed_when_at_capacity(auth_client):
 def test_rsvp_reaffirm_going_when_already_going_and_at_capacity(auth_client):
     client, user = auth_client
     event = EventFactory(capacity=1)
+    join(user, event.community)
     RSVPFactory(event=event, user=user, status=RSVP.Status.GOING)
     response = client.post(rsvp_url(event.id), {"status": "going"}, format="json")
     assert response.status_code == 200
@@ -141,6 +167,7 @@ def test_rsvp_delete_unauthenticated(api_client):
 def test_rsvp_delete_own_rsvp(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, user=user)
     response = client.delete(rsvp_url(event.id))
     assert response.status_code == 204
@@ -149,8 +176,9 @@ def test_rsvp_delete_own_rsvp(auth_client):
 
 @pytest.mark.django_db
 def test_rsvp_delete_not_rsvpd_returns_404(auth_client):
-    client, _ = auth_client
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.delete(rsvp_url(event.id))
     assert response.status_code == 404
 
@@ -158,29 +186,52 @@ def test_rsvp_delete_not_rsvpd_returns_404(auth_client):
 # ─── Attendees list ──────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_attendees_public(api_client):
+def test_attendees_unauthenticated(api_client):
     event = EventFactory()
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     response = api_client.get(attendees_url(event.id))
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_attendees_non_member_forbidden(auth_client):
+    client, _ = auth_client
+    event = EventFactory()
+    RSVPFactory(event=event, status=RSVP.Status.GOING)
+    response = client.get(attendees_url(event.id))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_attendees_member(auth_client):
+    client, user = auth_client
+    event = EventFactory()
+    join(user, event.community)
+    RSVPFactory(event=event, status=RSVP.Status.GOING)
+    response = client.get(attendees_url(event.id))
     assert response.status_code == 200
 
 
 @pytest.mark.django_db
-def test_attendees_shows_only_going(api_client):
+def test_attendees_shows_only_going(auth_client):
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     RSVPFactory(event=event, status=RSVP.Status.INTERESTED)
     RSVPFactory(event=event, status=RSVP.Status.NOT_GOING)
-    response = api_client.get(attendees_url(event.id))
+    response = client.get(attendees_url(event.id))
     assert response.status_code == 200
     assert len(response.data["results"]) == 1
 
 
 @pytest.mark.django_db
-def test_attendees_includes_user_fields(api_client):
+def test_attendees_includes_user_fields(auth_client):
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
-    response = api_client.get(attendees_url(event.id))
+    response = client.get(attendees_url(event.id))
     result = response.data["results"][0]
     assert "user_id" in result
     assert "display_name" in result
@@ -190,21 +241,25 @@ def test_attendees_includes_user_fields(api_client):
 # ─── going_count in event serializers ────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_going_count_in_event_list(api_client):
+def test_going_count_in_event_list(auth_client):
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
     RSVPFactory(event=event, status=RSVP.Status.INTERESTED)
-    response = api_client.get("/api/events/")
+    response = client.get("/api/events/")
     assert response.status_code == 200
     assert response.data["results"][0]["going_count"] == 2
 
 
 @pytest.mark.django_db
-def test_going_count_in_event_detail(api_client):
+def test_going_count_in_event_detail(auth_client):
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, status=RSVP.Status.GOING)
-    response = api_client.get(event_url(event.id))
+    response = client.get(event_url(event.id))
     assert response.status_code == 200
     assert response.data["going_count"] == 1
 
@@ -212,17 +267,17 @@ def test_going_count_in_event_detail(api_client):
 # ─── rsvp_status on event responses ──────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_rsvp_status_null_for_anonymous(api_client):
+def test_retrieve_unauthenticated_rejected(api_client):
     event = EventFactory()
     response = api_client.get(event_url(event.id))
-    assert response.status_code == 200
-    assert response.data["rsvp_status"] is None
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_rsvp_status_shows_own_status(auth_client):
     client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     RSVPFactory(event=event, user=user, status=RSVP.Status.INTERESTED)
     response = client.get(event_url(event.id))
     assert response.status_code == 200
@@ -231,8 +286,9 @@ def test_rsvp_status_shows_own_status(auth_client):
 
 @pytest.mark.django_db
 def test_rsvp_status_null_when_not_rsvpd(auth_client):
-    client, _ = auth_client
+    client, user = auth_client
     event = EventFactory()
+    join(user, event.community)
     response = client.get(event_url(event.id))
     assert response.status_code == 200
     assert response.data["rsvp_status"] is None
@@ -241,9 +297,11 @@ def test_rsvp_status_null_when_not_rsvpd(auth_client):
 # ─── community nested in response ────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_event_detail_returns_nested_community(api_client):
+def test_event_detail_returns_nested_community(auth_client):
+    client, user = auth_client
     event = EventFactory()
-    response = api_client.get(event_url(event.id))
+    join(user, event.community)
+    response = client.get(event_url(event.id))
     assert response.status_code == 200
     community = response.data["community"]
     assert "id" in community
@@ -252,9 +310,11 @@ def test_event_detail_returns_nested_community(api_client):
 
 
 @pytest.mark.django_db
-def test_event_list_returns_nested_community(api_client):
-    EventFactory()
-    response = api_client.get("/api/events/")
+def test_event_list_returns_nested_community(auth_client):
+    client, user = auth_client
+    event = EventFactory()
+    join(user, event.community)
+    response = client.get("/api/events/")
     assert response.status_code == 200
     community = response.data["results"][0]["community"]
     assert "id" in community
@@ -265,9 +325,11 @@ def test_event_list_returns_nested_community(api_client):
 # ─── organiser nested in event detail ────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_event_detail_returns_nested_organiser(api_client):
+def test_event_detail_returns_nested_organiser(auth_client):
+    client, user = auth_client
     event = EventFactory()
-    response = api_client.get(event_url(event.id))
+    join(user, event.community)
+    response = client.get(event_url(event.id))
     assert response.status_code == 200
     organiser = response.data["organiser"]
     assert "id" in organiser

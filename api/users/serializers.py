@@ -9,6 +9,30 @@ from core.s3 import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE
 User = get_user_model()
 
 
+def visible_upcoming_rsvp_count(user):
+    """Count a user's upcoming going/interested RSVPs, restricted to events they
+    can actually see — i.e. in a community they've joined or that they organise.
+
+    Mirrors the visibility rule of the events list endpoint so the profile
+    counter never drifts from the "My Events" sheet, even for orphan RSVPs left
+    over from before events were member-gated.
+    """
+    from django.db.models import Q
+    from django.utils import timezone
+
+    from apps.events.models import RSVP
+
+    member_community_ids = user.memberships.values_list("community_id", flat=True)
+    return (
+        user.rsvps.filter(
+            status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED],
+            event__start_datetime__gte=timezone.now(),
+        )
+        .filter(Q(event__community_id__in=member_community_ids) | Q(event__organiser=user))
+        .count()
+    )
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -48,8 +72,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "email", "created_at", "event_count"]
 
     def get_event_count(self, obj):
-        from apps.events.models import RSVP
-        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
+        return visible_upcoming_rsvp_count(obj)
 
     def validate_avatar_url(self, value):
         if not value:
@@ -94,8 +117,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return obj.memberships.count()
 
     def get_event_count(self, obj):
-        from apps.events.models import RSVP
-        return obj.rsvps.filter(status__in=[RSVP.Status.GOING, RSVP.Status.INTERESTED]).count()
+        return visible_upcoming_rsvp_count(obj)
 
 
 class ForgotPasswordSerializer(serializers.Serializer):

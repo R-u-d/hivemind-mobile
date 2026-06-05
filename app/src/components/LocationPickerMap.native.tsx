@@ -14,15 +14,50 @@ interface LocationPickerMapProps {
   lat: number | null;
   lng: number | null;
   onPick: (lat: number, lng: number) => void;
+  defaultCenter?: { lat: number; lng: number };
+  defaultCenterLabel?: string;
 }
 
-// Broad default view (continental US) until the user drops a pin.
-const DEFAULT_REGION = {
+// Coarse region centres derived from the IANA timezone area prefix.
+// No permission or network call needed — Intl is available in Hermes.
+const TIMEZONE_REGIONS: Record<string, { latitude: number; longitude: number; delta: number }> = {
+  Africa: { latitude: 7, longitude: 21, delta: 45 },
+  America: { latitude: 45, longitude: -100, delta: 50 },
+  Antarctica: { latitude: -75, longitude: 0, delta: 30 },
+  Arctic: { latitude: 80, longitude: 0, delta: 20 },
+  Asia: { latitude: 35, longitude: 95, delta: 50 },
+  Atlantic: { latitude: 25, longitude: -30, delta: 50 },
+  Australia: { latitude: -25, longitude: 133, delta: 25 },
+  Europe: { latitude: 50, longitude: 15, delta: 25 },
+  Indian: { latitude: 15, longitude: 75, delta: 35 },
+  Pacific: { latitude: 0, longitude: 160, delta: 50 },
+  US: { latitude: 45, longitude: -100, delta: 50 },
+};
+
+function getTimezoneRegion() {
+  try {
+    const area = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/')[0];
+    const r = TIMEZONE_REGIONS[area];
+    if (r)
+      return {
+        latitude: r.latitude,
+        longitude: r.longitude,
+        latitudeDelta: r.delta,
+        longitudeDelta: r.delta,
+      };
+  } catch {}
+  return null;
+}
+
+// Resolved once at module load — timezone doesn't change during a session.
+const DEFAULT_REGION = getTimezoneRegion() ?? {
   latitude: 39.5,
   longitude: -98.35,
   latitudeDelta: 40,
   longitudeDelta: 40,
 };
+
+const CITY_DELTA = 0.15;
 
 function PinDot() {
   return (
@@ -35,12 +70,30 @@ function PinDot() {
   );
 }
 
-export default function LocationPickerMap({ lat, lng, onPick }: LocationPickerMapProps) {
+export default function LocationPickerMap({
+  lat,
+  lng,
+  onPick,
+  defaultCenter,
+  defaultCenterLabel,
+}: LocationPickerMapProps) {
   const themeColors = useTheme();
   const mapRef = useRef<MapView>(null);
   const hasPin = lat !== null && lng !== null;
 
-  // Recenter when coords change from outside (e.g. address geocoding).
+  const initialRegion = (() => {
+    if (hasPin) return { latitude: lat, longitude: lng, latitudeDelta: 0.01, longitudeDelta: 0.01 };
+    if (defaultCenter)
+      return {
+        latitude: defaultCenter.lat,
+        longitude: defaultCenter.lng,
+        latitudeDelta: CITY_DELTA,
+        longitudeDelta: CITY_DELTA,
+      };
+    return DEFAULT_REGION;
+  })();
+
+  // Animate to pin when coords change from outside (e.g. address geocoding).
   useEffect(() => {
     if (lat !== null && lng !== null) {
       mapRef.current?.animateToRegion(
@@ -49,6 +102,21 @@ export default function LocationPickerMap({ lat, lng, onPick }: LocationPickerMa
       );
     }
   }, [lat, lng]);
+
+  // Animate to community location when it arrives, but only if no pin is set.
+  useEffect(() => {
+    if (!hasPin && defaultCenter) {
+      mapRef.current?.animateToRegion(
+        {
+          latitude: defaultCenter.lat,
+          longitude: defaultCenter.lng,
+          latitudeDelta: CITY_DELTA,
+          longitudeDelta: CITY_DELTA,
+        },
+        350,
+      );
+    }
+  }, [defaultCenter, hasPin]);
 
   const handlePress = (e: MapPressEvent) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
@@ -60,18 +128,15 @@ export default function LocationPickerMap({ lat, lng, onPick }: LocationPickerMa
     onPick(latitude, longitude);
   };
 
+  const hintText = hasPin
+    ? 'Tap to move the pin'
+    : defaultCenterLabel
+      ? `Near ${defaultCenterLabel} · tap to drop a pin`
+      : 'Tap the map to drop a pin';
+
   return (
     <View style={[styles.wrap, { borderColor: themeColors.borderSoft }]}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={
-          hasPin
-            ? { latitude: lat, longitude: lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }
-            : DEFAULT_REGION
-        }
-        onPress={handlePress}
-      >
+      <MapView ref={mapRef} style={styles.map} initialRegion={initialRegion} onPress={handlePress}>
         {hasPin ? (
           <Marker
             coordinate={{ latitude: lat, longitude: lng }}
@@ -87,7 +152,7 @@ export default function LocationPickerMap({ lat, lng, onPick }: LocationPickerMa
         <Text
           style={[typography.caption, { color: themeColors.textMuted, fontFamily: fonts.medium }]}
         >
-          {hasPin ? 'Tap to move the pin' : 'Tap the map to drop a pin'}
+          {hintText}
         </Text>
       </View>
     </View>

@@ -17,7 +17,8 @@ export function useJoinCommunity(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: joinCommunity,
-    onMutate: id => {
+    onMutate: async id => {
+      await queryClient.cancelQueries({ queryKey: ['communities'] });
       onOptimisticJoin(id);
     },
     onError: (_err, id) => {
@@ -26,6 +27,8 @@ export function useJoinCommunity(
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
     },
   });
 }
@@ -37,7 +40,8 @@ export function useLeaveCommunity(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: leaveCommunity,
-    onMutate: id => {
+    onMutate: async id => {
+      await queryClient.cancelQueries({ queryKey: ['communities'] });
       onOptimisticLeave(id);
     },
     onError: (_err, id) => {
@@ -46,6 +50,8 @@ export function useLeaveCommunity(
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
     },
   });
 }

@@ -131,7 +131,7 @@ it('shows error state and retry when fetch fails', async () => {
   await waitFor(() => {
     expect(screen.getByText("Couldn't load feed")).toBeTruthy();
   });
-  expect(screen.getByText('Retry')).toBeTruthy();
+  expect(screen.getByText('Try again')).toBeTruthy();
 });
 
 it('shows empty state with discover CTA when feed is empty', async () => {

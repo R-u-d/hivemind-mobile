@@ -13,7 +13,7 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -45,7 +45,6 @@ type FormData = z.infer<typeof schema>;
 
 export default function OnboardingStep3() {
   const colors = useTheme();
-  const { bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
   const { data: user } = useCurrentUser();
@@ -117,7 +116,10 @@ export default function OnboardingStep3() {
   const hasImage = !!avatarUri;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.surface }]}
+      edges={['top', 'bottom']}
+    >
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -141,7 +143,7 @@ export default function OnboardingStep3() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(spacing.lg, bottom) }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: spacing.lg }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -282,12 +284,12 @@ export default function OnboardingStep3() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 54 },
+  container: { flex: 1 },
   flex: { flex: 1 },
   header: {
     flexDirection: 'row',
