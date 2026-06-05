@@ -171,7 +171,7 @@ export default function EventsScreen() {
         onPress={() => router.push('/events/search' as never)}
         style={[styles.fab, { backgroundColor: colors.primary }]}
       >
-        <Ionicons name="search" size={22} color="#fff" />
+        <Ionicons name="search" size={22} color={colors.onPrimary} />
       </Pressable>
     </SafeAreaView>
   );

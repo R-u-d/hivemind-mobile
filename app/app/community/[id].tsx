@@ -585,7 +585,7 @@ export default function CommunityDetailScreen() {
             style={[styles.backBtn, { top: top + spacing.sm }]}
           >
             <View style={styles.backBtnInner}>
-              <Ionicons name="chevron-back" size={20} color="#fff" />
+              <Ionicons name="chevron-back" size={20} color={colors.onPrimary} />
             </View>
           </Pressable>
 

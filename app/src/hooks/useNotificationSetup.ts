@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { registerPushToken } from '@/api/notifications';
 import { tokenStorage } from '@/api/tokenStorage';
+import { colors } from '@/theme';
 import { routeFromNotificationData } from '@/utils/notificationRouting';
 import type { InAppNotification } from '@/components/InAppNotificationBanner';
 
@@ -59,7 +60,7 @@ export function useNotificationSetup() {
           name: 'HiveMind',
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#6D28D9',
+          lightColor: colors.primary,
         });
       }
 
