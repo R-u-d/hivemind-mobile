@@ -16,7 +16,7 @@ import SecondaryButton from '@/components/SecondaryButton';
 import SkeletonBox from '@/components/SkeletonBox';
 import TypePill from '@/components/TypePill';
 import { useEvent, useEventAttendees, useRsvp } from '@/hooks/useEvents';
-import { communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
+import { colors, communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Attendee, Event, RsvpStatus } from '@/types/event';
 
@@ -97,7 +97,7 @@ function EventCover({ event }: { event: Event }) {
           style={styles.coverBackBtn}
           hitSlop={8}
         >
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={colors.onPrimary} />
         </Pressable>
       </View>
 
@@ -207,9 +207,11 @@ function RsvpToggle({ eventId, current }: { eventId: string; current: RsvpStatus
             <Ionicons
               name={active ? opt.iconActive : opt.iconInactive}
               size={13}
-              color={active ? '#fff' : colors.textMuted}
+              color={active ? colors.onPrimary : colors.textMuted}
             />
-            <Text style={[styles.rsvpLabel, { color: active ? '#fff' : colors.textMuted }]}>
+            <Text
+              style={[styles.rsvpLabel, { color: active ? colors.onPrimary : colors.textMuted }]}
+            >
               {opt.label}
             </Text>
           </Pressable>

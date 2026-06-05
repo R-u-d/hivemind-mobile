@@ -37,7 +37,7 @@ function MarkReadAction({ dragX }: { dragX: Animated.AnimatedInterpolation<numbe
   });
   return (
     <Animated.View style={[styles.swipeAction, styles.swipeActionRead, { transform: [{ scale }] }]}>
-      <Ionicons name="checkmark-done-outline" size={20} color="#fff" />
+      <Ionicons name="checkmark-done-outline" size={20} color={colors.onPrimary} />
       <Text style={styles.swipeActionLabel}>Read</Text>
     </Animated.View>
   );
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   swipeActionRead: { backgroundColor: colors.primary },
   swipeActionUnread: { backgroundColor: colors.primarySoft },
   swipeActionLabel: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 11,
     fontFamily: fonts.medium,
   },
