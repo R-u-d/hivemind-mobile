@@ -1,11 +1,20 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Alert,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PrimaryButton from '@/components/PrimaryButton';
+import { useShakeAnimation } from '@/hooks/useShakeAnimation';
 import {
   communityTypeColors,
   communityTypeLabels,
@@ -144,7 +153,12 @@ function CreateHex({ scale }: { scale: number }) {
 
   return (
     <Pressable
-      onPress={() => {}}
+      onPress={() =>
+        Alert.alert(
+          'Create a community',
+          'Finish setting up your profile first — you can create a community right after.',
+        )
+      }
       accessibilityLabel="Create a community"
       accessibilityRole="button"
       style={{ width: w, height: h }}
@@ -214,6 +228,7 @@ export default function OnboardingScreen() {
   const colors = useTheme();
   const { width } = useWindowDimensions();
   const [selectedTypes, setSelectedTypes] = useState<Set<CommunityType>>(new Set());
+  const { style: shakeStyle, trigger: triggerShake } = useShakeAnimation();
 
   const scale = (width - 2 * spacing.xl - spacing.base) / BBOX_W;
 
@@ -232,7 +247,10 @@ export default function OnboardingScreen() {
     selectedTypes.size > 0 ? `Continue · ${selectedTypes.size} selected` : 'Continue';
 
   const handleContinue = () => {
-    if (selectedTypes.size === 0) return;
+    if (selectedTypes.size === 0) {
+      triggerShake();
+      return;
+    }
     router.push({
       pathname: '/(onboarding)/step2',
       params: { types: JSON.stringify([...selectedTypes]) },
@@ -273,13 +291,13 @@ export default function OnboardingScreen() {
         <HoneycombCluster selectedTypes={selectedTypes} onToggle={toggle} scale={scale} />
       </View>
 
-      <View style={styles.footer}>
+      <Animated.View style={[styles.footer, shakeStyle]}>
         <PrimaryButton
           label={buttonLabel}
           onPress={handleContinue}
           disabled={selectedTypes.size === 0}
         />
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
