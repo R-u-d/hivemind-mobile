@@ -25,6 +25,10 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
+      permissions: [
+        'android.permission.ACCESS_COARSE_LOCATION',
+        'android.permission.ACCESS_FINE_LOCATION',
+      ],
       config: {
         googleMaps: {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY,
@@ -37,6 +41,15 @@ module.exports = {
     },
     plugins: [
       'expo-router',
+      [
+        'expo-notifications',
+        {
+          icon: './assets/images/icon.png',
+          color: '#6D28D9',
+          defaultChannel: 'default',
+          sounds: [],
+        },
+      ],
       [
         '@sentry/react-native/expo',
         {
@@ -57,5 +70,12 @@ module.exports = {
     experiments: {
       typedRoutes: true,
     },
+    extra: {
+      router: {},
+      eas: {
+        projectId: 'dea59be6-d311-4a02-b861-4601499088e0',
+      },
+    },
+    owner: 'waqvirk',
   },
 };
