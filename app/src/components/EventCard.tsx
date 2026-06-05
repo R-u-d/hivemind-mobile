@@ -4,7 +4,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import TypePill from '@/components/TypePill';
 import { useRsvp } from '@/hooks/useEvents';
-import { fonts, radius, spacing } from '@/theme';
+import { colors, fonts, radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Event, RsvpStatus } from '@/types/event';
 
@@ -12,6 +12,7 @@ interface EventCardProps {
   event: Event;
   onPress: (id: string) => void;
   hidePill?: boolean;
+  isNew?: boolean;
 }
 
 const MONTH_ABBR = [
@@ -155,7 +156,7 @@ function RsvpPicker({
   );
 }
 
-function EventCard({ event, onPress, hidePill = false }: EventCardProps) {
+function EventCard({ event, onPress, hidePill = false, isNew }: EventCardProps) {
   const themeColors = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
   const date = new Date(event.start_datetime);
@@ -185,6 +186,7 @@ function EventCard({ event, onPress, hidePill = false }: EventCardProps) {
           },
         ]}
       >
+        {isNew && <View style={styles.newDot} />}
         {/* Date column */}
         <View style={styles.dateCol}>
           <Text style={[styles.month, { color: themeColors.primary }]}>{month}</Text>
@@ -329,6 +331,16 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 12, fontFamily: fonts.regular },
   metaLocation: { flexShrink: 1 },
 
+  newDot: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
+    zIndex: 1,
+  },
   // RSVP picker
   pickerBackdrop: {
     flex: 1,
