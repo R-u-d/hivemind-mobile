@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useScrollToTop } from '@react-navigation/native';
@@ -58,6 +58,10 @@ function buildQueryArgs(filter: EventFilter) {
   }
 }
 
+function eventKeyExtractor(item: Event): string {
+  return item.id;
+}
+
 export default function EventsScreen() {
   const colors = useTheme();
   const listRef = useRef<FlashListRef<Event>>(null);
@@ -95,9 +99,20 @@ export default function EventsScreen() {
 
   const events = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
-  function handleEventPress(id: string) {
+  const handleEventPress = useCallback((id: string) => {
     router.push(`/event/${id}` as never);
-  }
+  }, []);
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Event }) => (
+      <EventCard event={item} onPress={handleEventPress} isNew={newEventIds.has(item.id)} />
+    ),
+    [handleEventPress, newEventIds],
+  );
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -147,12 +162,10 @@ export default function EventsScreen() {
         <FlashList<Event>
           ref={listRef}
           data={events}
-          keyExtractor={item => item.id}
+          keyExtractor={eventKeyExtractor}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <EventCard event={item} onPress={handleEventPress} isNew={newEventIds.has(item.id)} />
-          )}
-          onEndReached={() => hasNextPage && fetchNextPage()}
+          renderItem={renderItem}
+          onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
           onRefresh={refetch}
           refreshing={isRefetching}
