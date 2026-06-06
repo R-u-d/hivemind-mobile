@@ -1,7 +1,7 @@
 module.exports = {
   expo: {
     name: 'HiveMind',
-    slug: 'hivemind',
+    slug: 'app',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
@@ -19,6 +19,7 @@ module.exports = {
     },
     android: {
       package: 'com.hivemind.app',
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#130C2E',

@@ -98,9 +98,14 @@ cp .env.example .env.local
 Open `.env.local` and fill in:
 
 ```
-EXPO_PUBLIC_API_URL=http://localhost:8000/api
+EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8000/api
 EXPO_PUBLIC_SENTRY_DSN=          # leave blank for local dev
+EXPO_PUBLIC_GOOGLE_MAPS_KEY=     # Android maps (optional for local dev)
 ```
+
+> **LAN IP, not localhost:** Expo Go on a physical device can't reach `localhost` on your
+> machine. Use your machine's local IP (e.g. `192.168.1.x`). Run `ipconfig` (Windows) or
+> `ifconfig` (Mac/Linux) to find it.
 
 Start the dev server:
 
@@ -109,10 +114,6 @@ npx expo start
 ```
 
 Scan the QR code with Expo Go, or press `i` for iOS simulator / `a` for Android emulator.
-
-> **Android maps:** The event create screen uses Google Maps on Android. Add
-> `EXPO_PUBLIC_GOOGLE_MAPS_KEY` to `.env.local` with a Maps SDK for Android key.
-> Without it the map renders as a grey tile. iOS uses Apple Maps and needs no key.
 
 ---
 
@@ -188,6 +189,44 @@ pre-commit install
 | API health | http://localhost:8000/api/health/ |
 | Expo dev server | http://localhost:8081 |
 | Django admin | http://localhost:8000/admin/ |
+
+---
+
+## EAS builds (Android / iOS)
+
+EAS builds run on Expo's cloud servers. There is **no `.env.production` file** — all
+build-time secrets are managed as EAS environment variables.
+
+### One-time setup
+
+```bash
+cd app
+npm install -g eas-cli
+eas login
+```
+
+Set required environment variables on EAS (run once per variable):
+
+```bash
+# Plaintext — visible in build logs
+eas env:create --name EXPO_PUBLIC_API_URL --value "https://api.your-domain.com/api" --environment production --visibility plaintext
+
+# Sensitive — hidden in logs
+eas env:create --name EXPO_PUBLIC_SENTRY_DSN --value "https://..." --environment production --visibility sensitive
+eas env:create --name SENTRY_AUTH_TOKEN --value "sntrys_..." --environment production --visibility sensitive
+
+# File — google-services.json for Android push notifications (FCM)
+eas env:create --name GOOGLE_SERVICES_JSON --type file --visibility secret --environment production
+# (paste the file contents when prompted)
+```
+
+### Trigger a build
+
+```bash
+cd app
+eas build --platform android --profile preview   # produces a shareable APK
+eas build --platform ios --profile preview        # requires Apple Developer account
+```
 
 ---
 

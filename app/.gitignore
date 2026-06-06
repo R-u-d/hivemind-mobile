@@ -31,6 +31,10 @@ yarn-error.*
 *.pem
 .gitignore-MacBookAir
 
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
 # local env files
 .env*.local
 
