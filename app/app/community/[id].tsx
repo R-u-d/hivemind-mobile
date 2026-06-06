@@ -50,7 +50,7 @@ const CHANNEL_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name'
   announcements: 'megaphone-outline',
   general: 'chatbubble-outline',
   events: 'calendar-outline',
-  media: 'image-outline',
+  resources: 'folder-open-outline',
   help: 'help-circle-outline',
 };
 
@@ -234,7 +234,7 @@ const CHANNEL_TYPES: {
   { value: 'general', label: 'General', icon: 'chatbubble-outline' },
   { value: 'announcements', label: 'Announcements', icon: 'megaphone-outline' },
   { value: 'events', label: 'Events', icon: 'calendar-outline' },
-  { value: 'media', label: 'Media', icon: 'image-outline' },
+  { value: 'resources', label: 'Resources', icon: 'folder-open-outline' },
   { value: 'help', label: 'Help', icon: 'help-circle-outline' },
 ];
 

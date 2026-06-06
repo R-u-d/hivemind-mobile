@@ -86,16 +86,15 @@ export default function EventsScreen() {
   }, [notifications]);
 
   const queryArgs = buildQueryArgs(filter);
-  const {
-    data,
-    isLoading,
-    isError,
-    isRefetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    refetch,
-  } = useEvents(queryArgs);
+  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    useEvents(queryArgs);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const events = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -167,8 +166,8 @@ export default function EventsScreen() {
           renderItem={renderItem}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
-          onRefresh={refetch}
-          refreshing={isRefetching}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>

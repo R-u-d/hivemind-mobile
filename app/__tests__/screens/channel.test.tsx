@@ -75,6 +75,7 @@ const baseCommunity: CommunityDetail = {
   is_private: false,
   description: '',
   owner_id: 'user-1',
+  my_role: 'member' as const,
 };
 
 const generalChannel = {

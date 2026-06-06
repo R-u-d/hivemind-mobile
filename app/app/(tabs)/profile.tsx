@@ -295,9 +295,15 @@ export default function ProfileScreen() {
     data: user,
     isLoading: userLoading,
     isError: userError,
-    isRefetching: userRefetching,
     refetch: refetchUser,
   } = useCurrentUser();
+
+  const [userRefreshing, setUserRefreshing] = useState(false);
+  const handleRefreshUser = useCallback(async () => {
+    setUserRefreshing(true);
+    await refetchUser();
+    setUserRefreshing(false);
+  }, [refetchUser]);
 
   const { data: communities = [], isLoading: commLoading } = useMyCommunities();
 
@@ -333,7 +339,9 @@ export default function ProfileScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={userRefetching} onRefresh={refetchUser} />}
+        refreshControl={
+          <RefreshControl refreshing={userRefreshing} onRefresh={handleRefreshUser} />
+        }
       >
         <View style={styles.head}>
           <Avatar uri={user.avatar_url} name={displayName} size={68} />

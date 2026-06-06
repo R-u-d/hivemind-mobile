@@ -15,6 +15,7 @@ export interface Community {
 export interface CommunityDetail extends Community {
   description: string;
   owner_id: string;
+  my_role: 'member' | 'moderator' | 'owner' | null;
 }
 
 export interface CommunityPage {
@@ -23,7 +24,7 @@ export interface CommunityPage {
   results: Community[];
 }
 
-export type ChannelType = 'announcements' | 'general' | 'events' | 'media' | 'help';
+export type ChannelType = 'announcements' | 'general' | 'events' | 'resources' | 'help';
 
 export interface Channel {
   id: string;

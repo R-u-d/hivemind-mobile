@@ -16,7 +16,7 @@ import SecondaryButton from '@/components/SecondaryButton';
 import SkeletonBox from '@/components/SkeletonBox';
 import TypePill from '@/components/TypePill';
 import { useEvent, useEventAttendees, useRsvp } from '@/hooks/useEvents';
-import { colors, communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
+import { communityTypeColors, fonts, radius, spacing, typography } from '@/theme';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Attendee, Event, RsvpStatus } from '@/types/event';
 
@@ -72,6 +72,7 @@ function openInMaps(lat: number, lng: number, label: string) {
 
 function EventCover({ event }: { event: Event }) {
   const insets = useSafeAreaInsets();
+  const colors = useTheme();
 
   return (
     <View style={[styles.coverWrap, { height: COVER_HEIGHT + insets.top }]}>

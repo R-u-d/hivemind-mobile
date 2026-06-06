@@ -43,16 +43,15 @@ export default function DiscoverScreen() {
   const [active, setActive] = useState<ChipValue>('all');
 
   const typesArg = active === 'all' ? undefined : [active];
-  const {
-    data,
-    isLoading,
-    isError,
-    isRefetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    refetch,
-  } = useCommunities({ types: typesArg });
+  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    useCommunities({ types: typesArg });
+
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const communities = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -173,8 +172,8 @@ export default function DiscoverScreen() {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
-          onRefresh={refetch}
-          refreshing={isRefetching}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>

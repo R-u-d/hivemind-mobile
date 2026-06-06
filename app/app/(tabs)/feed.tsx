@@ -35,16 +35,15 @@ export default function FeedScreen() {
   const { hasUnread } = useNotifications();
   useScrollToTop(listRef as never);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    isRefetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    refetch,
-  } = useFeed();
+  const { data, isLoading, isError, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    useFeed();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const items = useMemo(() => data?.pages.flatMap(p => p.results) ?? [], [data]);
 
@@ -116,8 +115,8 @@ export default function FeedScreen() {
           getItemType={getItemType}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.4}
-          onRefresh={refetch}
-          refreshing={isRefetching}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
           contentContainerStyle={styles.listContent}
           ListFooterComponent={
             isFetchingNextPage ? (
