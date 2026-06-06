@@ -1,4 +1,4 @@
-from django.db.models import BooleanField, Count, Exists, OuterRef, Value
+from django.db.models import BooleanField, CharField, Count, Exists, OuterRef, Subquery, Value
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
@@ -32,13 +32,19 @@ class CommunityViewSet(viewsets.ModelViewSet):
         )
 
         if user.is_authenticated:
+            membership_qs = Membership.objects.filter(community=OuterRef("pk"), user=user)
             qs = qs.annotate(
-                is_member=Exists(
-                    Membership.objects.filter(community=OuterRef("pk"), user=user)
-                )
+                is_member=Exists(membership_qs),
+                my_role=Subquery(
+                    membership_qs.values("role")[:1],
+                    output_field=CharField(),
+                ),
             )
         else:
-            qs = qs.annotate(is_member=Value(False, output_field=BooleanField()))
+            qs = qs.annotate(
+                is_member=Value(False, output_field=BooleanField()),
+                my_role=Value(None, output_field=CharField()),
+            )
 
         types = self.request.query_params.getlist("type")
         if types:

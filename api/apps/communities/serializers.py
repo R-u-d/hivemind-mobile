@@ -57,6 +57,7 @@ class CommunityDetailSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source="community_type", read_only=True)
     member_count = serializers.IntegerField(read_only=True)
     is_member = serializers.BooleanField(read_only=True)
+    my_role = serializers.CharField(read_only=True, allow_null=True)
     owner_id = serializers.UUIDField(source="owner.id", read_only=True)
 
     class Meta:
@@ -69,12 +70,13 @@ class CommunityDetailSerializer(serializers.ModelSerializer):
             "location",
             "member_count",
             "is_member",
+            "my_role",
             "owner_id",
             "cover_image_url",
             "is_private",
             "created_at",
         ]
-        read_only_fields = ["id", "owner_id", "created_at", "is_member", "member_count"]
+        read_only_fields = ["id", "owner_id", "created_at", "is_member", "my_role", "member_count"]
 
 
 class MembershipSerializer(serializers.ModelSerializer):
