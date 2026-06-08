@@ -13,6 +13,8 @@ __pycache__/
 venv/
 .venv/
 *.egg-info/
+.coverage
+htmlcov/
 
 # ─── Django ─────────────────────────────────────────────────────────────────
 db.sqlite3
@@ -27,6 +29,7 @@ web-build/
 expo-env.d.ts
 *.tsbuildinfo
 .metro-health-check*
+coverage/
 
 # ─── Mobile / Native ─────────────────────────────────────────────────────────
 /app/ios/
@@ -61,6 +64,9 @@ BUG_BASH.md
 design/
 docs/superpowers/
 .superpowers/
+
+# ─── Internal audits (not shared) ────────────────────────────────────────────
+audits/
 
 # ─── Local dev notes (not shared) ────────────────────────────────────────────
 BUG_BASH.md

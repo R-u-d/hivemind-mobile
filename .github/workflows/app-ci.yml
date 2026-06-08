@@ -36,4 +36,4 @@ jobs:
 
       - name: Jest tests
         working-directory: app
-        run: npm test
+        run: npm run test:coverage

@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "test": "jest --watchAll=false --forceExit",
+    "test:coverage": "jest --watchAll=false --forceExit --coverage",
     "web": "expo start --web"
   },
   "jest": {
@@ -18,7 +19,11 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts"
+    ]
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
