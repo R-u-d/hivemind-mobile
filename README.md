@@ -1,16 +1,82 @@
-# HiveMind
+# HiveMind Mobile
 
 A community-based mobile app where people discover events, join study groups, connect with
-gamers, and find hobby communities — all in one place.
+gamers, and find hobby communities — all in one place. Built with React Native (Expo) and
+Django REST Framework as a 4-week final project at WBS Coding School, 12 May – 8 June 2026,
+by [@R-u-d](https://github.com/R-u-d) and [@waqvirk](https://github.com/waqvirk).
 
-Built with React Native (Expo) and Django REST Framework as a 4-week final project
-at WBS Coding School.
+The product is called HiveMind; this repository is its mobile client. A desktop client,
+HiveMind Desktop, came later and lives elsewhere — see
+[Where this went](#where-this-went).
+
+---
+
+<img src="docs/hero.png" alt="HiveMind — Join. Sync. Evolve.">
+
+---
+
+> **Scope**
+>
+> This repository holds the history of the four-week MVP up to the
+> [`bootcamp-mvp`](../../releases/tag/bootcamp-mvp) tag: 52 reviewed pull requests, two
+> developers, reviews in both directions. See [docs/process.md](docs/process.md) for how
+> we worked.
+>
+> The original repository stays private — later, unrelated work continued there. The
+> pull requests and reviews live in that repository, so their index is exported to
+> [docs/pull-requests.md](docs/pull-requests.md), [docs/issues.md](docs/issues.md) and
+> [docs/project-board.md](docs/project-board.md); the numbers and branch names in them
+> match the merge commits in `git log` here.
 
 ---
 
 ## Screenshots
 
-> _Coming soon — see [#48](https://github.com/R-u-d/HiveMind/issues/48)_
+### Dark
+
+| Feed | Discover | Events |
+|---|---|---|
+| <img src="docs/screenshots/01-home-feed.png" alt="Home feed" width="240"> | <img src="docs/screenshots/02-discover.png" alt="Discover communities" width="240"> | <img src="docs/screenshots/03-events.png" alt="Event list" width="240"> |
+
+| Event detail | Community detail | Channel |
+|---|---|---|
+| <img src="docs/screenshots/04-event-detail.png" alt="Event detail with RSVP" width="240"> | <img src="docs/screenshots/05-community-detail.png" alt="Community detail with channels" width="240"> | <img src="docs/screenshots/06-channel.png" alt="Channel with posts" width="240"> |
+
+### Light
+
+| Feed | Discover | Events |
+|---|---|---|
+| <img src="docs/screenshots/01-home-feed-light.png" alt="Home feed, light" width="240"> | <img src="docs/screenshots/02-discover-light.png" alt="Discover communities, light" width="240"> | <img src="docs/screenshots/03-events-light.png" alt="Event list, light" width="240"> |
+
+| Event detail | Community detail | Channel |
+|---|---|---|
+| <img src="docs/screenshots/04-event-detail-light.png" alt="Event detail with RSVP, light" width="240"> | <img src="docs/screenshots/05-community-detail-light.png" alt="Community detail with channels, light" width="240"> | <img src="docs/screenshots/06-channel-light.png" alt="Channel with posts, light" width="240"> |
+
+> The app follows the system theme. Captured on an iOS simulator against a locally
+> seeded database.
+
+### Loading, empty and error states
+
+| Loading | Empty feed | Nothing coming up |
+|---|---|---|
+| <img src="docs/screenshots/10-loading-skeleton.png" alt="Feed skeleton while loading" width="240"> | <img src="docs/screenshots/07-empty-feed.png" alt="Empty feed for a new account" width="240"> | <img src="docs/screenshots/08-empty-events.png" alt="Empty events list" width="240"> |
+
+| Request failed | Form validation | Splash |
+|---|---|---|
+| <img src="docs/screenshots/09-error-state.png" alt="Error state with retry" width="240"> | <img src="docs/screenshots/11-form-validation.png" alt="Inline validation on the sign-in form" width="240"> | <img src="docs/screenshots/15-splash.png" alt="Animated splash screen on launch" width="240"> |
+
+> <p>Every tab has a skeleton, an empty state and an error state with a retry; forms
+> validate inline with Zod — see <br>
+`src/components/FeedSkeleton.tsx`, `EmptyState.tsx` and `TabErrorState.tsx`.</p>
+
+### More screens
+
+| Event detail with map | Create an event | Notifications |
+|---|---|---|
+| <img src="docs/screenshots/12-event-detail-map.png" alt="Event detail with map, capacity bar and RSVP" width="240"> | <img src="docs/screenshots/13-create-event.png" alt="Create event form with cover upload and map pin" width="240"> | <img src="docs/screenshots/14-notifications.png" alt="Notifications sheet with swipe to mark read" width="240"> |
+
+> Captured on a physical device during development and attached to the pull
+> requests that built these screens.
 
 ---
 
@@ -52,7 +118,7 @@ at WBS Coding School.
 ## Project structure
 
 ```
-HiveMind/
+hivemind-mobile/
 ├── app/          React Native frontend (Expo)
 ├── api/          Django REST API
 ├── docs/         API collection, team docs, wireframes
@@ -81,8 +147,8 @@ HiveMind/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/R-u-d/HiveMind.git
-cd HiveMind
+git clone https://github.com/R-u-d/hivemind-mobile.git
+cd hivemind-mobile
 ```
 
 ---
@@ -264,10 +330,13 @@ Two workflows run on every PR to `dev` and `main`:
 
 ## Team
 
-| Name | Role | GitHub |
-|---|---|---|
-| Waqar | Frontend lead | [@waqvirk](https://github.com/waqvirk) |
-| Rud | Backend lead | [@R-u-d](https://github.com/R-u-d) |
+| Name | Role | GitHub | Main areas |
+|---|---|---|---|
+| Waqar | Frontend lead | [@waqvirk](https://github.com/waqvirk) | Screens, components, navigation, app test suite, CI workflows |
+| Rud | Backend lead | [@R-u-d](https://github.com/R-u-d) | API apps and models, auth and profiles, Django config, Postman collection, AWS docs |
+
+Both of us worked across the whole stack — the split above only describes where each of us
+carried the weight. See [docs/process.md](docs/process.md) for branching, reviews, and CI.
 
 ---
 
@@ -288,6 +357,13 @@ Features deliberately cut from the 4-week MVP, planned for v2:
 - **Calendar sync** — export RSVPd events to Google / Apple Calendar
 - **Community moderation tools** — ban, mute, report
 - **AI study summaries** — LLM-generated summaries of channel activity
+
+### Where this went
+
+Most of that list got built after the bootcamp. The project continued as HiveMind Desktop —
+a self-hosted voice and screenshare platform with real-time channels, running on its own
+server and in daily use. Its architecture and the decisions behind it are documented
+separately. Link to follow.
 
 ---
 
