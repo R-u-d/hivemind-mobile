@@ -22,9 +22,11 @@ A four-week final project at WBS Coding School, 12 May – 8 June 2026, by two d
   `docs` and `test` as the types.
 - **`dev` was the integration branch.** Feature branches merged into `dev` through reviewed
   pull requests; `main` only received releases.
-- **CI gated every PR.** Typecheck, eslint and jest for the app; ruff and pytest against a
+- **CI ran on every PR.** Typecheck, eslint and jest for the app; ruff and pytest against a
   real Postgres instance for the API. Pre-commit hooks ran the same checks locally before
-  anything left the machine.
+  anything left the machine. The backend job was still being stabilised in the first week —
+  seven pull requests up to 18 May merged with it red. From PR #46 onwards every merge was
+  green on both jobs.
 - **A bug bash before the deadline** (`fix/39-bug-bash`) — a focused pass where both of us
   went hunting rather than building.
 
@@ -38,6 +40,20 @@ A four-week final project at WBS Coding School, 12 May – 8 June 2026, by two d
 
 Neither of us stayed on one side of the stack. The split above describes where each of us
 carried the weight, not where we were allowed to work.
+
+## What this looked like
+
+All 52 merged pull requests of the four-week MVP, oldest first:
+
+<img src="screenshots/process-pull-requests.png" alt="GitHub pull request list in the original repository, filtered to merged pull requests between 12 May and 8 June 2026, showing 52 results">
+
+A review with substance — three concrete findings, then an approve:
+
+<img src="screenshots/process-review-thread.png" alt="Pull request #36: review by waqvirk listing three issues with the Postman collection, followed by an approval and merge" width="700">
+
+Most of the other 51 reviews were shorter than this one; several were a plain approve with
+no comment. The claim here is that every pull request had a second reader before it merged,
+not that every one produced a discussion.
 
 The pull requests themselves live in the original private repository, which continued as a
 desktop application. Their index is exported to [pull-requests.md](pull-requests.md), and
