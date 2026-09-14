@@ -18,24 +18,15 @@ review, which is why the merged count and the reviewed count differ.
 
 ### The one that merged without a review
 
-Exactly one merged pull request has no review: **#114**, the last merge of the project.
+One merged pull request has no review on it: **#114**, which was also the last thing we
+merged. It went in near the end, in a batch with six others that were all reviewed.
 
-The evening of 5 June, three days before the 8 June deadline, seven pull requests merged in
-nineteen minutes — #116 at 19:49, then #118, #115, #119, #117, and #113 and #114 both at
-20:08. My teammate reviewed six of the seven. The seventh went in with the batch.
+Twenty lines in `app/app.config.js` — build configuration, nothing the app runs.
 
-It was twenty added lines in a single file, `app/app.config.js` — build configuration, no
-application code. It had been open since 09:46 that morning.
-
-The part worth admitting: it is the one change he was the only person who *could* have
-verified. Its own description carries an unchecked "still needed before merging" list, and
-three of the four items sit in his accounts — the Firebase services file, an EAS build
-secret, and the `owner` field naming his EAS account. The pull request that skipped review
-is the one where review was least substitutable.
-
-I do not remember the moment. This is reconstructed from the pull request timestamps and
-the body text, which is the only honest way to answer a question about a nineteen-minute
-window months after the fact.
+What makes it worth writing down is which one it was. Its description ends with a list of
+things still outstanding, and most of them sat in my teammate's accounts: the Firebase
+services file, an EAS secret, the `owner` field. So the one pull request that skipped a
+review is the one where his review was hardest to replace.
 
 ## How we worked
 
