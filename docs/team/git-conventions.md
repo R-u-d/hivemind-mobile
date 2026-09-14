@@ -1,9 +1,7 @@
 # Git conventions
 
-> Written in week one and kept as it stood; it is the convention we agreed on, not a
-> report of what happened. Where the history deviates — branches without an issue number,
-> seven early merges with a red backend job, merge commits instead of squashes — that is
-> documented in [process.md](../process.md).
+> Written in week one and kept as it stood. What the history actually did is in
+> [process.md](../process.md).
 
 Everything in this file is not a hard rule, just a suggestion.
 Consistent conventions mean the git history is readable, searchable, and useful in interviews.

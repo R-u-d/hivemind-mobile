@@ -13,8 +13,7 @@ A four-week final project at WBS Coding School, 12 May – 8 June 2026, by two d
 
 **Reviews went both ways.** Every one of my teammate's 26 merged pull requests was reviewed
 by me; 25 of my 26 were reviewed by him. Three further pull requests of mine were closed
-unmerged (#96, #100, #101) after being superseded — a superseded pull request never got a
-review, which is why the merged count and the reviewed count differ.
+unmerged (#96, #100, #101) after being superseded.
 
 ### The one that merged without a review
 
@@ -34,9 +33,8 @@ review is the one where his review was hardest to replace.
   carry their issue number: `feat/32-home-feed-endpoint`, `fix/40-feed-performance`,
   `chore/43-community-type-colour-audit`. Five of the 52 merged pull requests do not fit
   that pattern — #68, #70 and #103 were small fixes branched without an issue, and #114
-  and #116 cite numbers (`#46`, `#49`) that were never opened as issues. The honest
-  version: the issue tracker held the planned work; late polish sometimes went straight
-  to a branch.
+  and #116 cite numbers (`#46`, `#49`) that were never opened as issues. The issue
+  tracker held the planned work; late polish sometimes went straight to a branch.
 - **Branch naming** followed `<type>/<issue-number>-<slug>`, with `feat`, `fix`, `chore`,
   `docs` and `test` as the types.
 - **`dev` was the integration branch.** Feature branches merged into `dev` through reviewed
@@ -57,22 +55,20 @@ review is the one where his review was hardest to replace.
 | Main areas | Screens, components, navigation, app test suite, assets, CI workflows, pre-commit setup | API apps and models, auth and user profiles, Django settings and core, Postman collection, AWS infrastructure docs |
 | Crossover | Contributed substantially to the API as well | Built several screens and the client data layer |
 
-Neither of us stayed on one side of the stack. The split above describes where each of us
-carried the weight, not where we were allowed to work.
+Neither of us stayed on one side of the stack.
 
 ## What this looked like
 
 All 52 merged pull requests of the four-week MVP, oldest first:
 
-<img src="screenshots/process-pull-requests.png" alt="GitHub pull request list in the original repository, filtered to merged pull requests between 12 May and 8 June 2026, showing 52 results">
+<img src="screenshots/process-pull-requests.png" alt="The merged pull requests of the MVP, in the original repository">
 
 A review with substance — three concrete findings, then an approve:
 
-<img src="screenshots/process-review-thread.png" alt="Pull request #36: review by waqvirk listing three issues with the Postman collection, followed by an approval and merge" width="700">
+<img src="screenshots/process-review-thread.png" alt="A review thread on pull request #36" width="700">
 
-Most of the other 51 reviews were shorter than this one; several were a plain approve with
-no comment. The claim here is that every pull request had a second reader before it merged,
-not that every one produced a discussion.
+Most reviews were shorter than this one, and several were a plain approve with no
+comment.
 
 The pull requests themselves live in the original private repository, which continued as a
 desktop application. Their index is exported to [pull-requests.md](pull-requests.md), and
