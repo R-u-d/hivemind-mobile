@@ -1,6 +1,7 @@
 # Pull requests
 
-Every branch in this repository landed through a reviewed pull request. The pull
+Every branch in this repository landed through a pull request, all but one of
+them reviewed by the other developer. The pull
 requests themselves live in the original private repository, so this file is an
 export of their metadata — it is cross-checkable against the merge commits in
 `git log`, which name the same numbers and branches.
