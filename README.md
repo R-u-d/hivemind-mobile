@@ -366,7 +366,9 @@ Features deliberately cut from the 4-week MVP, planned for v2:
 Most of that list got built after the bootcamp. The project continued as HiveMind Desktop —
 a self-hosted voice and screenshare platform with real-time channels, running on its own
 server and in daily use. Its architecture and the decisions behind it are documented
-separately. Link to follow.
+separately, in
+[hivemind-showcase](https://github.com/R-u-d/hivemind-showcase) — including two
+postmortems from the screen-share work.
 
 ---
 
