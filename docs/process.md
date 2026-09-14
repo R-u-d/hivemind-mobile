@@ -11,22 +11,29 @@ A four-week final project at WBS Coding School, 12 May – 8 June 2026, by two d
 | Pull requests merged | 52 |
 | Commits (excluding merges) | 182 |
 
-**Reviews went both ways.** Every one of my teammate's 26 pull requests was reviewed by me;
-25 of my 29 were reviewed by him. Nothing reached `dev` without a second pair of eyes.
+**Reviews went both ways.** Every one of my teammate's 26 merged pull requests was reviewed
+by me; 25 of my 26 were reviewed by him. Exactly one merged without a review — #114, an EAS
+build config fix on the last day. Three further pull requests of mine were closed unmerged
+(#96, #100, #101) after being superseded.
 
 ## How we worked
 
-- **Issue-driven.** Every branch traced back to a numbered issue: `feat/32-home-feed-endpoint`,
-  `fix/40-feed-performance`, `chore/43-community-type-colour-audit`.
-- **Branch  naming** followed `<type>/<issue-number>-<slug>`, with `feat`, `fix`, `chore`,
+- **Issue-driven, with exceptions.** 44 issues were opened and closed, and most branches
+  carry their issue number: `feat/32-home-feed-endpoint`, `fix/40-feed-performance`,
+  `chore/43-community-type-colour-audit`. Five of the 52 merged pull requests do not fit
+  that pattern — #68, #70 and #103 were small fixes branched without an issue, and #114
+  and #116 cite numbers (`#46`, `#49`) that were never opened as issues. The honest
+  version: the issue tracker held the planned work; late polish sometimes went straight
+  to a branch.
+- **Branch naming** followed `<type>/<issue-number>-<slug>`, with `feat`, `fix`, `chore`,
   `docs` and `test` as the types.
 - **`dev` was the integration branch.** Feature branches merged into `dev` through reviewed
   pull requests; `main` only received releases.
 - **CI ran on every PR.** Typecheck, eslint and jest for the app; ruff and pytest against a
   real Postgres instance for the API. Pre-commit hooks ran the same checks locally before
   anything left the machine. The backend job was still being stabilised in the first week —
-  seven pull requests up to 18 May merged with it red. From PR #46 onwards every merge was
-  green on both jobs.
+  seven pull requests (#32, #33, #34, #35, #36, #44, #45) merged with it red, the last of
+  them on 19 May. From PR #46 onwards no pull request merged with a failing check.
 - **A bug bash before the deadline** (`fix/39-bug-bash`) — a focused pass where both of us
   went hunting rather than building.
 

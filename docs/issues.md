@@ -1,8 +1,9 @@
 # Issues
 
-Work was cut into numbered issues before it was built; every branch name carries its
-issue number (`feat/32-home-feed-endpoint`, `fix/40-feed-performance`). The issues live
-in the original private repository — this is an export of their index.
+Planned work was cut into numbered issues before it was built, and most branch names
+carry their issue number (`feat/32-home-feed-endpoint`, `fix/40-feed-performance`). Five
+merged pull requests are the exception — see [process.md](process.md#how-we-worked). The
+issues live in the original private repository — this is an export of their index.
 
 **44 issues, all closed.** 24 carry [@R-u-d](https://github.com/R-u-d) as an assignee, 25 carry [@waqvirk](https://github.com/waqvirk); 5 are assigned to both.
 

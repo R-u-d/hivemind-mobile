@@ -18,9 +18,9 @@ HiveMind Desktop, came later and lives elsewhere — see
 > **Scope**
 >
 > This repository holds the history of the four-week MVP up to the
-> [`bootcamp-mvp`](../../releases/tag/bootcamp-mvp) tag: 52 reviewed pull requests, two
-> developers, reviews in both directions. See [docs/process.md](docs/process.md) for how
-> we worked.
+> [`bootcamp-mvp`](../../releases/tag/bootcamp-mvp) tag: 52 merged pull requests, two
+> developers, 51 of them reviewed by the other one. See [docs/process.md](docs/process.md)
+> for how we worked.
 >
 > The original repository stays private — later, unrelated work continued there. The
 > pull requests and reviews live in that repository, so their index is exported to
@@ -111,7 +111,7 @@ HiveMind Desktop, came later and lives elsewhere — see
 | Notifications | Expo Push Notifications |
 | Error tracking | Sentry |
 | CI | GitHub Actions |
-| Distribution | EAS Build + TestFlight + Play Console |
+| Distribution | EAS Build (internal distribution APK) |
 
 ---
 
@@ -293,6 +293,9 @@ cd app
 eas build --platform android --profile preview   # produces a shareable APK
 eas build --platform ios --profile preview        # requires Apple Developer account
 ```
+
+> The MVP was distributed as an internal APK. No build was ever submitted to TestFlight
+> or the Play Console — `eas.json` has no `submit` configuration for that reason.
 
 ---
 
