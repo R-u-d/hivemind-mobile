@@ -169,9 +169,13 @@ POSTS_BY_CHANNEL_TYPE = {
     ],
 }
 
+# Upper bound per channel. The real count varies and is capped by the size of the
+# text pool for that channel type — see _seed().
 POSTS_PER_CHANNEL = 10
 # Posts spread across this many days in the past
 SPREAD_DAYS = 28
+# Fixed so a reseed produces the same demo state; screenshots stay reproducible.
+RANDOM_SEED = 20260608
 
 
 class Command(BaseCommand):
@@ -187,7 +191,7 @@ class Command(BaseCommand):
             "--count",
             type=int,
             default=POSTS_PER_CHANNEL,
-            help=f"Number of posts per channel (default: {POSTS_PER_CHANNEL}).",
+            help=f"Upper bound of posts per channel (default: {POSTS_PER_CHANNEL}).",
         )
 
     def handle(self, *args, **options):
@@ -211,6 +215,7 @@ class Command(BaseCommand):
             return
 
         count_per_channel = options["count"]
+        random.seed(RANDOM_SEED)
         now = timezone.now()
         created_total = 0
 
@@ -222,7 +227,12 @@ class Command(BaseCommand):
                 continue
 
             pool = POSTS_BY_CHANNEL_TYPE.get(channel.channel_type, POSTS_BY_CHANNEL_TYPE["general"])
-            bodies = [pool[i % len(pool)] for i in range(count_per_channel)]
+            # Never draw more posts than the pool holds: a channel showing the same
+            # body twice is the clearest tell that the data was generated. Varying
+            # the count per channel avoids the identical-length lists that make
+            # every community look like a copy of the last one.
+            upper = min(count_per_channel, len(pool))
+            bodies = random.sample(pool, random.randint(max(2, upper - 2), upper))
 
             for i, body in enumerate(bodies):
                 post = Post.objects.create(
